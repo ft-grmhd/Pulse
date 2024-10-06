@@ -27,6 +27,8 @@ extern "C" {
 
 #define PULSE_VERSION_1_0 PULSE_MAKE_VERSION(1, 0, 0)
 
+#define PULSE_BIT(x) (1u << x)
+
 #ifdef __cplusplus
 }
 #endif
