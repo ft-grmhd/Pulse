@@ -1,0 +1,16 @@
+/*
+/*/
+!.gitignore
+!README.md
+!LICENSE
+!xmake.lua
+!/Includes/
+!/Sources/
+!/.github/
+*.o
+*.swp
+*.swx
+*.a
+*.so
+*.d
+*.ini
