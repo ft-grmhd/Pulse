@@ -12,6 +12,7 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "PulseProfile.h"
 
@@ -31,6 +32,14 @@ PULSE_DEFINE_NULLABLE_HANDLE(PulseFence);
 PULSE_DEFINE_NULLABLE_HANDLE(PulseImage);
 
 // Flags
+typedef enum PulseBackendBits
+{
+	PULSE_BACKEND_INVALID = PULSE_BIT(1),
+	PULSE_BACKEND_VULKAN = PULSE_BIT(2),
+	// More to come
+} PulseBackendBits;
+typedef PulseFlags PulseBackendFlags;
+
 typedef enum PulseBufferUsageBits
 {
 	PULSE_BUFFER_USAGE_TRANSFER_UPLOAD        = PULSE_BIT(1),
@@ -146,7 +155,6 @@ typedef enum PulseImageFormat
 } PulseImageFormat;
 
 // Structs
-
 typedef struct PulseBufferCreateInfo
 {
 	PulseBufferUsageFlags usage;
@@ -220,6 +228,12 @@ typedef struct PulseImageRegion
 	uint32_t height;
 	uint32_t depth;
 } PulseImageRegion;
+
+// Functions
+PULSE_API PulseDevice PulseCreateDevice(PulseBackendFlags backend_candidates, PulseShaderFormatsFlags shader_formats_used);
+PULSE_API void PulseDestroyDevice(PulseDevice device);
+PULSE_API PulseBackendBits PulseGetBackendInUseByDevice(PulseDevice device);
+PULSE_API bool PulseSupportsBackend(PulseBackendFlags backend_candidates, PulseShaderFormatsFlags shader_formats_used);
 
 #ifdef __cplusplus
 }

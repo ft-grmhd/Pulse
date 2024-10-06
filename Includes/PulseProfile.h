@@ -11,6 +11,71 @@
 extern "C" {
 #endif
 
+#if defined(__BORLANDC__)
+	#define PULSE_COMPILER_BORDLAND
+#elif defined(__clang__)
+	#define PULSE_COMPILER_CLANG
+	#ifdef __MINGW32__
+		#define PULSE_COMPILER_MINGW
+		#ifdef __MINGW64_VERSION_MAJOR
+			#define PULSE_COMPILER_MINGW_W64
+		#endif
+	#endif
+#elif defined(__GNUC__) || defined(__MINGW32__)
+	#define PULSE_COMPILER_GCC
+	#ifdef __MINGW32__
+		#define PULSE_COMPILER_MINGW
+		#ifdef __MINGW64_VERSION_MAJOR
+			#define PULSE_COMPILER_MINGW_W64
+		#endif
+	#endif
+#elif defined(__INTEL_COMPILER) || defined(__ICL)
+	#define PULSE_COMPILER_INTEL
+#elif defined(_MSC_VER)
+	#define PULSE_COMPILER_MSVC
+#else
+	#define PULSE_COMPILER_UNKNOWN
+	#warning "This compiler is not fully supported"
+#endif
+
+#if defined(_WIN32) || defined(__CYGWIN__)
+	#define PULSE_PLAT_WINDOWS
+#elif defined(__linux__)
+	#define PULSE_PLAT_LINUX
+#elif defined(__APPLE__) && defined(__MACH__)
+	#define PULSE_PLAT_MACOS
+#elif defined(unix) || defined(__unix__) || defined(__unix)
+	#define PULSE_PLAT_UNIX
+#else
+	#error "Unknown environment (not Windows, not Linux, not MacOS, not Unix)"
+#endif
+
+#ifndef PULSE_STATIC
+	#ifdef PULSE_PLAT_WINDOWS
+		#ifdef PULSE_COMPILER_MSVC
+			#ifdef PULSE_BUILD
+				#define PULSE_API __declspec(dllexport)
+			#else
+				#define PULSE_API __declspec(dllimport)
+			#endif
+		#elif defined(PULSE_COMPILER_GCC)
+			#ifdef PULSE_BUILD
+				#define PULSE_API __attribute__((dllexport))
+			#else
+				#define PULSE_API __attribute__((dllimport))
+			#endif
+		#else
+			#define PULSE_API
+		#endif
+	#elif defined(PULSE_COMPILER_GCC)
+		#define PULSE_API __attribute__((visibility("default")))
+	#else
+		#define PULSE_API
+	#endif
+#else
+	#define PULSE_API
+#endif
+
 #define PULSE_DEFINE_NULLABLE_HANDLE(object) typedef struct object##Handler* object
 
 #if (defined(__cplusplus) && (__cplusplus >= 201103L)) || (defined(_MSVC_LANG) && (_MSVC_LANG >= 201103L))
