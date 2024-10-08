@@ -14,6 +14,8 @@
 #define VMA_VULKAN_VERSION 1000000
 #include <vk_mem_alloc.h>
 
+#include <Pulse.h>
+
 typedef struct VulkanDevice
 {
 	VkPhysicalDeviceFeatures features;
@@ -29,6 +31,9 @@ typedef struct VulkanDevice
 		#include "VulkanDevicePrototypes.h"
 	#undef PULSE_VULKAN_DEVICE_FUNCTION
 } VulkanDevice;
+
+VulkanDevice* VulkanCreateDevice(PulseDebugLevel debug_level);
+void VulkanDestroyDevice(VulkanDevice* device);
 
 #endif // PULSE_VULKAN_DEVICE_H_
 

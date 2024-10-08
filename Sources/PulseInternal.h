@@ -11,32 +11,42 @@
 extern "C" {
 #endif
 
+#define PULSE_CHECK_ALLOCATION_RETVAL(ptr, retval) \
+	do { \
+		if(ptr == PULSE_NULLPTR) \
+		{ \
+			PulseSetInternalError(PULSE_ERROR_ALLOCATION_FAILED); \
+			return retval; \
+		} \
+	} while(0); \
+
+#define PULSE_CHECK_ALLOCATION(ptr) PULSE_CHECK_ALLOCATION_RETVAL(ptr, )
+
 typedef bool (*PulseLoadBackendPFN)(void);
 typedef PulseDevice (*PulseCreateDevicePFN)(PulseDebugLevel);
-
 typedef void (*PulseDestroyDevicePFN)(PulseDevice);
-
-typedef struct PulseDeviceHandler
-{
-	// PFNs
-	PulseDestroyDevicePFN PFN_DestroyDevice;
-
-	// Attributes
-	PulseBackendFlags backend;
-	PulseShaderFormatsFlags supported_shader_formats;
-	PulseDebugLevel debug_level;
-} PulseDeviceHandler;
 
 typedef struct PulseBackendLoader
 {
 	// PFNs
 	PulseLoadBackendPFN PFN_LoadBackend;
 	PulseCreateDevicePFN PFN_CreateDevice;
+	PulseDestroyDevicePFN PFN_DestroyDevice;
 
 	// Attributes
 	PulseBackendFlags backend;
 	PulseShaderFormatsFlags supported_shader_formats;
 } PulseBackendLoader;
+
+typedef struct PulseDeviceHandler
+{
+	// PFNs
+
+	// Attributes
+	void* driver_data;
+	const PulseBackendLoader* backend;
+	PulseDebugLevel debug_level;
+} PulseDeviceHandler;
 
 void PulseSetInternalError(PulseErrorType error);
 

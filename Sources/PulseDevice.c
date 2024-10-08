@@ -66,19 +66,20 @@ PULSE_API PulseDevice PulseCreateDevice(PulseBackendFlags backend_candidates, Pu
 	PulseDevice device = backend->PFN_CreateDevice(debug_level);
 	if(device == PULSE_NULL_HANDLE)
 		PulseSetInternalError(PULSE_ERROR_INITIALIZATION_FAILED);
+	device->backend = backend;
 	return device;
 }
 
 PULSE_API void PulseDestroyDevice(PulseDevice device)
 {
 	PULSE_CHECK_HANDLE(device);
-	device->PFN_DestroyDevice(device);
+	device->backend->PFN_DestroyDevice(device);
 }
 
 PULSE_API PulseBackendBits PulseGetBackendInUseByDevice(PulseDevice device)
 {
 	PULSE_CHECK_HANDLE_RETVAL(device, PULSE_BACKEND_INVALID);
-	return device->backend;
+	return device->backend->backend;
 }
 
 PULSE_API bool PulseSupportsBackend(PulseBackendFlags backend_candidates, PulseShaderFormatsFlags shader_formats_used)
@@ -100,7 +101,7 @@ PULSE_API bool PulseSupportsBackend(PulseBackendFlags backend_candidates, PulseS
 PULSE_API bool PulseDeviceSupportsSahderFormats(PulseDevice device, PulseShaderFormatsFlags shader_formats_used)
 {
 	PULSE_CHECK_HANDLE_RETVAL(device, false);
-	return (device->supported_shader_formats & shader_formats_used) != 0;
+	return (device->backend->supported_shader_formats & shader_formats_used) != 0;
 }
 
 PULSE_API PulseErrorType PulseGetLastErrorType()
@@ -117,6 +118,7 @@ PULSE_API const char* PulseVerbaliseErrorType(PulseErrorType error)
 		case PULSE_ERROR_NONE:                                       return "no error";
 		case PULSE_ERROR_BACKENDS_CANDIDATES_SHADER_FORMAT_MISMATCH: return "no backend candidates support the required shader formats";
 		case PULSE_ERROR_INITIALIZATION_FAILED:                      return "initialization of an object could not be completed for implementation-specific reasons";
+		case PULSE_ERROR_ALLOCATION_FAILED:                          return "an internal allocation failed";
 
 		default: return "invalid error type";
 	};

@@ -4,5 +4,4 @@ target("LoadingPulse")
 		set_extension(".x86_64")
 	end
 	add_files("main.c")
-	set_targetdir("build/")
 target_end()

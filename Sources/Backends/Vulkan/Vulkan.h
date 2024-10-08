@@ -19,11 +19,11 @@ typedef struct VulkanGlobal
 	#undef PULSE_VULKAN_GLOBAL_FUNCTION
 } VulkanGlobal;
 
-typedef struct VulkanContext
+typedef struct VulkanPulseDevice
 {
 	VulkanInstance instance;
 	VulkanDevice device;
-} VulkanContext;
+} VulkanPulseDevice;
 
 VulkanGlobal* VulkanGetGlobal();
 

@@ -116,11 +116,7 @@ extern "C" {
 
 #define PULSE_DEFINE_NULLABLE_HANDLE(object) typedef struct object##Handler* object
 
-#if (defined(__cplusplus) && (__cplusplus >= 201103L)) || (defined(_MSVC_LANG) && (_MSVC_LANG >= 201103L))
-	#define PULSE_NULL_HANDLE nullptr
-#else
-	#define PULSE_NULL_HANDLE ((void*)0)
-#endif
+#define PULSE_NULL_HANDLE PULSE_NULLPTR
 
 #define PULSE_MAKE_VERSION(major, minor, patch) ((((uint32_t)(major)) << 22U) | (((uint32_t)(minor)) << 12U) | ((uint32_t)(patch)))
 

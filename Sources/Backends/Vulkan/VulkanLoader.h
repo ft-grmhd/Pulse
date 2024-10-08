@@ -9,8 +9,8 @@
 
 #include <stdbool.h>
 
-typedef struct VulkanInstance VulkanInstance;
-typedef struct VulkanDevice VulkanDevice;
+#include "VulkanDevice.h"
+#include "VulkanInstance.h"
 
 bool VulkanInitLoader();
 bool VulkanLoadInstance(VulkanInstance* instance);

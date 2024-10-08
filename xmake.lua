@@ -63,36 +63,31 @@ end
 target("pulse_gpu")
 	set_kind("$(kind)")
 	add_defines("PULSE_BUILD")
-	add_headerfiles("Includes/*.hpp)")
 	add_headerfiles("Sources/*.h", { prefixdir = "private", install = false })
 	add_headerfiles("Sources/*.inl", { prefixdir = "private", install = false })
 	
 	add_files("Sources/*.c")
 
 	for name, module in pairs(backends) do
-		if not has_config(module.option) then
-			goto continue
+		if has_config(module.option) then
+			if module.packages then
+				add_packages(table.unpack(module.packages))
+			end
+
+			add_defines("PULSE_ENABLE_" .. name:upper() .. "_BACKEND")
+
+			add_headerfiles("Sources/Backends/" .. name .. "/**.h", { prefixdir = "private", install = false })
+			add_headerfiles("Sources/Backends/" .. name .. "/**.inl", { prefixdir = "private", install = false })
+
+			add_files("Sources/Backends/" .. name .. "/**.c")
+			if module.has_cpp_files then
+				add_files("Sources/Backends/" .. name .. "/**.cpp")
+			end
+
+			if module.custom then
+				module.custom()
+			end
 		end
-
-		if module.packages then
-			add_packages(table.unpack(module.packages))
-		end
-
-		add_defines("PULSE_ENABLE_" .. name:upper() .. "_BACKEND")
-
-		add_headerfiles("Sources/Backends/" .. name .. "/**.h", { prefixdir = "private", install = false })
-		add_headerfiles("Sources/Backends/" .. name .. "/*.inl", { prefixdir = "private", install = false })
-
-		add_files("Sources/Backends/" .. name .. "/**.c")
-		if module.has_cpp_files then
-			add_files("Sources/Backends/" .. name .. "/**.cpp")
-		end
-
-		if module.custom then
-			module.custom()
-		end
-
-		::continue::
 	end
 
 	on_load(function(target)

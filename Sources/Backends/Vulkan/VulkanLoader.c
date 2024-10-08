@@ -40,9 +40,9 @@
 
 static LibModule vulkan_lib_module = PULSE_NULLPTR;
 
-static void VulkanLoadGlobalFunctions(void* context, PFN_vkVoidFunction (*load)(void*, const char*));
-static void VulkanLoadInstanceFunctions(VulkanInstance* instance, PFN_vkVoidFunction (*load)(void*, const char*));
-static void VulkanLoadDeviceFunctions(VulkanInstance* instance, VulkanDevice* device, PFN_vkVoidFunction (*load)(VulkanInstance*, void*, const char*));
+static bool VulkanLoadGlobalFunctions(void* context, PFN_vkVoidFunction (*load)(void*, const char*));
+static bool VulkanLoadInstanceFunctions(VulkanInstance* instance, PFN_vkVoidFunction (*load)(void*, const char*));
+static bool VulkanLoadDeviceFunctions(VulkanInstance* instance, VulkanDevice* device, PFN_vkVoidFunction (*load)(VulkanInstance*, void*, const char*));
 
 static inline PFN_vkVoidFunction vkGetInstanceProcAddrStub(void* context, const char* name)
 {
@@ -127,18 +127,17 @@ bool VulkanInitLoader()
 		PulseSetInternalError(PULSE_ERROR_INITIALIZATION_FAILED);
 		return false;
 	}
-	VulkanLoadGlobalFunctions(PULSE_NULLPTR, vkGetInstanceProcAddrStub);
-	return true;
+	return VulkanLoadGlobalFunctions(PULSE_NULLPTR, vkGetInstanceProcAddrStub);
 }
 
-void VulkanLoadInstance(VulkanInstance* instance)
+bool VulkanLoadInstance(VulkanInstance* instance)
 {
-	VulkanLoadInstanceFunctions(instance, vkGetInstanceProcAddrStub);
+	return VulkanLoadInstanceFunctions(instance, vkGetInstanceProcAddrStub);
 }
 
-void VulkanLoadDevice(VulkanInstance* instance, VulkanDevice* device)
+bool VulkanLoadDevice(VulkanInstance* instance, VulkanDevice* device)
 {
-	VulkanLoadDeviceFunctions(instance, device, vkGetDeviceProcAddrStub);
+	return VulkanLoadDeviceFunctions(instance, device, vkGetDeviceProcAddrStub);
 }
 
 void VulkanLoaderShutdown()
@@ -147,23 +146,35 @@ void VulkanLoaderShutdown()
 	vulkan_lib_module = PULSE_NULLPTR;
 }
 
-static void VulkanLoadGlobalFunctions(void* context, PFN_vkVoidFunction (*load)(void*, const char*))
+static bool VulkanLoadGlobalFunctions(void* context, PFN_vkVoidFunction (*load)(void*, const char*))
 {
-	#define PULSE_VULKAN_GLOBAL_FUNCTION(func) VulkanGetGlobal()->func = (PFN_##func)load(context, #func);
+	#define PULSE_VULKAN_GLOBAL_FUNCTION(func) \
+		VulkanGetGlobal()->func = (PFN_##func)load(context, #func); \
+		if(!VulkanGetGlobal()->func) \
+			return false;
 		#include "VulkanGlobalPrototypes.h"
 	#undef PULSE_VULKAN_GLOBAL_FUNCTION
+	return true;
 }
 
-static void VulkanLoadInstanceFunctions(VulkanInstance* instance, PFN_vkVoidFunction (*load)(void*, const char*))
+static bool VulkanLoadInstanceFunctions(VulkanInstance* instance, PFN_vkVoidFunction (*load)(void*, const char*))
 {
-	#define PULSE_VULKAN_INSTANCE_FUNCTION(func) instance->func = (PFN_##func)load(instance->instance, #func);
+	#define PULSE_VULKAN_INSTANCE_FUNCTION(func) \
+		instance->func = (PFN_##func)load(instance->instance, #func); \
+		if(!instance->func) \
+			return false;
 		#include "VulkanInstancePrototypes.h"
 	#undef PULSE_VULKAN_INSTANCE_FUNCTION
+	return true;
 }
 
-static void VulkanLoadDeviceFunctions(VulkanInstance* instance, VulkanDevice* device, PFN_vkVoidFunction (*load)(VulkanInstance*, void*, const char*))
+static bool VulkanLoadDeviceFunctions(VulkanInstance* instance, VulkanDevice* device, PFN_vkVoidFunction (*load)(VulkanInstance*, void*, const char*))
 {
-	#define PULSE_VULKAN_DEVICE_FUNCTION(func) device->func = (PFN_##func)load(instance, device->device, #func);
+	#define PULSE_VULKAN_DEVICE_FUNCTION(func) \
+		device->func = (PFN_##func)load(instance, device->device, #func); \
+		if(!device->func) \
+			return false;
 		#include "VulkanDevicePrototypes.h"
 	#undef PULSE_VULKAN_DEVICE_FUNCTION
+	return true;
 }

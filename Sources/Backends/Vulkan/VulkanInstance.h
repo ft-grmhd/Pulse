@@ -9,6 +9,8 @@
 
 #include <vulkan/vulkan_core.h>
 
+#include <Pulse.h>
+
 typedef struct VulkanInstance
 {
 	VkInstance instance;
@@ -17,6 +19,9 @@ typedef struct VulkanInstance
 		#include "VulkanInstancePrototypes.h"
 	#undef PULSE_VULKAN_INSTANCE_FUNCTION
 } VulkanInstance;
+
+bool VulkanInitInstance(VulkanInstance* instance, PulseDebugLevel debug_level);
+void VulkanDestroyInstance(VulkanInstance* instance);
 
 #endif // PULSE_VULKAN_INSTANCE_H_
 
