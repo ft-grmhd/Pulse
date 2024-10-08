@@ -16,7 +16,7 @@ extern "C" {
 
 #include "PulseProfile.h"
 
-#define PULSE_VERSION PULSE_MAKE_VERSION(1, 0, 0)
+#define PULSE_VERSION PULSE_MAKE_VERSION(0, 0, 1)
 
 // Types
 typedef uint64_t PulseDeviceSize;
@@ -35,7 +35,9 @@ PULSE_DEFINE_NULLABLE_HANDLE(PulseImage);
 typedef enum PulseBackendBits
 {
 	PULSE_BACKEND_INVALID = PULSE_BIT(1),
-	PULSE_BACKEND_VULKAN = PULSE_BIT(2),
+	PULSE_BACKEND_ANY = PULSE_BIT(2),
+	PULSE_BACKEND_VULKAN = PULSE_BIT(3),
+	PULSE_BACKEND_D3D11 = PULSE_BIT(4),
 	// More to come
 } PulseBackendBits;
 typedef PulseFlags PulseBackendFlags;
@@ -65,13 +67,30 @@ typedef PulseFlags PulseImageUsageFlags;
 
 typedef enum PulseShaderFormatsBits
 {
-	PULSE_SHADER_FORMAT_INVALID_BIT = PULSE_BIT(1),
-	PULSE_SHADER_FORMAT_SPIRV_BIT   = PULSE_BIT(2),
+	PULSE_SHADER_FORMAT_SPIRV_BIT   = PULSE_BIT(1), // Can be used by Vulkan | D3D11 backends
+	PULSE_SHADER_FORMAT_DXBC_BIT    = PULSE_BIT(2), // Can be used by D3D11 backend only
 	// More to come
 } PulseShaderFormatsBits;
 typedef PulseFlags PulseShaderFormatsFlags;
 
 // Enums
+typedef enum PulseDebugLevel
+{
+	PULSE_NO_DEBUG,
+	PULSE_LOW_DEBUG,
+	PULSE_HIGH_DEBUG,
+	PULSE_PARANOID_DEBUG // Causes every warning to be treated as error
+} PulseDebugLevel;
+
+typedef enum PulseErrorType
+{
+	PULSE_ERROR_NONE,
+
+	PULSE_ERROR_BACKENDS_CANDIDATES_SHADER_FORMAT_MISMATCH,
+	PULSE_ERROR_INITIALIZATION_FAILED,
+	PULSE_ERROR_INVALID_HANDLE,
+} PulseErrorType;
+
 typedef enum PulseImageType
 {
 	PULSE_IMAGE_TYPE_2D,
@@ -180,7 +199,6 @@ typedef struct PulseComputePipelineCreateInfo
 	const uint8_t* code;
 	const char* entrypoint;
 	PulseShaderFormatsFlags format;
-	uint32_t num_samplers;
 	uint32_t num_readonly_storage_images;
 	uint32_t num_readonly_storage_buffers;
 	uint32_t num_readwrite_storage_images;
@@ -230,10 +248,14 @@ typedef struct PulseImageRegion
 } PulseImageRegion;
 
 // Functions
-PULSE_API PulseDevice PulseCreateDevice(PulseBackendFlags backend_candidates, PulseShaderFormatsFlags shader_formats_used);
+PULSE_API PulseDevice PulseCreateDevice(PulseBackendFlags backend_candidates, PulseShaderFormatsFlags shader_formats_used, PulseDebugLevel debug_level);
 PULSE_API void PulseDestroyDevice(PulseDevice device);
 PULSE_API PulseBackendBits PulseGetBackendInUseByDevice(PulseDevice device);
 PULSE_API bool PulseSupportsBackend(PulseBackendFlags backend_candidates, PulseShaderFormatsFlags shader_formats_used);
+PULSE_API bool PulseDeviceSupportsSahderFormats(PulseDevice device, PulseShaderFormatsFlags shader_formats_used);
+
+PULSE_API PulseErrorType PulseGetLastErrorType(); // /!\ Warning /!\ Call to this function resets the internal last error variable
+PULSE_API const char* PulseVerbaliseErrorType(PulseErrorType error);
 
 #ifdef __cplusplus
 }

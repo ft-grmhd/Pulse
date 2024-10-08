@@ -7,6 +7,8 @@
 #ifndef PULSE_PROFILE_H_
 #define PULSE_PROFILE_H_
 
+#include <stdlib.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -74,6 +76,42 @@ extern "C" {
 	#endif
 #else
 	#define PULSE_API
+#endif
+
+#ifndef __cplusplus // if we compile in C
+	#ifdef __STDC__
+		#ifdef __STDC_VERSION__
+			#if __STDC_VERSION__ == 199409L
+				#define PULSE_C_VERSION 1994
+			#elif __STDC_VERSION__ == 199901L
+				#define PULSE_C_VERSION 1999
+			#elif __STDC_VERSION__ == 201112L
+				#define PULSE_C_VERSION 2011
+			#elif __STDC_VERSION__ == 201710L
+				#define PULSE_C_VERSION 2017
+			#elif __STDC_VERSION__ == 202311L
+				#define PULSE_C_VERSION 2023
+			#else
+				#define PULSE_C_VERSION 0
+			#endif
+		#else
+			#define PULSE_C_VERSION 0
+		#endif
+	#else
+		#define PULSE_C_VERSION 0
+	#endif
+#else
+	#define PULSE_C_VERSION 0
+#endif
+
+#if PULSE_C_VERSION >= 2023
+	#if defined(PULSE_COMPILER_GCC) || defined(PULSE_COMPILER_CLANG) // for now only GCC and Clang supports nullptr
+		#define PULSE_NULLPTR nullptr
+	#else
+		#define PULSE_NULLPTR NULL
+	#endif
+#else
+	#define PULSE_NULLPTR NULL
 #endif
 
 #define PULSE_DEFINE_NULLABLE_HANDLE(object) typedef struct object##Handler* object

@@ -2,9 +2,5 @@
 // This file is part of "Pulse"
 // For conditions of distribution and use, see copyright notice in LICENSE
 
-#include <Pulse.h>
-
-typedef struct PulseDeviceHandler
-{
-
-} PulseDeviceHandler;
+#define VMA_IMPLEMENTATION
+#include <vk_mem_alloc.h>
