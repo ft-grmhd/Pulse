@@ -8,6 +8,8 @@
 !/Sources/
 !/Tests/
 !/.github/
+build/
+Build/
 *.o
 *.swp
 *.swx
