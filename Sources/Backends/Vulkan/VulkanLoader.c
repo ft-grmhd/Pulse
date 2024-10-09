@@ -40,6 +40,8 @@
 
 static LibModule vulkan_lib_module = PULSE_NULLPTR;
 
+static uint32_t loader_references_count = 0;
+
 static bool VulkanLoadGlobalFunctions(void* context, PFN_vkVoidFunction (*load)(void*, const char*));
 static bool VulkanLoadInstanceFunctions(VulkanInstance* instance, PFN_vkVoidFunction (*load)(void*, const char*));
 static bool VulkanLoadDeviceFunctions(VulkanInstance* instance, VulkanDevice* device, PFN_vkVoidFunction (*load)(VulkanInstance*, void*, const char*));
@@ -109,6 +111,9 @@ bool VulkanInitLoader()
 		};
 	#endif
 
+	if(loader_references_count != 0)
+		return true;
+
 	for(size_t i = 0; i < sizeof(libnames) / sizeof(const char*); i++)
 	{
 		vulkan_lib_module = LoadLibrary(libnames[i]);
@@ -127,6 +132,7 @@ bool VulkanInitLoader()
 		PulseSetInternalError(PULSE_ERROR_INITIALIZATION_FAILED);
 		return false;
 	}
+	loader_references_count++;
 	return VulkanLoadGlobalFunctions(PULSE_NULLPTR, vkGetInstanceProcAddrStub);
 }
 
@@ -142,6 +148,9 @@ bool VulkanLoadDevice(VulkanInstance* instance, VulkanDevice* device)
 
 void VulkanLoaderShutdown()
 {
+	loader_references_count--;
+	if(loader_references_count != 0)
+		return;
 	UnloadLibrary(vulkan_lib_module);
 	vulkan_lib_module = PULSE_NULLPTR;
 }

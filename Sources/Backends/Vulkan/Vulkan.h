@@ -12,6 +12,8 @@
 #include "VulkanDevice.h"
 #include "VulkanInstance.h"
 
+#define VULKAN_RETRIEVE_DRIVER_DATA(device) ((VulkanDriverData*)device->driver_data)
+
 typedef struct VulkanGlobal
 {
 	#define PULSE_VULKAN_GLOBAL_FUNCTION(fn) PFN_##fn fn;
@@ -19,13 +21,15 @@ typedef struct VulkanGlobal
 	#undef PULSE_VULKAN_GLOBAL_FUNCTION
 } VulkanGlobal;
 
-typedef struct VulkanPulseDevice
+typedef struct VulkanDriverData
 {
 	VulkanInstance instance;
 	VulkanDevice device;
-} VulkanPulseDevice;
+} VulkanDriverData;
 
 VulkanGlobal* VulkanGetGlobal();
+
+PulseBackendFlags VulkanCheckSupport(PulseBackendFlags candidates, PulseShaderFormatsFlags shader_formats_used); // Return PULSE_BACKEND_VULKAN in case of success and PULSE_BACKEND_INVALID otherwise
 
 #endif // PULSE_VULKAN_H_
 

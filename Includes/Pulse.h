@@ -22,6 +22,7 @@ extern "C" {
 typedef uint64_t PulseDeviceSize;
 typedef uint32_t PulseFlags;
 
+PULSE_DEFINE_NULLABLE_HANDLE(PulseBackend);
 PULSE_DEFINE_NULLABLE_HANDLE(PulseBuffer);
 PULSE_DEFINE_NULLABLE_HANDLE(PulseCommandList);
 PULSE_DEFINE_NULLABLE_HANDLE(PulseComputePass);
@@ -249,11 +250,13 @@ typedef struct PulseImageRegion
 } PulseImageRegion;
 
 // Functions
-PULSE_API PulseDevice PulseCreateDevice(PulseBackendFlags backend_candidates, PulseShaderFormatsFlags shader_formats_used, PulseDebugLevel debug_level);
+PULSE_API PulseBackend PulseLoadBackend(PulseBackendFlags backend_candidates, PulseShaderFormatsFlags shader_formats_used, PulseDebugLevel debug_level);
+PULSE_API void PulseUnloadBackend(PulseBackend backend);
+PULSE_API PulseDevice PulseCreateDevice(PulseBackend backend, PulseDevice* forbiden_devices, uint32_t forbiden_devices_count);
 PULSE_API void PulseDestroyDevice(PulseDevice device);
 PULSE_API PulseBackendBits PulseGetBackendInUseByDevice(PulseDevice device);
 PULSE_API bool PulseSupportsBackend(PulseBackendFlags backend_candidates, PulseShaderFormatsFlags shader_formats_used);
-PULSE_API bool PulseDeviceSupportsSahderFormats(PulseDevice device, PulseShaderFormatsFlags shader_formats_used);
+PULSE_API bool PulseDeviceSupportsShaderFormats(PulseDevice device, PulseShaderFormatsFlags shader_formats_used);
 
 PULSE_API PulseErrorType PulseGetLastErrorType(); // /!\ Warning /!\ Call to this function resets the internal last error variable
 PULSE_API const char* PulseVerbaliseErrorType(PulseErrorType error);

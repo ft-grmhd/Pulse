@@ -24,7 +24,10 @@ static VkInstance VulkanCreateInstance(const char** extensions_enabled, uint32_t
 	create_info.pApplicationInfo = &app_info;
 	create_info.enabledExtensionCount = extensions_count;
 	create_info.ppEnabledExtensionNames = extensions_enabled;
-	create_info.enabledLayerCount = sizeof(layer_names) / sizeof(layer_names[0]);
+	if(debug_level == PULSE_NO_DEBUG)
+		create_info.enabledLayerCount = 0;
+	else
+		create_info.enabledLayerCount = sizeof(layer_names) / sizeof(layer_names[0]);
 	create_info.ppEnabledLayerNames = layer_names;
 	create_info.pNext = PULSE_NULLPTR;
 	#ifdef PULSE_PLAT_MACOS
@@ -39,17 +42,29 @@ static VkInstance VulkanCreateInstance(const char** extensions_enabled, uint32_t
 
 bool VulkanInitInstance(VulkanInstance* instance, PulseDebugLevel debug_level)
 {
-	instance->instance = VulkanCreateInstance(NULL, 0, debug_level);
+	#ifdef PULSE_PLAT_MACOS
+		const char* extensions[] = {
+			VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME,
+		};
+	#else
+		const char* extensions[] = {
+		};
+	#endif
+	instance->instance = VulkanCreateInstance(extensions, sizeof(extensions) / sizeof(char*), debug_level);
 	if(instance->instance == VK_NULL_HANDLE)
 	{
 		PulseSetInternalError(PULSE_ERROR_INITIALIZATION_FAILED);
 		return false;
 	}
-	if(VulkanLoadInstance(instance))
+	if(!VulkanLoadInstance(instance))
 		return false;
 	return true;
 }
 
 void VulkanDestroyInstance(VulkanInstance* instance)
 {
+	if(instance == PULSE_NULLPTR || instance->instance == VK_NULL_HANDLE)
+		return;
+	instance->vkDestroyInstance(instance->instance, PULSE_NULLPTR);
+	instance->instance = VK_NULL_HANDLE;
 }

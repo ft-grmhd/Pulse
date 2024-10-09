@@ -32,7 +32,7 @@ typedef struct VulkanDevice
 	#undef PULSE_VULKAN_DEVICE_FUNCTION
 } VulkanDevice;
 
-VulkanDevice* VulkanCreateDevice(PulseDebugLevel debug_level);
+void* VulkanCreateDevice(PulseBackend backend, PulseDevice* forbiden_devices, uint32_t forbiden_devices_count);
 void VulkanDestroyDevice(VulkanDevice* device);
 
 #endif // PULSE_VULKAN_DEVICE_H_

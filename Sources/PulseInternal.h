@@ -22,30 +22,46 @@ extern "C" {
 
 #define PULSE_CHECK_ALLOCATION(ptr) PULSE_CHECK_ALLOCATION_RETVAL(ptr, )
 
-typedef bool (*PulseLoadBackendPFN)(void);
-typedef PulseDevice (*PulseCreateDevicePFN)(PulseDebugLevel);
+#define PULSE_CHECK_HANDLE_RETVAL(handle, retval) \
+	do { \
+		if(handle == PULSE_NULL_HANDLE) \
+		{ \
+			PulseSetInternalError(PULSE_ERROR_INVALID_HANDLE); \
+			return retval; \
+		} \
+	} while(0); \
+
+#define PULSE_CHECK_HANDLE(handle) PULSE_CHECK_HANDLE_RETVAL(handle, )
+
+typedef PulseBackendFlags (*PulseCheckBackendSupportPFN)(PulseBackendFlags, PulseShaderFormatsFlags);
+
+typedef bool (*PulseLoadBackendPFN)(PulseDebugLevel);
+typedef void (*PulseUnloadBackendPFN)(PulseBackend);
+typedef void* (*PulseCreateDevicePFN)(PulseBackend, PulseDevice*, uint32_t);
+
 typedef void (*PulseDestroyDevicePFN)(PulseDevice);
 
-typedef struct PulseBackendLoader
+typedef struct PulseBackendHandler
 {
 	// PFNs
 	PulseLoadBackendPFN PFN_LoadBackend;
+	PulseUnloadBackendPFN PFN_UnloadBackend;
 	PulseCreateDevicePFN PFN_CreateDevice;
-	PulseDestroyDevicePFN PFN_DestroyDevice;
 
 	// Attributes
 	PulseBackendFlags backend;
 	PulseShaderFormatsFlags supported_shader_formats;
-} PulseBackendLoader;
+	void* driver_data;
+} PulseBackendHandler;
 
 typedef struct PulseDeviceHandler
 {
 	// PFNs
+	PulseDestroyDevicePFN PFN_DestroyDevice;
 
 	// Attributes
 	void* driver_data;
-	const PulseBackendLoader* backend;
-	PulseDebugLevel debug_level;
+	PulseBackend backend;
 } PulseDeviceHandler;
 
 void PulseSetInternalError(PulseErrorType error);
@@ -55,10 +71,10 @@ void PulseSetInternalError(PulseErrorType error);
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(DestroyDevice, _namespace) \
 
 #ifdef PULSE_ENABLE_VULKAN_BACKEND
-	extern PulseBackendLoader VulkanDriver;
+	extern PulseBackendHandler VulkanDriver;
 #endif // PULSE_ENABLE_VULKAN_BACKEND
 #ifdef PULSE_ENABLE_D3D11_BACKEND
-	extern PulseBackendLoader D3D11Driver;
+	extern PulseBackendHandler D3D11Driver;
 #endif // PULSE_ENABLE_D3D11_BACKEND
 
 #ifdef __cplusplus
