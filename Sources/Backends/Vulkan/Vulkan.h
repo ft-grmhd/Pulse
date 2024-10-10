@@ -14,7 +14,7 @@
 
 #include "../../PulseInternal.h"
 
-#define VULKAN_RETRIEVE_DRIVER_DATA(handle) ((VulkanDriverData*)handle->driver_data)
+#define VULKAN_RETRIEVE_DRIVER_DATA_AS(handle, cast) ((cast)handle->driver_data)
 
 #define CHECK_VK_RETVAL(res, error, retval) \
 	if((res) != VK_SUCCESS) \

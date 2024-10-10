@@ -111,6 +111,7 @@ PULSE_API const char* PulseVerbaliseErrorType(PulseErrorType error)
 		case PULSE_ERROR_BACKENDS_CANDIDATES_SHADER_FORMAT_MISMATCH: return "no backend candidates support the required shader formats";
 		case PULSE_ERROR_INITIALIZATION_FAILED:                      return "initialization of an object could not be completed for implementation-specific reasons";
 		case PULSE_ERROR_ALLOCATION_FAILED:                          return "an internal allocation failed";
+		case PULSE_ERROR_DEVICE_LOST:                                return "device has been lost";
 
 		default: return "invalid error type";
 	};

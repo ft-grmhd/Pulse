@@ -45,6 +45,10 @@ typedef void (*PulseDestroyDevicePFN)(PulseDevice);
 typedef PulseComputePipeline (*PulseCreateComputePipelinePFN)(PulseDevice, const PulseComputePipelineCreateInfo*);
 typedef void (*PulseBindComputePipelinePFN)(PulseComputePass, PulseComputePipeline);
 typedef void (*PulseDestroyComputePipelinePFN)(PulseDevice, PulseComputePipeline);
+typedef PulseFence (*PulseCreateFencePFN)(PulseDevice device);
+typedef void (*PulseDestroyFencePFN)(PulseDevice device, PulseFence fence);
+typedef bool (*PulseIsFenceReadyPFN)(PulseDevice device, PulseFence fence);
+typedef bool (*PulseWaitForFencesPFN)(PulseDevice device, PulseFence* const* fences, uint32_t fences_count, bool wait_for_all);
 
 typedef struct PulseBackendHandler
 {
@@ -66,11 +70,20 @@ typedef struct PulseDeviceHandler
 	PulseCreateComputePipelinePFN PFN_CreateComputePipeline;
 	PulseBindComputePipelinePFN PFN_BindComputePipeline;
 	PulseDestroyComputePipelinePFN PFN_DestroyComputePipeline;
+	PulseCreateFencePFN PFN_CreateFence;
+	PulseDestroyFencePFN PFN_DestroyFence;
+	PulseIsFenceReadyPFN PFN_IsFenceReady;
+	PulseWaitForFencesPFN PFN_WaitForFences;
 
 	// Attributes
 	void* driver_data;
 	PulseBackend backend;
 } PulseDeviceHandler;
+
+typedef struct PulseFenceHandler
+{
+	void* driver_data;
+} PulseFenceHandler;
 
 void PulseSetInternalError(PulseErrorType error);
 
@@ -78,8 +91,12 @@ void PulseSetInternalError(PulseErrorType error);
 #define PULSE_LOAD_DRIVER_DEVICE(_namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(DestroyDevice, _namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(CreateComputePipeline, _namespace) \
-	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(BindComputePipeline, _namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(DestroyComputePipeline, _namespace) \
+	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(BindComputePipeline, _namespace) \
+	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(CreateFence, _namespace) \
+	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(DestroyFence, _namespace) \
+	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(IsFenceReady, _namespace) \
+	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(WaitForFences, _namespace) \
 
 #ifdef PULSE_ENABLE_VULKAN_BACKEND
 	extern PulseBackendHandler VulkanDriver;

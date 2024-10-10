@@ -6,6 +6,7 @@
 #include "Vulkan.h"
 #include "VulkanComputePipeline.h"
 #include "VulkanDevice.h"
+#include "VulkanFence.h"
 #include "VulkanInstance.h"
 #include "VulkanLoader.h"
 #include "VulkanQueue.h"
@@ -117,7 +118,7 @@ PulseDevice VulkanCreateDevice(PulseBackend backend, PulseDevice* forbiden_devic
 	VulkanDevice* device = (VulkanDevice*)calloc(1, sizeof(VulkanDevice));
 	PULSE_CHECK_ALLOCATION_RETVAL(device, PULSE_NULLPTR);
 
-	VulkanInstance* instance = &VULKAN_RETRIEVE_DRIVER_DATA(backend)->instance;
+	VulkanInstance* instance = &VULKAN_RETRIEVE_DRIVER_DATA_AS(backend, VulkanDriverData*)->instance;
 
 	device->physical = VulkanPickPhysicalDevice(instance, forbiden_devices, forbiden_devices_count);
 	PULSE_CHECK_HANDLE_RETVAL(device->physical, PULSE_NULLPTR);
@@ -226,12 +227,11 @@ PulseDevice VulkanCreateDevice(PulseBackend backend, PulseDevice* forbiden_devic
 
 void VulkanDestroyDevice(PulseDevice device)
 {
-	VulkanDevice* vulkan_device = (VulkanDevice*)device->driver_data;
+	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(device, VulkanDevice*);
 	if(vulkan_device == PULSE_NULLPTR || vulkan_device->device == VK_NULL_HANDLE)
 		return;
 	vmaDestroyAllocator(vulkan_device->allocator);
 	vulkan_device->vkDestroyDevice(vulkan_device->device, PULSE_NULLPTR);
-	vulkan_device->device = VK_NULL_HANDLE;
 	free(vulkan_device);
 	free(device);
 }

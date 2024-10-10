@@ -51,7 +51,7 @@ bool VulkanLoadBackend(PulseDebugLevel debug_level)
 
 void VulkanUnloadBackend(PulseBackend backend)
 {
-	VulkanDestroyInstance(&VULKAN_RETRIEVE_DRIVER_DATA(backend)->instance);
+	VulkanDestroyInstance(&VULKAN_RETRIEVE_DRIVER_DATA_AS(backend, VulkanDriverData*)->instance);
 	VulkanLoaderShutdown();
 }
 
