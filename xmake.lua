@@ -97,4 +97,6 @@ target("pulse_gpu")
 	end)
 target_end()
 
-includes("Tests/*.lua")
+includes("Examples/*.lua")
+
+includes("Tests/Vulkan/*.lua")

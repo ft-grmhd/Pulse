@@ -16,8 +16,14 @@
 
 #include <Pulse.h>
 
+#include "VulkanEnums.h"
+
+struct VulkanQueue;
+
 typedef struct VulkanDevice
 {
+	struct VulkanQueue* queues[VULKAN_QUEUE_END_ENUM];
+
 	VkPhysicalDeviceFeatures features;
 	VkPhysicalDeviceMemoryProperties memory_properties;
 	VkPhysicalDeviceProperties properties;
@@ -32,8 +38,8 @@ typedef struct VulkanDevice
 	#undef PULSE_VULKAN_DEVICE_FUNCTION
 } VulkanDevice;
 
-void* VulkanCreateDevice(PulseBackend backend, PulseDevice* forbiden_devices, uint32_t forbiden_devices_count);
-void VulkanDestroyDevice(VulkanDevice* device);
+PulseDevice VulkanCreateDevice(PulseBackend backend, PulseDevice* forbiden_devices, uint32_t forbiden_devices_count);
+void VulkanDestroyDevice(PulseDevice device);
 
 #endif // PULSE_VULKAN_DEVICE_H_
 

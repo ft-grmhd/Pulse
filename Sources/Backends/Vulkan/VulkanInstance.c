@@ -36,7 +36,7 @@ static VkInstance VulkanCreateInstance(const char** extensions_enabled, uint32_t
 		create_info.flags = 0;
 	#endif
 
-	VulkanGetGlobal()->vkCreateInstance(&create_info, PULSE_NULLPTR, &instance);
+	CHECK_VK_RETVAL(VulkanGetGlobal()->vkCreateInstance(&create_info, PULSE_NULLPTR, &instance), PULSE_ERROR_INITIALIZATION_FAILED, VK_NULL_HANDLE);
 	return instance;
 }
 
@@ -52,10 +52,7 @@ bool VulkanInitInstance(VulkanInstance* instance, PulseDebugLevel debug_level)
 	#endif
 	instance->instance = VulkanCreateInstance(extensions, sizeof(extensions) / sizeof(char*), debug_level);
 	if(instance->instance == VK_NULL_HANDLE)
-	{
-		PulseSetInternalError(PULSE_ERROR_INITIALIZATION_FAILED);
 		return false;
-	}
 	if(!VulkanLoadInstance(instance))
 		return false;
 	return true;

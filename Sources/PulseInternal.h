@@ -11,6 +11,8 @@
 extern "C" {
 #endif
 
+#define PulseStaticAllocStack(size) ((char[size]){ 0 })
+
 #define PULSE_CHECK_ALLOCATION_RETVAL(ptr, retval) \
 	do { \
 		if(ptr == PULSE_NULLPTR) \
@@ -37,9 +39,12 @@ typedef PulseBackendFlags (*PulseCheckBackendSupportPFN)(PulseBackendFlags, Puls
 
 typedef bool (*PulseLoadBackendPFN)(PulseDebugLevel);
 typedef void (*PulseUnloadBackendPFN)(PulseBackend);
-typedef void* (*PulseCreateDevicePFN)(PulseBackend, PulseDevice*, uint32_t);
+typedef PulseDevice (*PulseCreateDevicePFN)(PulseBackend, PulseDevice*, uint32_t);
 
 typedef void (*PulseDestroyDevicePFN)(PulseDevice);
+typedef PulseComputePipeline (*PulseCreateComputePipelinePFN)(PulseDevice, const PulseComputePipelineCreateInfo*);
+typedef void (*PulseBindComputePipelinePFN)(PulseComputePass, PulseComputePipeline);
+typedef void (*PulseDestroyComputePipelinePFN)(PulseDevice, PulseComputePipeline);
 
 typedef struct PulseBackendHandler
 {
@@ -58,6 +63,9 @@ typedef struct PulseDeviceHandler
 {
 	// PFNs
 	PulseDestroyDevicePFN PFN_DestroyDevice;
+	PulseCreateComputePipelinePFN PFN_CreateComputePipeline;
+	PulseBindComputePipelinePFN PFN_BindComputePipeline;
+	PulseDestroyComputePipelinePFN PFN_DestroyComputePipeline;
 
 	// Attributes
 	void* driver_data;
@@ -66,9 +74,12 @@ typedef struct PulseDeviceHandler
 
 void PulseSetInternalError(PulseErrorType error);
 
-#define PULSE_LOAD_DRIVER_DEVICE_FUNCTION(fn, _namespace) device->PFN_##fn = _namespace##fn;
+#define PULSE_LOAD_DRIVER_DEVICE_FUNCTION(fn, _namespace) pulse_device->PFN_##fn = _namespace##fn;
 #define PULSE_LOAD_DRIVER_DEVICE(_namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(DestroyDevice, _namespace) \
+	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(CreateComputePipeline, _namespace) \
+	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(BindComputePipeline, _namespace) \
+	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(DestroyComputePipeline, _namespace) \
 
 #ifdef PULSE_ENABLE_VULKAN_BACKEND
 	extern PulseBackendHandler VulkanDriver;

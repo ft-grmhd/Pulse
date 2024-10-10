@@ -7,17 +7,15 @@
 
 PULSE_API PulseDevice PulseCreateDevice(PulseBackend backend, PulseDevice* forbiden_devices, uint32_t forbiden_devices_count)
 {
-	PulseDevice device = backend->PFN_CreateDevice(backend, forbiden_devices, forbiden_devices_count);
-	if(device == PULSE_NULL_HANDLE)
-		PulseSetInternalError(PULSE_ERROR_INITIALIZATION_FAILED);
-	device->backend = backend;
-	return device;
+	PULSE_CHECK_HANDLE_RETVAL(backend, PULSE_NULL_HANDLE);
+	return backend->PFN_CreateDevice(backend, forbiden_devices, forbiden_devices_count);
 }
 
 PULSE_API void PulseDestroyDevice(PulseDevice device)
 {
 	PULSE_CHECK_HANDLE(device);
 	device->PFN_DestroyDevice(device);
+	device->driver_data = PULSE_NULLPTR;
 }
 
 PULSE_API PulseBackendBits PulseGetBackendInUseByDevice(PulseDevice device)

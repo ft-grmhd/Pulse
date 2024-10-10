@@ -12,7 +12,18 @@
 #include "VulkanDevice.h"
 #include "VulkanInstance.h"
 
-#define VULKAN_RETRIEVE_DRIVER_DATA(device) ((VulkanDriverData*)device->driver_data)
+#include "../../PulseInternal.h"
+
+#define VULKAN_RETRIEVE_DRIVER_DATA(handle) ((VulkanDriverData*)handle->driver_data)
+
+#define CHECK_VK_RETVAL(res, error, retval) \
+	if((res) != VK_SUCCESS) \
+	{ \
+		PulseSetInternalError(error); \
+		return retval; \
+	}
+
+#define CHECK_VK(res, error) CHECK_VK_RETVAL(res, error, )
 
 typedef struct VulkanGlobal
 {
@@ -24,7 +35,6 @@ typedef struct VulkanGlobal
 typedef struct VulkanDriverData
 {
 	VulkanInstance instance;
-	VulkanDevice device;
 } VulkanDriverData;
 
 VulkanGlobal* VulkanGetGlobal();
