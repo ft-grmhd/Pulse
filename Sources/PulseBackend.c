@@ -2,6 +2,8 @@
 // This file is part of "Pulse"
 // For conditions of distribution and use, see copyright notice in LICENSE
 
+#include <string.h>
+
 #include <Pulse.h>
 #include "PulseInternal.h"
 
@@ -23,11 +25,36 @@ static const PulseCheckBackendSupportPFN backends_supports[] = {
 	PULSE_NULLPTR
 };
 
-static PulseErrorType last_error = PULSE_ERROR_NONE;
-
-void PulseSetInternalError(PulseErrorType error)
+struct
 {
-	last_error = error;
+	char file[1024];
+	char function[1024];
+	PulseErrorType type;
+	int line;
+} last_error = { .file = { 0 }, .function = { 0 }, .type = PULSE_ERROR_NONE, .line = -1 };
+
+void PulseSetInternalErrorBackend(PulseErrorType error, const char* file, const char* function, int line)
+{
+	strcpy(last_error.file, file);
+	strcpy(last_error.function, function);
+	last_error.type = error;
+	last_error.line = line;
+}
+
+void PulseLogErrorBackend(PulseBackend backend, PulseErrorType error, const char* file, const char* function, int line)
+{
+	if(backend == PULSE_NULL_HANDLE)
+		return;
+	if(!backend->PFN_UserDebugCallback)
+		return;
+}
+
+void PulseLogWarningBackend(PulseBackend backend, PulseWarningType warning, const char* file, const char* function, int line)
+{
+}
+
+void PulseLogInfoBackend(PulseBackend backend, const char* message, const char* file, const char* function, int line)
+{
 }
 
 static PulseBackendFlags PulseSelectBackend(PulseBackendFlags backend_candidates, PulseShaderFormatsFlags shader_formats_used)
@@ -47,6 +74,10 @@ static PulseBackendFlags PulseSelectBackend(PulseBackendFlags backend_candidates
 	return PULSE_BACKEND_INVALID;
 }
 
+static const char* PulseVerbaliseErrorType(PulseErrorType error)
+{
+}
+
 static PulseBackend PulseGetBackendFromFlag(PulseBackendBits flag)
 {
 	switch(flag)
@@ -58,9 +89,9 @@ static PulseBackend PulseGetBackendFromFlag(PulseBackendBits flag)
 			case PULSE_BACKEND_VULKAN: return &D3D11Driver;
 		#endif
 
-		default: return PULSE_NULL_HANDLE;
+		default: break;
 	}
-	return PULSE_NULL_HANDLE; // To avoid warnings
+	return PULSE_NULL_HANDLE;
 }
 
 PULSE_API PulseBackend PulseLoadBackend(PulseBackendFlags backend_candidates, PulseShaderFormatsFlags shader_formats_used, PulseDebugLevel debug_level)
@@ -74,6 +105,7 @@ PULSE_API PulseBackend PulseLoadBackend(PulseBackendFlags backend_candidates, Pu
 		return PULSE_NULL_HANDLE;
 	if(!backend->PFN_LoadBackend(debug_level))
 		return PULSE_NULL_HANDLE;
+	backend->PFN_UserDebugCallback = PULSE_NULLPTR;
 	return (PulseBackend)backend;
 }
 
@@ -96,24 +128,8 @@ PULSE_API bool PulseSupportsBackend(PulseBackendFlags backend_candidates, PulseS
 	return false;
 }
 
-PULSE_API PulseErrorType PulseGetLastErrorType()
+PULSE_API void PulseSetDebugCallback(PulseBackend backend, PulseDebugCallbackPFN callback)
 {
-	PulseErrorType error = last_error;
-	last_error = PULSE_ERROR_NONE;
-	return error;
-}
-
-PULSE_API const char* PulseVerbaliseErrorType(PulseErrorType error)
-{
-	switch(error)
-	{
-		case PULSE_ERROR_NONE:                                       return "no error";
-		case PULSE_ERROR_BACKENDS_CANDIDATES_SHADER_FORMAT_MISMATCH: return "no backend candidates support the required shader formats";
-		case PULSE_ERROR_INITIALIZATION_FAILED:                      return "initialization of an object could not be completed for implementation-specific reasons";
-		case PULSE_ERROR_ALLOCATION_FAILED:                          return "an internal allocation failed";
-		case PULSE_ERROR_DEVICE_LOST:                                return "device has been lost";
-
-		default: return "invalid error type";
-	};
-	return PULSE_NULLPTR; // To avoid warnings, should be unreachable
+	PULSE_CHECK_HANDLE(backend);
+	backend->PFN_UserDebugCallback = callback;
 }

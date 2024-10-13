@@ -17,11 +17,14 @@
 #include <Pulse.h>
 
 #include "VulkanEnums.h"
+#include "VulkanCommandPool.h"
 
 struct VulkanQueue;
 
 typedef struct VulkanDevice
 {
+	VulkanCommandPool* cmd_pools;
+
 	struct VulkanQueue* queues[VULKAN_QUEUE_END_ENUM];
 
 	VkPhysicalDeviceFeatures features;

@@ -7,15 +7,13 @@
 #ifndef PULSE_VULKAN_FENCE_H_
 #define PULSE_VULKAN_FENCE_H_
 
-#include <vulkan/vulkan_core.h>
-
 #include <Pulse.h>
 #include "VulkanDevice.h"
 
 PulseFence VulkanCreateFence(PulseDevice device);
 void VulkanDestroyFence(PulseDevice device, PulseFence fence);
 bool VulkanIsFenceReady(PulseDevice device, PulseFence fence);
-bool VulkanWaitForFences(PulseDevice device, PulseFence *const *fences, uint32_t fences_count, bool wait_for_all);
+bool VulkanWaitForFences(PulseDevice device, const PulseFence* fences, uint32_t fences_count, bool wait_for_all);
 
 #endif // PULSE_VULKAN_FENCE_H_
 

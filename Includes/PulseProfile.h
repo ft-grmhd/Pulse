@@ -44,10 +44,13 @@ extern "C" {
 	#define PULSE_PLAT_WINDOWS
 #elif defined(__linux__)
 	#define PULSE_PLAT_LINUX
+	#define PULSE_PLAT_POSIX
 #elif defined(__APPLE__) && defined(__MACH__)
 	#define PULSE_PLAT_MACOS
+	#define PULSE_PLAT_POSIX
 #elif defined(unix) || defined(__unix__) || defined(__unix)
 	#define PULSE_PLAT_UNIX
+	#define PULSE_PLAT_POSIX
 #else
 	#error "Unknown environment (not Windows, not Linux, not MacOS, not Unix)"
 #endif

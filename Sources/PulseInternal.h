@@ -7,48 +7,11 @@
 
 #include <Pulse.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "PulsePFNs.h"
+#include "PulseDefs.h"
+#include "PulseEnums.h"
 
-#define PulseStaticAllocStack(size) ((char[size]){ 0 })
-
-#define PULSE_CHECK_ALLOCATION_RETVAL(ptr, retval) \
-	do { \
-		if(ptr == PULSE_NULLPTR) \
-		{ \
-			PulseSetInternalError(PULSE_ERROR_ALLOCATION_FAILED); \
-			return retval; \
-		} \
-	} while(0); \
-
-#define PULSE_CHECK_ALLOCATION(ptr) PULSE_CHECK_ALLOCATION_RETVAL(ptr, )
-
-#define PULSE_CHECK_HANDLE_RETVAL(handle, retval) \
-	do { \
-		if(handle == PULSE_NULL_HANDLE) \
-		{ \
-			PulseSetInternalError(PULSE_ERROR_INVALID_HANDLE); \
-			return retval; \
-		} \
-	} while(0); \
-
-#define PULSE_CHECK_HANDLE(handle) PULSE_CHECK_HANDLE_RETVAL(handle, )
-
-typedef PulseBackendFlags (*PulseCheckBackendSupportPFN)(PulseBackendFlags, PulseShaderFormatsFlags);
-
-typedef bool (*PulseLoadBackendPFN)(PulseDebugLevel);
-typedef void (*PulseUnloadBackendPFN)(PulseBackend);
-typedef PulseDevice (*PulseCreateDevicePFN)(PulseBackend, PulseDevice*, uint32_t);
-
-typedef void (*PulseDestroyDevicePFN)(PulseDevice);
-typedef PulseComputePipeline (*PulseCreateComputePipelinePFN)(PulseDevice, const PulseComputePipelineCreateInfo*);
-typedef void (*PulseBindComputePipelinePFN)(PulseComputePass, PulseComputePipeline);
-typedef void (*PulseDestroyComputePipelinePFN)(PulseDevice, PulseComputePipeline);
-typedef PulseFence (*PulseCreateFencePFN)(PulseDevice device);
-typedef void (*PulseDestroyFencePFN)(PulseDevice device, PulseFence fence);
-typedef bool (*PulseIsFenceReadyPFN)(PulseDevice device, PulseFence fence);
-typedef bool (*PulseWaitForFencesPFN)(PulseDevice device, PulseFence* const* fences, uint32_t fences_count, bool wait_for_all);
+typedef uint64_t PulseThreadID;
 
 typedef struct PulseBackendHandler
 {
@@ -61,7 +24,31 @@ typedef struct PulseBackendHandler
 	PulseBackendFlags backend;
 	PulseShaderFormatsFlags supported_shader_formats;
 	void* driver_data;
+	PulseDebugCallbackPFN PFN_UserDebugCallback;
 } PulseBackendHandler;
+
+typedef struct PulseBufferHandler
+{
+	void* driver_data;
+} PulseBufferHandler;
+
+typedef struct PulseCommandListHandler
+{
+	PulseDevice device;
+	void* driver_data;
+	PulseCommandListState state;
+	bool is_compute_pipeline_bound;
+} PulseCommandListHandler;
+
+typedef struct PulseComputePassHandler
+{
+	void* driver_data;
+} PulseComputePassHandler;
+
+typedef struct PulseComputePipelineHandler
+{
+	void* driver_data;
+} PulseComputePipelineHandler;
 
 typedef struct PulseDeviceHandler
 {
@@ -85,18 +72,25 @@ typedef struct PulseFenceHandler
 	void* driver_data;
 } PulseFenceHandler;
 
-void PulseSetInternalError(PulseErrorType error);
+typedef struct PulseGeneralPassHandler
+{
+	void* driver_data;
+} PulseGeneralPassHandler;
 
-#define PULSE_LOAD_DRIVER_DEVICE_FUNCTION(fn, _namespace) pulse_device->PFN_##fn = _namespace##fn;
-#define PULSE_LOAD_DRIVER_DEVICE(_namespace) \
-	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(DestroyDevice, _namespace) \
-	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(CreateComputePipeline, _namespace) \
-	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(DestroyComputePipeline, _namespace) \
-	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(BindComputePipeline, _namespace) \
-	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(CreateFence, _namespace) \
-	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(DestroyFence, _namespace) \
-	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(IsFenceReady, _namespace) \
-	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(WaitForFences, _namespace) \
+typedef struct PulseImageHandler
+{
+	void* driver_data;
+} PulseImageHandler;
+
+PulseThreadID PulseGetThreadID();
+
+void PulseLogErrorBackend(PulseBackend backend, PulseErrorType error, const char* file, const char* function, int line);
+void PulseLogWarningBackend(PulseBackend backend, PulseWarningType warning, const char* file, const char* function, int line);
+void PulseLogInfoBackend(PulseBackend backend, const char* message, const char* file, const char* function, int line);
+
+#define PulseLogError(backend, type) PulseSetInternalErrorBackend(backend, type, __FILE__, __FUNCTION__, __LINE__)
+#define PulseLogWarning(backend, type) PulseSetInternalErrorBackend(backend, type, __FILE__, __FUNCTION__, __LINE__)
+#define PulseLogInfo(backend, msg) PulseSetInternalErrorBackend(backend, msg, __FILE__, __FUNCTION__, __LINE__)
 
 #ifdef PULSE_ENABLE_VULKAN_BACKEND
 	extern PulseBackendHandler VulkanDriver;
@@ -104,9 +98,5 @@ void PulseSetInternalError(PulseErrorType error);
 #ifdef PULSE_ENABLE_D3D11_BACKEND
 	extern PulseBackendHandler D3D11Driver;
 #endif // PULSE_ENABLE_D3D11_BACKEND
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif // PULSE_INTERNAL_H_
