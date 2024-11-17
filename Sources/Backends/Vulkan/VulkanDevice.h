@@ -24,6 +24,7 @@ struct VulkanQueue;
 typedef struct VulkanDevice
 {
 	VulkanCommandPool* cmd_pools;
+	uint32_t cmd_pools_size;
 
 	struct VulkanQueue* queues[VULKAN_QUEUE_END_ENUM];
 
@@ -43,6 +44,7 @@ typedef struct VulkanDevice
 
 PulseDevice VulkanCreateDevice(PulseBackend backend, PulseDevice* forbiden_devices, uint32_t forbiden_devices_count);
 void VulkanDestroyDevice(PulseDevice device);
+VulkanCommandPool* VulkanRequestCmdPoolFromDevice(PulseDevice device, VulkanQueueType queue_type);
 
 #endif // PULSE_VULKAN_DEVICE_H_
 

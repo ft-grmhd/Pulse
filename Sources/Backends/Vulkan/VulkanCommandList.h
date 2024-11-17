@@ -10,22 +10,17 @@
 #include <vulkan/vulkan_core.h>
 
 #include <Pulse.h>
-#include "../../PulseInternal.h"
 #include "VulkanCommandPool.h"
 
 typedef struct VulkanCommandList
 {
-	PulseDevice device;
 	VulkanCommandPool* pool;
-	PulseThreadID thread_id;
 	VkCommandBuffer cmd;
-
-	PulseComputePipeline* compute_pipelines_bound;
-	uint32_t compute_pipelines_bound_capacity;
-	uint32_t compute_pipelines_bound_size;
 } VulkanCommandList;
 
-void VulkanInitCommandList(VulkanCommandPool* pool);
+PulseCommandList VulkanRequestCommandList(PulseDevice device, PulseCommandListUsage usage);
+bool VulkanSubmitCommandList(PulseDevice device, PulseCommandList cmd, PulseFence fence);
+void VulkanReleaseCommandList(PulseDevice device, PulseCommandList cmd);
 
 #endif // PULSE_VULKAN_COMMAND_LIST_H_
 

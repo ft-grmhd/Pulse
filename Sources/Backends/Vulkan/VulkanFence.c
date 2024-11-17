@@ -10,12 +10,14 @@
 
 PulseFence VulkanCreateFence(PulseDevice device)
 {
+	PULSE_CHECK_HANDLE_RETVAL(device, PULSE_NULL_HANDLE);
+
 	VkFenceCreateInfo fence_info = {};
 	fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 	fence_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 	VkFence vulkan_fence;
 	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(device, VulkanDevice*);
-	CHECK_VK_RETVAL(vulkan_device->vkCreateFence(vulkan_device->device, &fence_info, PULSE_NULLPTR, &vulkan_fence), PULSE_ERROR_INITIALIZATION_FAILED, PULSE_NULL_HANDLE);
+	CHECK_VK_RETVAL(device->backend, vulkan_device->vkCreateFence(vulkan_device->device, &fence_info, PULSE_NULLPTR, &vulkan_fence), PULSE_ERROR_INITIALIZATION_FAILED, PULSE_NULL_HANDLE);
 
 	PulseFenceHandler* fence = (PulseFenceHandler*)malloc(sizeof(PulseFenceHandler));
 	PULSE_CHECK_ALLOCATION_RETVAL(fence, PULSE_NULL_HANDLE);
@@ -25,6 +27,15 @@ PulseFence VulkanCreateFence(PulseDevice device)
 
 void VulkanDestroyFence(PulseDevice device, PulseFence fence)
 {
+	PULSE_CHECK_HANDLE(device);
+
+	if(fence == PULSE_NULL_HANDLE)
+	{
+		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(device->backend))
+			PulseLogWarning(device->backend, "fence is NULL, this may be a bug in your application");
+		return;
+	}
+
 	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(device, VulkanDevice*);
 	if(vulkan_device == PULSE_NULLPTR || vulkan_device->device == VK_NULL_HANDLE)
 		return;
@@ -37,6 +48,9 @@ void VulkanDestroyFence(PulseDevice device, PulseFence fence)
 
 bool VulkanIsFenceReady(PulseDevice device, PulseFence fence)
 {
+	PULSE_CHECK_HANDLE_RETVAL(device, false);
+	PULSE_CHECK_HANDLE_RETVAL(fence, false);
+
 	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(device, VulkanDevice*);
 	if(vulkan_device == PULSE_NULLPTR || vulkan_device->device == VK_NULL_HANDLE)
 		return false;
@@ -66,7 +80,7 @@ bool VulkanWaitForFences(PulseDevice device, const PulseFence* fences, uint32_t 
 	VkFence* vulkan_fences = (VkFence*)calloc(fences_count, sizeof(VkFence));
 	PULSE_CHECK_ALLOCATION_RETVAL(vulkan_fences, false);
 	for(uint32_t i = 0; i < fences_count; i++)
-		vulkan_fences[i] = VULKAN_RETRIEVE_DRIVER_DATA_AS(((PulseFence)fences + i), VkFence);
+		vulkan_fences[i] = VULKAN_RETRIEVE_DRIVER_DATA_AS(((PulseFence)fences[i]), VkFence);
 	VkResult result = vulkan_device->vkWaitForFences(vulkan_device->device, fences_count, vulkan_fences, wait_for_all, UINT64_MAX);
 	free(vulkan_fences);
 	switch(result)

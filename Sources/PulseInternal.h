@@ -25,6 +25,7 @@ typedef struct PulseBackendHandler
 	PulseShaderFormatsFlags supported_shader_formats;
 	void* driver_data;
 	PulseDebugCallbackPFN PFN_UserDebugCallback;
+	PulseDebugLevel debug_level;
 } PulseBackendHandler;
 
 typedef struct PulseBufferHandler
@@ -36,14 +37,15 @@ typedef struct PulseCommandListHandler
 {
 	PulseDevice device;
 	void* driver_data;
+	PulseThreadID thread_id;
+	PulseComputePipeline* compute_pipelines_bound;
+	uint32_t compute_pipelines_bound_capacity;
+	uint32_t compute_pipelines_bound_size;
 	PulseCommandListState state;
+	PulseCommandListUsage usage;
 	bool is_compute_pipeline_bound;
+	bool is_available;
 } PulseCommandListHandler;
-
-typedef struct PulseComputePassHandler
-{
-	void* driver_data;
-} PulseComputePassHandler;
 
 typedef struct PulseComputePipelineHandler
 {
@@ -61,6 +63,9 @@ typedef struct PulseDeviceHandler
 	PulseDestroyFencePFN PFN_DestroyFence;
 	PulseIsFenceReadyPFN PFN_IsFenceReady;
 	PulseWaitForFencesPFN PFN_WaitForFences;
+	PulseRequestCommandListPFN PFN_RequestCommandList;
+	PulseSubmitCommandListPFN PFN_SubmitCommandList;
+	PulseReleaseCommandListPFN PFN_ReleaseCommandList;
 
 	// Attributes
 	void* driver_data;
@@ -72,11 +77,6 @@ typedef struct PulseFenceHandler
 	void* driver_data;
 } PulseFenceHandler;
 
-typedef struct PulseGeneralPassHandler
-{
-	void* driver_data;
-} PulseGeneralPassHandler;
-
 typedef struct PulseImageHandler
 {
 	void* driver_data;
@@ -84,13 +84,17 @@ typedef struct PulseImageHandler
 
 PulseThreadID PulseGetThreadID();
 
-void PulseLogErrorBackend(PulseBackend backend, PulseErrorType error, const char* file, const char* function, int line);
-void PulseLogWarningBackend(PulseBackend backend, PulseWarningType warning, const char* file, const char* function, int line);
-void PulseLogInfoBackend(PulseBackend backend, const char* message, const char* file, const char* function, int line);
+void PulseSetInternalError(PulseErrorType error);
 
-#define PulseLogError(backend, type) PulseSetInternalErrorBackend(backend, type, __FILE__, __FUNCTION__, __LINE__)
-#define PulseLogWarning(backend, type) PulseSetInternalErrorBackend(backend, type, __FILE__, __FUNCTION__, __LINE__)
-#define PulseLogInfo(backend, msg) PulseSetInternalErrorBackend(backend, msg, __FILE__, __FUNCTION__, __LINE__)
+void PulseLogBackend(PulseBackend backend, PulseDebugMessageSeverity type, const char* message, const char* file, const char* function, int line, ...);
+
+#define PulseLogError(backend, msg) PulseLogBackend(backend, PULSE_DEBUG_MESSAGE_SEVERITY_ERROR, msg, __FILE__, __FUNCTION__, __LINE__)
+#define PulseLogWarning(backend, msg) PulseLogBackend(backend, PULSE_DEBUG_MESSAGE_SEVERITY_WARNING, msg, __FILE__, __FUNCTION__, __LINE__)
+#define PulseLogInfo(backend, msg) PulseLogBackend(backend, PULSE_DEBUG_MESSAGE_SEVERITY_INFO, msg, __FILE__, __FUNCTION__, __LINE__)
+
+#define PulseLogErrorFmt(backend, msg, ...) PulseLogBackend(backend, PULSE_DEBUG_MESSAGE_SEVERITY_ERROR, msg, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+#define PulseLogWarningFmt(backend, msg, ...) PulseLogBackend(backend, PULSE_DEBUG_MESSAGE_SEVERITY_WARNING, msg, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+#define PulseLogInfoFmt(backend, msg, ...) PulseLogBackend(backend, PULSE_DEBUG_MESSAGE_SEVERITY_INFO, msg, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
 
 #ifdef PULSE_ENABLE_VULKAN_BACKEND
 	extern PulseBackendHandler VulkanDriver;

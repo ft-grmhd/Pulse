@@ -5,6 +5,7 @@
 #include "Pulse.h"
 #include "Vulkan.h"
 #include "VulkanComputePipeline.h"
+#include "VulkanCommandList.h"
 #include "VulkanDevice.h"
 #include "VulkanFence.h"
 #include "VulkanInstance.h"
@@ -175,9 +176,11 @@ PulseDevice VulkanCreateDevice(PulseBackend backend, PulseDevice* forbiden_devic
 	create_info.flags = 0;
 	create_info.pNext = PULSE_NULLPTR;
 
-	CHECK_VK_RETVAL(instance->vkCreateDevice(device->physical, &create_info, PULSE_NULLPTR, &device->device), PULSE_ERROR_INITIALIZATION_FAILED, PULSE_NULLPTR);
+	CHECK_VK_RETVAL(backend, instance->vkCreateDevice(device->physical, &create_info, PULSE_NULLPTR, &device->device), PULSE_ERROR_INITIALIZATION_FAILED, PULSE_NULLPTR);
 	if(!VulkanLoadDevice(instance, device))
 	{
+		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(backend))
+			PulseLogInfoFmt(backend, "(Vulkan) Could not load device functions from %s", device->properties.deviceName);
 		PulseSetInternalError(PULSE_ERROR_INITIALIZATION_FAILED);
 		return PULSE_NULLPTR;
 	}
@@ -217,11 +220,14 @@ PulseDevice VulkanCreateDevice(PulseBackend backend, PulseDevice* forbiden_devic
 	allocator_create_info.instance = instance->instance;
 	allocator_create_info.pVulkanFunctions = &vma_vulkan_func;
 
-	CHECK_VK_RETVAL(vmaCreateAllocator(&allocator_create_info, &device->allocator), PULSE_ERROR_INITIALIZATION_FAILED, PULSE_NULLPTR);
+	CHECK_VK_RETVAL(backend, vmaCreateAllocator(&allocator_create_info, &device->allocator), PULSE_ERROR_INITIALIZATION_FAILED, PULSE_NULLPTR);
 
 	pulse_device->driver_data = device;
 	pulse_device->backend = backend;
 	PULSE_LOAD_DRIVER_DEVICE(Vulkan);
+
+	if(PULSE_IS_BACKEND_HIGH_LEVEL_DEBUG(backend))
+		PulseLogInfoFmt(backend, "(Vulkan) Created device from %s", device->properties.deviceName);
 	return pulse_device;
 }
 
@@ -230,8 +236,35 @@ void VulkanDestroyDevice(PulseDevice device)
 	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(device, VulkanDevice*);
 	if(vulkan_device == PULSE_NULLPTR || vulkan_device->device == VK_NULL_HANDLE)
 		return;
+	for(uint32_t i = 0; i < vulkan_device->cmd_pools_size; i++)
+		vulkan_device->vkDestroyCommandPool(vulkan_device->device, vulkan_device->cmd_pools[i].pool, PULSE_NULLPTR);
 	vmaDestroyAllocator(vulkan_device->allocator);
 	vulkan_device->vkDestroyDevice(vulkan_device->device, PULSE_NULLPTR);
+	if(PULSE_IS_BACKEND_HIGH_LEVEL_DEBUG(device->backend))
+		PulseLogInfoFmt(device->backend, "(Vulkan) Destroyed device created from %s", vulkan_device->properties.deviceName);
+	free(vulkan_device->cmd_pools);
 	free(vulkan_device);
 	free(device);
+}
+
+VulkanCommandPool* VulkanRequestCmdPoolFromDevice(PulseDevice device, VulkanQueueType queue_type)
+{
+	PULSE_CHECK_HANDLE_RETVAL(device, PULSE_NULLPTR);
+	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(device, VulkanDevice*);
+	if(vulkan_device == PULSE_NULLPTR || vulkan_device->device == VK_NULL_HANDLE)
+		return PULSE_NULLPTR;
+
+	PulseThreadID thread_id = PulseGetThreadID();
+
+	for(uint32_t i = 0; i < vulkan_device->cmd_pools_size; i++)
+	{
+		if(thread_id == vulkan_device->cmd_pools[i].thread_id && queue_type == vulkan_device->cmd_pools[i].queue_type)
+			return &vulkan_device->cmd_pools[i];
+	}
+
+	vulkan_device->cmd_pools_size++;
+	vulkan_device->cmd_pools = (VulkanCommandPool*)realloc(vulkan_device->cmd_pools, vulkan_device->cmd_pools_size * sizeof(VulkanCommandPool));
+	if(!VulkanInitCommandPool(device, &vulkan_device->cmd_pools[vulkan_device->cmd_pools_size - 1], queue_type))
+		return PULSE_NULLPTR;
+	return &vulkan_device->cmd_pools[vulkan_device->cmd_pools_size - 1];
 }

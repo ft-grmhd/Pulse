@@ -10,9 +10,8 @@ PULSE_API PulseComputePipeline PulseCreateComputePipeline(PulseDevice device, co
 	PULSE_CHECK_HANDLE_RETVAL(device, PULSE_NULL_HANDLE);
 }
 
-PULSE_API void PulseBindComputePipeline(PulseComputePass pass, PulseComputePipeline pipeline)
+PULSE_API void PulseBindComputePipeline(PulseComputePipeline pipeline)
 {
-	PULSE_CHECK_HANDLE(pass);
 	PULSE_CHECK_HANDLE(pipeline);
 }
 

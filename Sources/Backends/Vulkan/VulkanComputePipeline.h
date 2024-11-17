@@ -16,7 +16,7 @@ typedef struct VulkanComputePipeline
 } VulkanComputePipeline;
 
 PulseComputePipeline VulkanCreateComputePipeline(PulseDevice device, const PulseComputePipelineCreateInfo* info);
-void VulkanBindComputePipeline(PulseComputePass pass, PulseComputePipeline pipeline);
+void VulkanBindComputePipeline(PulseComputePipeline pipeline);
 void VulkanDestroyComputePipeline(PulseDevice device, PulseComputePipeline pipeline);
 
 #endif // PULSE_VULKAN_COMPUTE_PIPELINE_H_

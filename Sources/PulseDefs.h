@@ -40,6 +40,13 @@
 		} \
 	} while(0); \
 
+#define PULSE_UNUSED(x) ((void)x)
+
+#define PULSE_CHECK_BACKEND_DEBUG_LEVEL(backend, level) (backend != PULSE_NULL_HANDLE && ((PulseBackend)backend)->debug_level >= level)
+
+#define PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(backend) PULSE_CHECK_BACKEND_DEBUG_LEVEL(backend, PULSE_LOW_DEBUG)
+#define PULSE_IS_BACKEND_HIGH_LEVEL_DEBUG(backend) PULSE_CHECK_BACKEND_DEBUG_LEVEL(backend, PULSE_HIGH_DEBUG)
+
 #define PULSE_CHECK_PTR(handle) PULSE_CHECK_PTR_RETVAL(handle, )
 
 #define PULSE_LOAD_DRIVER_DEVICE_FUNCTION(fn, _namespace) pulse_device->PFN_##fn = _namespace##fn;
@@ -52,5 +59,8 @@
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(DestroyFence, _namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(IsFenceReady, _namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(WaitForFences, _namespace) \
+	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(RequestCommandList, _namespace) \
+	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(SubmitCommandList, _namespace) \
+	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(ReleaseCommandList, _namespace) \
 
 #endif // PULSE_DEFS_H_

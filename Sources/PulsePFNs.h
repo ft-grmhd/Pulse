@@ -15,11 +15,14 @@ typedef PulseDevice (*PulseCreateDevicePFN)(PulseBackend, PulseDevice*, uint32_t
 
 typedef void (*PulseDestroyDevicePFN)(PulseDevice);
 typedef PulseComputePipeline (*PulseCreateComputePipelinePFN)(PulseDevice, const PulseComputePipelineCreateInfo*);
-typedef void (*PulseBindComputePipelinePFN)(PulseComputePass, PulseComputePipeline);
+typedef void (*PulseBindComputePipelinePFN)(PulseComputePipeline);
 typedef void (*PulseDestroyComputePipelinePFN)(PulseDevice, PulseComputePipeline);
 typedef PulseFence (*PulseCreateFencePFN)(PulseDevice);
 typedef void (*PulseDestroyFencePFN)(PulseDevice, PulseFence);
 typedef bool (*PulseIsFenceReadyPFN)(PulseDevice, PulseFence);
 typedef bool (*PulseWaitForFencesPFN)(PulseDevice, const PulseFence*, uint32_t, bool);
+typedef PulseCommandList (*PulseRequestCommandListPFN)(PulseDevice, PulseCommandListUsage);
+typedef bool (*PulseSubmitCommandListPFN)(PulseDevice, PulseCommandList, PulseFence);
+typedef void (*PulseReleaseCommandListPFN)(PulseDevice, PulseCommandList);
 
 #endif // PULSE_PFNS_H_

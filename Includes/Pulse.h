@@ -25,11 +25,9 @@ typedef uint32_t PulseFlags;
 PULSE_DEFINE_NULLABLE_HANDLE(PulseBackend);
 PULSE_DEFINE_NULLABLE_HANDLE(PulseBuffer);
 PULSE_DEFINE_NULLABLE_HANDLE(PulseCommandList);
-PULSE_DEFINE_NULLABLE_HANDLE(PulseComputePass);
 PULSE_DEFINE_NULLABLE_HANDLE(PulseComputePipeline);
 PULSE_DEFINE_NULLABLE_HANDLE(PulseDevice);
 PULSE_DEFINE_NULLABLE_HANDLE(PulseFence);
-PULSE_DEFINE_NULLABLE_HANDLE(PulseGeneralPass);
 PULSE_DEFINE_NULLABLE_HANDLE(PulseImage);
 
 // Flags
@@ -75,12 +73,18 @@ typedef enum PulseShaderFormatsBits
 typedef PulseFlags PulseShaderFormatsFlags;
 
 // Enums
+typedef enum PulseCommandListUsage
+{
+	PULSE_COMMAND_LIST_GENERAL,
+	PULSE_COMMAND_LIST_TRANSFER_ONLY
+} PulseCommandListUsage;
+
 typedef enum PulseDebugLevel
 {
-	PULSE_NO_DEBUG,
-	PULSE_LOW_DEBUG,
-	PULSE_HIGH_DEBUG,
-	PULSE_PARANOID_DEBUG // Causes every warning to be treated as error
+	PULSE_NO_DEBUG = 0,
+	PULSE_LOW_DEBUG = 1,
+	PULSE_HIGH_DEBUG = 2,
+	PULSE_PARANOID_DEBUG = 3 // Causes every warning to be treated as error
 } PulseDebugLevel;
 
 typedef enum PulseDebugMessageSeverity
@@ -89,6 +93,18 @@ typedef enum PulseDebugMessageSeverity
 	PULSE_DEBUG_MESSAGE_SEVERITY_WARNING,
 	PULSE_DEBUG_MESSAGE_SEVERITY_ERROR
 } PulseDebugMessageSeverity;
+
+typedef enum PulseErrorType
+{
+	PULSE_ERROR_NONE,
+	PULSE_ERROR_BACKENDS_CANDIDATES_SHADER_FORMAT_MISMATCH,
+	PULSE_ERROR_INITIALIZATION_FAILED,
+	PULSE_ERROR_INVALID_HANDLE,
+	PULSE_ERROR_CPU_ALLOCATION_FAILED,
+	PULSE_ERROR_DEVICE_ALLOCATION_FAILED,
+	PULSE_ERROR_DEVICE_LOST,
+	PULSE_ERROR_INVALID_INTERNAL_POINTER,
+} PulseErrorType;
 
 typedef enum PulseImageType
 {
@@ -249,25 +265,21 @@ typedef struct PulseImageRegion
 // Functions
 typedef void (*PulseDebugCallbackPFN)(PulseDebugMessageSeverity, const char*);
 
+PULSE_API bool PulseSupportsBackend(PulseBackendFlags backend_candidates, PulseShaderFormatsFlags shader_formats_used);
+
 PULSE_API PulseBackend PulseLoadBackend(PulseBackendFlags backend_candidates, PulseShaderFormatsFlags shader_formats_used, PulseDebugLevel debug_level);
 PULSE_API void PulseUnloadBackend(PulseBackend backend);
+PULSE_API PulseBackendFlags PulseGetBackendType(PulseBackend backend);
 PULSE_API void PulseSetDebugCallback(PulseBackend backend, PulseDebugCallbackPFN callback);
 
 PULSE_API PulseDevice PulseCreateDevice(PulseBackend backend, PulseDevice* forbiden_devices, uint32_t forbiden_devices_count);
 PULSE_API void PulseDestroyDevice(PulseDevice device);
 PULSE_API PulseBackendBits PulseGetBackendInUseByDevice(PulseDevice device);
-PULSE_API bool PulseSupportsBackend(PulseBackendFlags backend_candidates, PulseShaderFormatsFlags shader_formats_used);
 PULSE_API bool PulseDeviceSupportsShaderFormats(PulseDevice device, PulseShaderFormatsFlags shader_formats_used);
 
-PULSE_API PulseCommandList PulseRequestCommandList(PulseDevice device);
+PULSE_API PulseCommandList PulseRequestCommandList(PulseDevice device, PulseCommandListUsage usage);
 PULSE_API bool PulseSubmitCommandList(PulseDevice device, PulseCommandList cmd, PulseFence fence);
 PULSE_API void PulseReleaseCommandList(PulseDevice device, PulseCommandList cmd);
-
-PULSE_API PulseComputePass PulseBeginComputePass(PulseCommandList cmd);
-PULSE_API void PulseEndComputePass(PulseComputePass pass);
-
-PULSE_API PulseGeneralPass PulseBeginGeneralPass(PulseCommandList cmd);
-PULSE_API void PulseEndGeneralPass(PulseGeneralPass pass);
 
 PULSE_API PulseFence PulseCreateFence(PulseDevice device);
 PULSE_API void PulseDestroyFence(PulseDevice device, PulseFence fence);
@@ -276,7 +288,10 @@ PULSE_API bool PulseWaitForFences(PulseDevice device, const PulseFence* fences, 
 
 PULSE_API PulseComputePipeline PulseCreateComputePipeline(PulseDevice device, const PulseComputePipelineCreateInfo* info);
 PULSE_API void PulseDestroyComputePipeline(PulseDevice device, PulseComputePipeline pipeline);
-PULSE_API void PulseBindComputePipeline(PulseComputePass pass, PulseComputePipeline pipeline);
+PULSE_API void PulseBindComputePipeline(PulseComputePipeline pipeline);
+
+PULSE_API PulseErrorType PulseGetLastErrorType(); // /!\ Warning /!\ Call to this function resets the internal last error variable
+PULSE_API const char* PulseVerbaliseErrorType(PulseErrorType error);
 
 #ifdef __cplusplus
 }

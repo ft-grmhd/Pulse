@@ -36,7 +36,7 @@ static VkInstance VulkanCreateInstance(const char** extensions_enabled, uint32_t
 		create_info.flags = 0;
 	#endif
 
-	CHECK_VK_RETVAL(VulkanGetGlobal()->vkCreateInstance(&create_info, PULSE_NULLPTR, &instance), PULSE_ERROR_INITIALIZATION_FAILED, VK_NULL_HANDLE);
+	CHECK_VK_RETVAL(PULSE_NULL_HANDLE, VulkanGetGlobal()->vkCreateInstance(&create_info, PULSE_NULLPTR, &instance), PULSE_ERROR_INITIALIZATION_FAILED, VK_NULL_HANDLE);
 	return instance;
 }
 

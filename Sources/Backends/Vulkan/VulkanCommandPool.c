@@ -19,7 +19,7 @@ bool VulkanInitCommandPool(PulseDevice device, VulkanCommandPool* pool, VulkanQu
 	create_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 	create_info.queueFamilyIndex = vulkan_device->queues[queue_type]->queue_family_index;
 	create_info.pNext = PULSE_NULLPTR;
-	CHECK_VK_RETVAL(vulkan_device->vkCreateCommandPool(vulkan_device->device, &create_info, PULSE_NULLPTR, &pool->pool), PULSE_ERROR_INITIALIZATION_FAILED, false);
+	CHECK_VK_RETVAL(device->backend, vulkan_device->vkCreateCommandPool(vulkan_device->device, &create_info, PULSE_NULLPTR, &pool->pool), PULSE_ERROR_INITIALIZATION_FAILED, false);
 
 	pool->thread_id = PulseGetThreadID();
 

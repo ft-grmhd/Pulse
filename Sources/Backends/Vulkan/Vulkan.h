@@ -16,14 +16,16 @@
 
 #define VULKAN_RETRIEVE_DRIVER_DATA_AS(handle, cast) ((cast)handle->driver_data)
 
-#define CHECK_VK_RETVAL(res, error, retval) \
+#define CHECK_VK_RETVAL(backend, res, error, retval) \
 	if((res) != VK_SUCCESS) \
 	{ \
+		if(backend != PULSE_NULL_HANDLE && PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(backend)) \
+			PulseLogErrorFmt(backend, "(Vulkan) Call to Vulkan function failed due to %s", VulkanVerbaliseResult(res)); \
 		PulseSetInternalError(error); \
 		return retval; \
 	}
 
-#define CHECK_VK(res, error) CHECK_VK_RETVAL(res, error, )
+#define CHECK_VK(backend, res, error) CHECK_VK_RETVAL(backend, res, error, )
 
 typedef struct VulkanGlobal
 {
@@ -38,6 +40,8 @@ typedef struct VulkanDriverData
 } VulkanDriverData;
 
 VulkanGlobal* VulkanGetGlobal();
+
+const char* VulkanVerbaliseResult(VkResult res);
 
 PulseBackendFlags VulkanCheckSupport(PulseBackendFlags candidates, PulseShaderFormatsFlags shader_formats_used); // Return PULSE_BACKEND_VULKAN in case of success and PULSE_BACKEND_INVALID otherwise
 
