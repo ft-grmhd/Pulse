@@ -13,10 +13,13 @@
 
 typedef struct VulkanComputePipeline
 {
+	VkShaderModule module;
+	VkPipelineLayout layout;
+	VkPipeline pipeline;
 } VulkanComputePipeline;
 
 PulseComputePipeline VulkanCreateComputePipeline(PulseDevice device, const PulseComputePipelineCreateInfo* info);
-void VulkanBindComputePipeline(PulseComputePipeline pipeline);
+void VulkanDispatchComputePipeline(PulseComputePipeline pipeline, PulseCommandList cmd, uint32_t groupcount_x, uint32_t groupcount_y, uint32_t groupcount_z);
 void VulkanDestroyComputePipeline(PulseDevice device, PulseComputePipeline pipeline);
 
 #endif // PULSE_VULKAN_COMPUTE_PIPELINE_H_

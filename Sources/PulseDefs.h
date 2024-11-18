@@ -54,7 +54,7 @@
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(DestroyDevice, _namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(CreateComputePipeline, _namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(DestroyComputePipeline, _namespace) \
-	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(BindComputePipeline, _namespace) \
+	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(DispatchComputePipeline, _namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(CreateFence, _namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(DestroyFence, _namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(IsFenceReady, _namespace) \

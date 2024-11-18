@@ -227,7 +227,7 @@ PulseDevice VulkanCreateDevice(PulseBackend backend, PulseDevice* forbiden_devic
 	PULSE_LOAD_DRIVER_DEVICE(Vulkan);
 
 	if(PULSE_IS_BACKEND_HIGH_LEVEL_DEBUG(backend))
-		PulseLogInfoFmt(backend, "(Vulkan) Created device from %s", device->properties.deviceName);
+		PulseLogInfoFmt(backend, "(Vulkan) created device from %s", device->properties.deviceName);
 	return pulse_device;
 }
 
@@ -241,7 +241,7 @@ void VulkanDestroyDevice(PulseDevice device)
 	vmaDestroyAllocator(vulkan_device->allocator);
 	vulkan_device->vkDestroyDevice(vulkan_device->device, PULSE_NULLPTR);
 	if(PULSE_IS_BACKEND_HIGH_LEVEL_DEBUG(device->backend))
-		PulseLogInfoFmt(device->backend, "(Vulkan) Destroyed device created from %s", vulkan_device->properties.deviceName);
+		PulseLogInfoFmt(device->backend, "(Vulkan) destroyed device created from %s", vulkan_device->properties.deviceName);
 	free(vulkan_device->cmd_pools);
 	free(vulkan_device);
 	free(device);

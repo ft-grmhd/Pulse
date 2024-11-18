@@ -78,9 +78,8 @@ PulseCommandList VulkanRequestCommandList(PulseDevice device, PulseCommandListUs
 	}
 
 	cmd->compute_pipelines_bound_size = 0;
-	cmd->state = PULSE_COMMAND_LIST_STATE_EMPTY;
+	cmd->state = PULSE_COMMAND_LIST_STATE_RECORDING;
 	cmd->is_available = false;
-	cmd->is_compute_pipeline_bound = false;
 
 	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(device, VulkanDevice*);
 	VulkanCommandList* vulkan_cmd = VULKAN_RETRIEVE_DRIVER_DATA_AS(cmd, VulkanCommandList*);
@@ -103,7 +102,6 @@ PulseCommandList VulkanRequestCommandList(PulseDevice device, PulseCommandListUs
 
 bool VulkanSubmitCommandList(PulseDevice device, PulseCommandList cmd, PulseFence fence)
 {
-	PULSE_UNUSED(device);
 	PULSE_CHECK_HANDLE_RETVAL(cmd, false);
 
 	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(device, VulkanDevice*);
@@ -121,8 +119,9 @@ bool VulkanSubmitCommandList(PulseDevice device, PulseCommandList cmd, PulseFenc
 	VkFence vulkan_fence;
 	if(fence != PULSE_NULL_HANDLE)
 	{
-		vulkan_fence = VULKAN_RETRIEVE_DRIVER_DATA_AS(device, VkFence);
-		vulkan_device->vkResetFences(vulkan_device->device, 1, &vulkan_fence);
+		vulkan_fence = VULKAN_RETRIEVE_DRIVER_DATA_AS(fence, VkFence);
+		CHECK_VK_RETVAL(device->backend, vulkan_device->vkResetFences(vulkan_device->device, 1, &vulkan_fence), PULSE_ERROR_DEVICE_ALLOCATION_FAILED, false);
+		fence->cmd = cmd;
 	}
 
 	VulkanQueue* vulkan_queue;
@@ -140,6 +139,7 @@ bool VulkanSubmitCommandList(PulseDevice device, PulseCommandList cmd, PulseFenc
 	submit_info.commandBufferCount = 1;
 	submit_info.pCommandBuffers = &vulkan_cmd->cmd;
 	res = vulkan_device->vkQueueSubmit(vulkan_queue->queue, 1, &submit_info, vulkan_fence);
+	cmd->state = PULSE_COMMAND_LIST_STATE_SENT;
 	switch(res)
 	{
 		case VK_SUCCESS: return true;

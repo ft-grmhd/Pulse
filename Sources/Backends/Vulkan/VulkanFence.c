@@ -21,6 +21,7 @@ PulseFence VulkanCreateFence(PulseDevice device)
 
 	PulseFenceHandler* fence = (PulseFenceHandler*)malloc(sizeof(PulseFenceHandler));
 	PULSE_CHECK_ALLOCATION_RETVAL(fence, PULSE_NULL_HANDLE);
+	fence->cmd = PULSE_NULL_HANDLE;
 	fence->driver_data = vulkan_fence;
 	return fence;
 }
@@ -60,7 +61,10 @@ bool VulkanIsFenceReady(PulseDevice device, PulseFence fence)
 	VkResult res = vulkan_device->vkGetFenceStatus(vulkan_device->device, vulkan_fence);
 	switch(res)
 	{
-		case VK_SUCCESS: return true;
+		case VK_SUCCESS:
+			if(fence->cmd != PULSE_NULL_HANDLE)
+				fence->cmd->state = PULSE_COMMAND_LIST_STATE_READY;
+		return true;
 
 		case VK_NOT_READY: return false;
 		case VK_ERROR_DEVICE_LOST: PulseSetInternalError(PULSE_ERROR_DEVICE_LOST); return false;
@@ -80,12 +84,19 @@ bool VulkanWaitForFences(PulseDevice device, const PulseFence* fences, uint32_t 
 	VkFence* vulkan_fences = (VkFence*)calloc(fences_count, sizeof(VkFence));
 	PULSE_CHECK_ALLOCATION_RETVAL(vulkan_fences, false);
 	for(uint32_t i = 0; i < fences_count; i++)
+	{
+		if(fences[i]->cmd == PULSE_NULL_HANDLE && PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(device->backend))
+			PulseLogError(device->backend, "cannot wait on a fence that has no command list attached to it");
 		vulkan_fences[i] = VULKAN_RETRIEVE_DRIVER_DATA_AS(((PulseFence)fences[i]), VkFence);
+	}
 	VkResult result = vulkan_device->vkWaitForFences(vulkan_device->device, fences_count, vulkan_fences, wait_for_all, UINT64_MAX);
 	free(vulkan_fences);
 	switch(result)
 	{
-		case VK_SUCCESS: break;
+		case VK_SUCCESS:
+			for(uint32_t i = 0; i < fences_count; i++)
+				fences[i]->cmd->state = PULSE_COMMAND_LIST_STATE_READY;
+		break;
 		case VK_TIMEOUT: break;
 
 		case VK_ERROR_DEVICE_LOST: PulseSetInternalError(PULSE_ERROR_DEVICE_LOST); return false;

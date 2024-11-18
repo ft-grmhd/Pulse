@@ -20,11 +20,10 @@
 	if((res) != VK_SUCCESS) \
 	{ \
 		if(backend != PULSE_NULL_HANDLE && PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(backend)) \
-			PulseLogErrorFmt(backend, "(Vulkan) Call to Vulkan function failed due to %s", VulkanVerbaliseResult(res)); \
+			PulseLogErrorFmt(backend, "(Vulkan) call to Vulkan function failed due to %s", VulkanVerbaliseResult(res)); \
 		PulseSetInternalError(error); \
 		return retval; \
 	}
-
 #define CHECK_VK(backend, res, error) CHECK_VK_RETVAL(backend, res, error, )
 
 typedef struct VulkanGlobal

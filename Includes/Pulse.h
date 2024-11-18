@@ -98,6 +98,7 @@ typedef enum PulseErrorType
 {
 	PULSE_ERROR_NONE,
 	PULSE_ERROR_BACKENDS_CANDIDATES_SHADER_FORMAT_MISMATCH,
+	PULSE_ERROR_INVALID_BACKEND,
 	PULSE_ERROR_INITIALIZATION_FAILED,
 	PULSE_ERROR_INVALID_HANDLE,
 	PULSE_ERROR_CPU_ALLOCATION_FAILED,
@@ -219,17 +220,7 @@ typedef struct PulseComputePipelineCreateInfo
 	uint32_t num_readwrite_storage_images;
 	uint32_t num_readwrite_storage_buffers;
 	uint32_t num_uniform_buffers;
-	uint32_t threadcount_x;
-	uint32_t threadcount_y;
-	uint32_t threadcount_z;
 } PulseComputePipelineCreateInfo;
-
-typedef struct PulseIndirectDispatchCommand
-{
-	uint32_t groupcount_x;
-	uint32_t groupcount_y;
-	uint32_t groupcount_z;
-} PulseIndirectDispatchCommand;
 
 typedef struct PulseImageCreateInfo
 {
@@ -287,8 +278,8 @@ PULSE_API bool PulseIsFenceReady(PulseDevice device, PulseFence fence);
 PULSE_API bool PulseWaitForFences(PulseDevice device, const PulseFence* fences, uint32_t fences_count, bool wait_for_all);
 
 PULSE_API PulseComputePipeline PulseCreateComputePipeline(PulseDevice device, const PulseComputePipelineCreateInfo* info);
+PULSE_API void PulseDispatchComputePipeline(PulseComputePipeline pipeline, PulseCommandList cmd, uint32_t groupcount_x, uint32_t groupcount_y, uint32_t groupcount_z);
 PULSE_API void PulseDestroyComputePipeline(PulseDevice device, PulseComputePipeline pipeline);
-PULSE_API void PulseBindComputePipeline(PulseComputePipeline pipeline);
 
 PULSE_API PulseErrorType PulseGetLastErrorType(); // /!\ Warning /!\ Call to this function resets the internal last error variable
 PULSE_API const char* PulseVerbaliseErrorType(PulseErrorType error);

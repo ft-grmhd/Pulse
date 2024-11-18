@@ -16,7 +16,7 @@ PULSE_API bool PulseSubmitCommandList(PulseDevice device, PulseCommandList cmd, 
 	PULSE_CHECK_HANDLE_RETVAL(device, false);
 	PULSE_CHECK_HANDLE_RETVAL(cmd, false);
 
-	if(cmd->state != PULSE_COMMAND_LIST_STATE_READY)
+	if(cmd->state != PULSE_COMMAND_LIST_STATE_RECORDING)
 	{
 		switch(cmd->state)
 		{
@@ -25,14 +25,9 @@ PULSE_API bool PulseSubmitCommandList(PulseDevice device, PulseCommandList cmd, 
 					PulseLogError(device->backend, "command list is in invalid state");
 			return false;
 
-			case PULSE_COMMAND_LIST_STATE_EMPTY:
+			case PULSE_COMMAND_LIST_STATE_READY:
 				if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(device->backend))
-					PulseLogWarning(device->backend, "command list is empty");
-			return false;
-
-			case PULSE_COMMAND_LIST_STATE_RECORDING:
-				if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(device->backend))
-					PulseLogError(device->backend, "command list is in recording state");
+					PulseLogError(device->backend, "command list is empty");
 			return false;
 
 			case PULSE_COMMAND_LIST_STATE_SENT:
@@ -60,9 +55,9 @@ PULSE_API void PulseReleaseCommandList(PulseDevice device, PulseCommandList cmd)
 
 	switch(cmd->state)
 	{
-		case PULSE_COMMAND_LIST_STATE_RECORDING:
+		case PULSE_COMMAND_LIST_STATE_SENT:
 			if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(device->backend))
-				PulseLogWarning(device->backend, "command list is in recording state");
+				PulseLogWarning(device->backend, "command list is in pending state");
 		break;
 
 		default: break;

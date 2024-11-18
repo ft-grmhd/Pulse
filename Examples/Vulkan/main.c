@@ -31,11 +31,25 @@ int main(void)
 	PulseDevice device = PulseCreateDevice(backend, NULL, 0);
 	CHECK_PULSE_HANDLE_RETVAL(device, 1);
 
+	const uint8_t shader_bytecode[] = {
+		#include "shader.spv.h"
+	};
+
+	PulseComputePipelineCreateInfo info = {};
+	info.code_size = sizeof(shader_bytecode);
+	info.code = shader_bytecode;
+	info.entrypoint = "main";
+	info.format = PULSE_SHADER_FORMAT_SPIRV_BIT;
+
+	PulseComputePipeline pipeline = PulseCreateComputePipeline(device, &info);
+	CHECK_PULSE_HANDLE_RETVAL(pipeline, 1);
+
 	PulseFence fence = PulseCreateFence(device);
 	CHECK_PULSE_HANDLE_RETVAL(fence, 1);
 	PulseCommandList cmd = PulseRequestCommandList(device, PULSE_COMMAND_LIST_GENERAL);
 	CHECK_PULSE_HANDLE_RETVAL(cmd, 1);
 
+	PulseDispatchComputePipeline(pipeline, cmd, 8, 8, 8);
 
 	if(!PulseSubmitCommandList(device, cmd, fence))
 		fprintf(stderr, "Could not submit command list, %s\n", PulseVerbaliseErrorType(PulseGetLastErrorType()));
@@ -44,6 +58,7 @@ int main(void)
 
 	PulseReleaseCommandList(device, cmd);
 	PulseDestroyFence(device, fence);
+	PulseDestroyComputePipeline(device, pipeline);
 
 	PulseDestroyDevice(device);
 	PulseUnloadBackend(backend);

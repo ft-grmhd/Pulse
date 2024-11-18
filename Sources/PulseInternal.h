@@ -43,12 +43,12 @@ typedef struct PulseCommandListHandler
 	uint32_t compute_pipelines_bound_size;
 	PulseCommandListState state;
 	PulseCommandListUsage usage;
-	bool is_compute_pipeline_bound;
 	bool is_available;
 } PulseCommandListHandler;
 
 typedef struct PulseComputePipelineHandler
 {
+	PulseCommandList cmd;
 	void* driver_data;
 } PulseComputePipelineHandler;
 
@@ -57,7 +57,7 @@ typedef struct PulseDeviceHandler
 	// PFNs
 	PulseDestroyDevicePFN PFN_DestroyDevice;
 	PulseCreateComputePipelinePFN PFN_CreateComputePipeline;
-	PulseBindComputePipelinePFN PFN_BindComputePipeline;
+	PulseDispatchComputePipelinePFN PFN_DispatchComputePipeline;
 	PulseDestroyComputePipelinePFN PFN_DestroyComputePipeline;
 	PulseCreateFencePFN PFN_CreateFence;
 	PulseDestroyFencePFN PFN_DestroyFence;
@@ -74,6 +74,7 @@ typedef struct PulseDeviceHandler
 
 typedef struct PulseFenceHandler
 {
+	PulseCommandList cmd;
 	void* driver_data;
 } PulseFenceHandler;
 
