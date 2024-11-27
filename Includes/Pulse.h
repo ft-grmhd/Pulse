@@ -43,10 +43,11 @@ typedef PulseFlags PulseBackendFlags;
 
 typedef enum PulseBufferUsageBits
 {
-	PULSE_BUFFER_USAGE_TRANSFER_UPLOAD        = PULSE_BIT(1),
-	PULSE_BUFFER_USAGE_TRANSFER_DOWNLOAD      = PULSE_BIT(2),
-	PULSE_BUFFER_USAGE_TRANSFER_STORAGE_READ  = PULSE_BIT(3),
-	PULSE_BUFFER_USAGE_TRANSFER_STORAGE_WRITE = PULSE_BIT(4),
+	PULSE_BUFFER_USAGE_TRANSFER_UPLOAD   = PULSE_BIT(1),
+	PULSE_BUFFER_USAGE_TRANSFER_DOWNLOAD = PULSE_BIT(2),
+	PULSE_BUFFER_USAGE_STORAGE_READ      = PULSE_BIT(3),
+	PULSE_BUFFER_USAGE_STORAGE_WRITE     = PULSE_BIT(4),
+	PULSE_BUFFER_USAGE_UNIFORM_ACCESS    = PULSE_BIT(5),
 } PulseShaderFormatBits;
 typedef PulseFlags PulseBufferUsageFlags;
 
@@ -58,9 +59,9 @@ typedef PulseFlags PulseBufferUsageFlags;
  */
 typedef enum PulseImageUsageBits
 {
-	PULSE_IMAGE_USAGE_TRANSFER_STORAGE_READ                   = PULSE_BIT(1),
-	PULSE_IMAGE_USAGE_TRANSFER_STORAGE_WRITE                  = PULSE_BIT(2),
-	PULSE_IMAGE_USAGE_TRANSFER_STORAGE_SIMULTANEOUS_READWRITE = PULSE_BIT(3),
+	PULSE_IMAGE_USAGE_STORAGE_READ                   = PULSE_BIT(1),
+	PULSE_IMAGE_USAGE_STORAGE_WRITE                  = PULSE_BIT(2),
+	PULSE_IMAGE_USAGE_STORAGE_SIMULTANEOUS_READWRITE = PULSE_BIT(3),
 } PulseImageFormatBits;
 typedef PulseFlags PulseImageUsageFlags;
 
@@ -267,6 +268,9 @@ PULSE_API PulseDevice PulseCreateDevice(PulseBackend backend, PulseDevice* forbi
 PULSE_API void PulseDestroyDevice(PulseDevice device);
 PULSE_API PulseBackendBits PulseGetBackendInUseByDevice(PulseDevice device);
 PULSE_API bool PulseDeviceSupportsShaderFormats(PulseDevice device, PulseShaderFormatsFlags shader_formats_used);
+
+PULSE_API PulseBuffer PulseCreateBuffer(PulseDevice device, const PulseBufferCreateInfo* create_infos);
+PULSE_API void PulseDestroyBuffer(PulseDevice device, PulseBuffer buffer);
 
 PULSE_API PulseCommandList PulseRequestCommandList(PulseDevice device, PulseCommandListUsage usage);
 PULSE_API bool PulseSubmitCommandList(PulseDevice device, PulseCommandList cmd, PulseFence fence);

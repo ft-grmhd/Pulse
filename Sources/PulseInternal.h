@@ -30,7 +30,10 @@ typedef struct PulseBackendHandler
 
 typedef struct PulseBufferHandler
 {
+	PulseDevice device;
 	void* driver_data;
+	PulseBufferUsageFlags usage;
+	PulseDeviceSize size;
 } PulseBufferHandler;
 
 typedef struct PulseCommandListHandler
@@ -66,6 +69,8 @@ typedef struct PulseDeviceHandler
 	PulseRequestCommandListPFN PFN_RequestCommandList;
 	PulseSubmitCommandListPFN PFN_SubmitCommandList;
 	PulseReleaseCommandListPFN PFN_ReleaseCommandList;
+	PulseCreateBufferPFN PFN_CreateBuffer;
+	PulseDestroyBufferPFN PFN_DestroyBuffer;
 
 	// Attributes
 	void* driver_data;

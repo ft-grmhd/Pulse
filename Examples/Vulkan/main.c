@@ -44,6 +44,13 @@ int main(void)
 	PulseComputePipeline pipeline = PulseCreateComputePipeline(device, &info);
 	CHECK_PULSE_HANDLE_RETVAL(pipeline, 1);
 
+	PulseBufferCreateInfo buffer_create_info = {};
+	buffer_create_info.size = 1024;
+	buffer_create_info.usage = PULSE_BUFFER_USAGE_STORAGE_READ | PULSE_BUFFER_USAGE_STORAGE_WRITE | PULSE_BUFFER_USAGE_TRANSFER_DOWNLOAD;
+
+	PulseBuffer buffer = PulseCreateBuffer(device, &buffer_create_info);
+	CHECK_PULSE_HANDLE_RETVAL(buffer, 1);
+
 	PulseFence fence = PulseCreateFence(device);
 	CHECK_PULSE_HANDLE_RETVAL(fence, 1);
 	PulseCommandList cmd = PulseRequestCommandList(device, PULSE_COMMAND_LIST_GENERAL);
@@ -58,6 +65,7 @@ int main(void)
 
 	PulseReleaseCommandList(device, cmd);
 	PulseDestroyFence(device, fence);
+	PulseDestroyBuffer(device, buffer);
 	PulseDestroyComputePipeline(device, pipeline);
 
 	PulseDestroyDevice(device);
