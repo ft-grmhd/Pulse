@@ -25,6 +25,7 @@ typedef PulseCommandList (*PulseRequestCommandListPFN)(PulseDevice, PulseCommand
 typedef bool (*PulseSubmitCommandListPFN)(PulseDevice, PulseCommandList, PulseFence);
 typedef void (*PulseReleaseCommandListPFN)(PulseDevice, PulseCommandList);
 typedef PulseBuffer (*PulseCreateBufferPFN)(PulseDevice, const PulseBufferCreateInfo*);
+typedef bool (*PulseGetBufferMapPFN)(PulseBuffer, void**);
 typedef void (*PulseDestroyBufferPFN)(PulseDevice, PulseBuffer);
 
 #endif // PULSE_PFNS_H_

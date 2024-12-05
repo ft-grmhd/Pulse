@@ -3,6 +3,7 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
 #include "Pulse.h"
+#include "PulseDefs.h"
 #include "PulseInternal.h"
 
 PULSE_API PulseBuffer PulseCreateBuffer(PulseDevice device, const PulseBufferCreateInfo* create_infos)
@@ -18,6 +19,13 @@ PULSE_API PulseBuffer PulseCreateBuffer(PulseDevice device, const PulseBufferCre
 		}
 	}
 	return device->PFN_CreateBuffer(device, create_infos);
+}
+
+PULSE_API bool PulseGetBufferMap(PulseBuffer buffer, void** data)
+{
+	PULSE_CHECK_HANDLE_RETVAL(buffer, false);
+	PULSE_CHECK_PTR_RETVAL(data, false);
+	return buffer->device->PFN_GetBufferMap(buffer, data);
 }
 
 PULSE_API void PulseDestroyBuffer(PulseDevice device, PulseBuffer buffer)

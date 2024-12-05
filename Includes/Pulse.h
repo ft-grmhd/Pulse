@@ -48,6 +48,7 @@ typedef enum PulseBufferUsageBits
 	PULSE_BUFFER_USAGE_STORAGE_READ      = PULSE_BIT(3),
 	PULSE_BUFFER_USAGE_STORAGE_WRITE     = PULSE_BIT(4),
 	PULSE_BUFFER_USAGE_UNIFORM_ACCESS    = PULSE_BIT(5),
+	PULSE_BUFFER_USAGE_HOST_ACCESS       = PULSE_BIT(6),
 } PulseShaderFormatBits;
 typedef PulseFlags PulseBufferUsageFlags;
 
@@ -106,6 +107,7 @@ typedef enum PulseErrorType
 	PULSE_ERROR_DEVICE_ALLOCATION_FAILED,
 	PULSE_ERROR_DEVICE_LOST,
 	PULSE_ERROR_INVALID_INTERNAL_POINTER,
+	PULSE_ERROR_MAP_FAILED,
 } PulseErrorType;
 
 typedef enum PulseImageType
@@ -260,16 +262,17 @@ typedef void (*PulseDebugCallbackPFN)(PulseDebugMessageSeverity, const char*);
 PULSE_API bool PulseSupportsBackend(PulseBackendFlags backend_candidates, PulseShaderFormatsFlags shader_formats_used);
 
 PULSE_API PulseBackend PulseLoadBackend(PulseBackendFlags backend_candidates, PulseShaderFormatsFlags shader_formats_used, PulseDebugLevel debug_level);
-PULSE_API void PulseUnloadBackend(PulseBackend backend);
 PULSE_API PulseBackendFlags PulseGetBackendType(PulseBackend backend);
 PULSE_API void PulseSetDebugCallback(PulseBackend backend, PulseDebugCallbackPFN callback);
+PULSE_API void PulseUnloadBackend(PulseBackend backend);
 
 PULSE_API PulseDevice PulseCreateDevice(PulseBackend backend, PulseDevice* forbiden_devices, uint32_t forbiden_devices_count);
-PULSE_API void PulseDestroyDevice(PulseDevice device);
 PULSE_API PulseBackendBits PulseGetBackendInUseByDevice(PulseDevice device);
 PULSE_API bool PulseDeviceSupportsShaderFormats(PulseDevice device, PulseShaderFormatsFlags shader_formats_used);
+PULSE_API void PulseDestroyDevice(PulseDevice device);
 
 PULSE_API PulseBuffer PulseCreateBuffer(PulseDevice device, const PulseBufferCreateInfo* create_infos);
+PULSE_API bool PulseGetBufferMap(PulseBuffer buffer, void** data);
 PULSE_API void PulseDestroyBuffer(PulseDevice device, PulseBuffer buffer);
 
 PULSE_API PulseCommandList PulseRequestCommandList(PulseDevice device, PulseCommandListUsage usage);

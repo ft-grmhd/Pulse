@@ -70,6 +70,7 @@ typedef struct PulseDeviceHandler
 	PulseSubmitCommandListPFN PFN_SubmitCommandList;
 	PulseReleaseCommandListPFN PFN_ReleaseCommandList;
 	PulseCreateBufferPFN PFN_CreateBuffer;
+	PulseGetBufferMapPFN PFN_GetBufferMap;
 	PulseDestroyBufferPFN PFN_DestroyBuffer;
 
 	// Attributes

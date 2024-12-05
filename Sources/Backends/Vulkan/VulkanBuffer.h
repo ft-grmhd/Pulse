@@ -19,9 +19,11 @@ typedef struct VulkanBuffer
 	VkBuffer buffer;
 	VkBufferUsageFlags usage;
 	VmaAllocation allocation;
+	VmaAllocationInfo allocation_info;
 } VulkanBuffer;
 
 PulseBuffer VulkanCreateBuffer(PulseDevice device, const PulseBufferCreateInfo* create_infos);
+bool VulkanGetBufferMap(PulseBuffer buffer, void** data);
 void VulkanDestroyBuffer(PulseDevice device, PulseBuffer buffer);
 
 #endif // PULSE_VULKAN_BUFFER_H_

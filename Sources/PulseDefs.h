@@ -63,6 +63,7 @@
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(SubmitCommandList, _namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(ReleaseCommandList, _namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(CreateBuffer, _namespace) \
+	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(GetBufferMap, _namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(DestroyBuffer, _namespace) \
 
 #endif // PULSE_DEFS_H_
