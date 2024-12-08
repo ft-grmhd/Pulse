@@ -25,23 +25,23 @@ PulseBuffer VulkanCreateBuffer(PulseDevice device, const PulseBufferCreateInfo* 
 	VmaAllocationCreateInfo allocation_create_info = { 0 };
 	allocation_create_info.usage = VMA_MEMORY_USAGE_AUTO;
 
-	if(buffer->usage & PULSE_BUFFER_USAGE_STORAGE_READ || buffer->usage & PULSE_BUFFER_USAGE_STORAGE_WRITE)
-		vulkan_buffer->usage |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
 	if(buffer->usage & PULSE_BUFFER_USAGE_TRANSFER_UPLOAD)
 	{
 		vulkan_buffer->usage |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-		allocation_create_info.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
+		allocation_create_info.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
 	}
 	if(buffer->usage & PULSE_BUFFER_USAGE_TRANSFER_DOWNLOAD)
 	{
 		vulkan_buffer->usage |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-		allocation_create_info.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
+		allocation_create_info.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
 	}
 	if(buffer->usage & PULSE_BUFFER_USAGE_UNIFORM_ACCESS)
 	{
 		vulkan_buffer->usage |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-		allocation_create_info.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
+		allocation_create_info.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
 	}
+	if(buffer->usage & PULSE_BUFFER_USAGE_STORAGE_READ || buffer->usage & PULSE_BUFFER_USAGE_STORAGE_WRITE)
+		vulkan_buffer->usage |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
 
 	VkBufferCreateInfo buffer_create_info = { 0 };
 	buffer_create_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -55,18 +55,19 @@ PulseBuffer VulkanCreateBuffer(PulseDevice device, const PulseBufferCreateInfo* 
 	return buffer;
 }
 
-bool VulkanGetBufferMap(PulseBuffer buffer, void** data)
+bool VulkanMapBuffer(PulseBuffer buffer, void** data)
 {
 	VulkanBuffer* vulkan_buffer = VULKAN_RETRIEVE_DRIVER_DATA_AS(buffer, VulkanBuffer*);
-	if(vulkan_buffer->allocation_info.pMappedData == PULSE_NULLPTR)
-	{
-		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(buffer->device->backend))
-			PulseLogErrorFmt(buffer->device->backend, "(Vulkan) cannot map a buffer (%p); Buffer has to be created with PULSE_BUFFER_USAGE_HOST_ACCESS flag", buffer);
-		PulseSetInternalError(PULSE_ERROR_MAP_FAILED);
-		return false;
-	}
-	*data = vulkan_buffer->allocation_info.pMappedData;
+	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(buffer->device, VulkanDevice*);
+	CHECK_VK_RETVAL(buffer->device->backend, vmaMapMemory(vulkan_device->allocator, vulkan_buffer->allocation, data), PULSE_ERROR_MAP_FAILED, false);
 	return true;
+}
+
+void VulkanUnmapBuffer(PulseBuffer buffer)
+{
+	VulkanBuffer* vulkan_buffer = VULKAN_RETRIEVE_DRIVER_DATA_AS(buffer, VulkanBuffer*);
+	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(buffer->device, VulkanDevice*);
+	vmaUnmapMemory(vulkan_device->allocator, vulkan_buffer->allocation);
 }
 
 void VulkanDestroyBuffer(PulseDevice device, PulseBuffer buffer)

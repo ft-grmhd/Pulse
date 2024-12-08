@@ -273,7 +273,8 @@ PULSE_API bool PulseDeviceSupportsShaderFormats(PulseDevice device, PulseShaderF
 PULSE_API void PulseDestroyDevice(PulseDevice device);
 
 PULSE_API PulseBuffer PulseCreateBuffer(PulseDevice device, const PulseBufferCreateInfo* create_infos);
-PULSE_API bool PulseGetBufferMap(PulseBuffer buffer, void** data);
+PULSE_API bool PulseMapBuffer(PulseBuffer buffer, void** data);
+PULSE_API void PulseUnmapBuffer(PulseBuffer buffer);
 PULSE_API void PulseDestroyBuffer(PulseDevice device, PulseBuffer buffer);
 
 PULSE_API PulseImage PulseCreateImage(PulseDevice device, const PulseImageCreateInfo* create_infos);

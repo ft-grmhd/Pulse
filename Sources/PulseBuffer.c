@@ -21,11 +21,21 @@ PULSE_API PulseBuffer PulseCreateBuffer(PulseDevice device, const PulseBufferCre
 	return device->PFN_CreateBuffer(device, create_infos);
 }
 
-PULSE_API bool PulseGetBufferMap(PulseBuffer buffer, void** data)
+PULSE_API bool PulseMapBuffer(PulseBuffer buffer, void** data)
 {
 	PULSE_CHECK_HANDLE_RETVAL(buffer, false);
 	PULSE_CHECK_PTR_RETVAL(data, false);
-	return buffer->device->PFN_GetBufferMap(buffer, data);
+	bool res = buffer->device->PFN_MapBuffer(buffer, data);
+	if(res)
+		buffer->is_mapped = true;
+	return res;
+}
+
+PULSE_API void PulseUnmapBuffer(PulseBuffer buffer)
+{
+	PULSE_CHECK_HANDLE(buffer);
+	buffer->device->PFN_UnmapBuffer(buffer);
+	buffer->is_mapped = false;
 }
 
 PULSE_API void PulseDestroyBuffer(PulseDevice device, PulseBuffer buffer)

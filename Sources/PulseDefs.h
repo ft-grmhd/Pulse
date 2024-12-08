@@ -90,7 +90,8 @@
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(SubmitCommandList, _namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(ReleaseCommandList, _namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(CreateBuffer, _namespace) \
-	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(GetBufferMap, _namespace) \
+	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(MapBuffer, _namespace) \
+	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(UnmapBuffer, _namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(DestroyBuffer, _namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(CreateImage, _namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(DestroyImage, _namespace) \

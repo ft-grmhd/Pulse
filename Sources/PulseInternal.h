@@ -34,6 +34,7 @@ typedef struct PulseBufferHandler
 	void* driver_data;
 	PulseBufferUsageFlags usage;
 	PulseDeviceSize size;
+	bool is_mapped;
 } PulseBufferHandler;
 
 typedef struct PulseCommandListHandler
@@ -70,7 +71,8 @@ typedef struct PulseDeviceHandler
 	PulseSubmitCommandListPFN PFN_SubmitCommandList;
 	PulseReleaseCommandListPFN PFN_ReleaseCommandList;
 	PulseCreateBufferPFN PFN_CreateBuffer;
-	PulseGetBufferMapPFN PFN_GetBufferMap;
+	PulseMapBufferPFN PFN_MapBuffer;
+	PulseUnmapBufferPFN PFN_UnmapBuffer;
 	PulseDestroyBufferPFN PFN_DestroyBuffer;
 	PulseCreateImagePFN PFN_CreateImage;
 	PulseDestroyImagePFN PFN_DestroyImage;

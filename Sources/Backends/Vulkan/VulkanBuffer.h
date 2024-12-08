@@ -23,7 +23,8 @@ typedef struct VulkanBuffer
 } VulkanBuffer;
 
 PulseBuffer VulkanCreateBuffer(PulseDevice device, const PulseBufferCreateInfo* create_infos);
-bool VulkanGetBufferMap(PulseBuffer buffer, void** data);
+bool VulkanMapBuffer(PulseBuffer buffer, void** data);
+void VulkanUnmapBuffer(PulseBuffer buffer);
 void VulkanDestroyBuffer(PulseDevice device, PulseBuffer buffer);
 
 #endif // PULSE_VULKAN_BUFFER_H_
