@@ -48,7 +48,6 @@ typedef enum PulseBufferUsageBits
 	PULSE_BUFFER_USAGE_STORAGE_READ      = PULSE_BIT(3),
 	PULSE_BUFFER_USAGE_STORAGE_WRITE     = PULSE_BIT(4),
 	PULSE_BUFFER_USAGE_UNIFORM_ACCESS    = PULSE_BIT(5),
-	PULSE_BUFFER_USAGE_HOST_ACCESS       = PULSE_BIT(6),
 } PulseShaderFormatBits;
 typedef PulseFlags PulseBufferUsageFlags;
 
@@ -190,6 +189,8 @@ typedef enum PulseImageFormat
 	PULSE_IMAGE_FORMAT_BC2_RGBA_UNORM_SRGB,
 	PULSE_IMAGE_FORMAT_BC3_RGBA_UNORM_SRGB,
 	PULSE_IMAGE_FORMAT_BC7_RGBA_UNORM_SRGB,
+
+	PULSE_IMAGE_FORMAT_MAX_ENUM // For internal use only
 } PulseImageFormat;
 
 // Structs
@@ -274,6 +275,9 @@ PULSE_API void PulseDestroyDevice(PulseDevice device);
 PULSE_API PulseBuffer PulseCreateBuffer(PulseDevice device, const PulseBufferCreateInfo* create_infos);
 PULSE_API bool PulseGetBufferMap(PulseBuffer buffer, void** data);
 PULSE_API void PulseDestroyBuffer(PulseDevice device, PulseBuffer buffer);
+
+PULSE_API PulseImage PulseCreateImage(PulseDevice device, const PulseImageCreateInfo* create_infos);
+PULSE_API void PulseDestroyImage(PulseDevice device, PulseImage image);
 
 PULSE_API PulseCommandList PulseRequestCommandList(PulseDevice device, PulseCommandListUsage usage);
 PULSE_API bool PulseSubmitCommandList(PulseDevice device, PulseCommandList cmd, PulseFence fence);

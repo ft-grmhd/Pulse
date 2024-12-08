@@ -19,8 +19,14 @@
 
 #include <Pulse.h>
 
+extern bool errors_enabled;
+#define DISABLE_ERRORS errors_enabled = false
+#define ENABLE_ERRORS errors_enabled = true
+
 void DebugCallBack(PulseDebugMessageSeverity severity, const char* message);
 void SetupPulse(PulseBackend* backend);
+void SetupDevice(PulseBackend backend, PulseDevice* device);
+void CleanupDevice(PulseDevice device);
 void CleanupPulse(PulseBackend backend);
 
 #endif

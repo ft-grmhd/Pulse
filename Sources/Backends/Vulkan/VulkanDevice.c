@@ -12,6 +12,7 @@
 #include "VulkanLoader.h"
 #include "VulkanQueue.h"
 #include "VulkanBuffer.h"
+#include "VulkanImage.h"
 #include "../../PulseInternal.h"
 
 #include <string.h>

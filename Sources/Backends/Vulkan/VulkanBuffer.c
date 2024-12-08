@@ -22,20 +22,26 @@ PulseBuffer VulkanCreateBuffer(PulseDevice device, const PulseBufferCreateInfo* 
 	buffer->size = create_infos->size;
 	buffer->usage = create_infos->usage;
 
-	if(buffer->usage & PULSE_BUFFER_USAGE_TRANSFER_UPLOAD)
-		vulkan_buffer->usage |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-	if(buffer->usage & PULSE_BUFFER_USAGE_TRANSFER_DOWNLOAD)
-		vulkan_buffer->usage |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-	if(buffer->usage & PULSE_BUFFER_USAGE_STORAGE_READ || buffer->usage & PULSE_BUFFER_USAGE_STORAGE_WRITE)
-		vulkan_buffer->usage |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
-	if(buffer->usage & PULSE_BUFFER_USAGE_UNIFORM_ACCESS)
-		vulkan_buffer->usage |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-
 	VmaAllocationCreateInfo allocation_create_info = { 0 };
 	allocation_create_info.usage = VMA_MEMORY_USAGE_AUTO;
 
-	if(buffer->usage & PULSE_BUFFER_USAGE_HOST_ACCESS)
+	if(buffer->usage & PULSE_BUFFER_USAGE_STORAGE_READ || buffer->usage & PULSE_BUFFER_USAGE_STORAGE_WRITE)
+		vulkan_buffer->usage |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+	if(buffer->usage & PULSE_BUFFER_USAGE_TRANSFER_UPLOAD)
+	{
+		vulkan_buffer->usage |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 		allocation_create_info.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
+	}
+	if(buffer->usage & PULSE_BUFFER_USAGE_TRANSFER_DOWNLOAD)
+	{
+		vulkan_buffer->usage |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+		allocation_create_info.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
+	}
+	if(buffer->usage & PULSE_BUFFER_USAGE_UNIFORM_ACCESS)
+	{
+		vulkan_buffer->usage |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+		allocation_create_info.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
+	}
 
 	VkBufferCreateInfo buffer_create_info = { 0 };
 	buffer_create_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -68,4 +74,6 @@ void VulkanDestroyBuffer(PulseDevice device, PulseBuffer buffer)
 	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(device, VulkanDevice*);
 	VulkanBuffer* vulkan_buffer = VULKAN_RETRIEVE_DRIVER_DATA_AS(buffer, VulkanBuffer*);
 	vmaDestroyBuffer(vulkan_device->allocator, vulkan_buffer->buffer, vulkan_buffer->allocation);
+	free(vulkan_buffer);
+	free(buffer);
 }

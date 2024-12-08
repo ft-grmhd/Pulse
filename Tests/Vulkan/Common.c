@@ -1,9 +1,11 @@
 #include "Common.h"
 #include <unity/unity.h>
 
+bool errors_enabled = true;
+
 void DebugCallBack(PulseDebugMessageSeverity severity, const char* message)
 {
-	if(severity == PULSE_DEBUG_MESSAGE_SEVERITY_ERROR)
+	if(errors_enabled && severity == PULSE_DEBUG_MESSAGE_SEVERITY_ERROR)
 		TEST_FAIL_MESSAGE(message);
 }
 
@@ -20,6 +22,17 @@ void SetupPulse(PulseBackend* backend)
 		TEST_ABORT();
 	}
 	PulseSetDebugCallback(*backend, DebugCallBack);
+}
+
+void SetupDevice(PulseBackend backend, PulseDevice* device)
+{
+	*device = PulseCreateDevice(backend, NULL, 0);
+	TEST_ASSERT_NOT_EQUAL_MESSAGE(device, PULSE_NULL_HANDLE, PulseVerbaliseErrorType(PulseGetLastErrorType()));
+}
+
+void CleanupDevice(PulseDevice device)
+{
+	PulseDestroyDevice(device);
 }
 
 void CleanupPulse(PulseBackend backend)

@@ -41,6 +41,7 @@ typedef struct VulkanDescriptorSetLayout
 
 typedef struct VulkanDescriptorSet
 {
+	PulseDevice device;
 	VulkanDescriptorSetLayout* layout;
 	struct VulkanDescriptorSetPool* pool;
 	VkDescriptorSet set;
@@ -50,18 +51,27 @@ typedef struct VulkanDescriptorSetPool
 {
 	VulkanDescriptorSet* used_sets[VULKAN_POOL_SIZE];
 	VulkanDescriptorSet* free_sets[VULKAN_POOL_SIZE];
+	uint32_t used_index;
+	uint32_t free_index;
+	PulseDevice device;
 	VkDescriptorPool pool;
-	uint32_t sets_count;
+	uint32_t allocations_count;
 } VulkanDescriptorSetPool;
 
 typedef struct VulkanDescriptorSetPoolManager
 {
-	VulkanDescriptorSetPool* pools;
+	PulseDevice device;
+	VulkanDescriptorSetPool** pools;
 	uint32_t pools_capacity;
 	uint32_t pools_size;
 } VulkanDescriptorSetPoolManager;
 
-void VulkanInitDescriptorSetPoolManager(VulkanDescriptorSetPoolManager* manager);
+void VulkanInitDescriptorSetPool(VulkanDescriptorSetPool* pool, PulseDevice device);
+VulkanDescriptorSet* VulkanRequestDescriptorSetFromPool(VulkanDescriptorSetPool* pool, const VulkanDescriptorSetLayout* layout);
+void VulkanReturnDescriptorSetToPool(VulkanDescriptorSetPool* pool, const VulkanDescriptorSet* set);
+void VulkanDestroyDescriptorSetPool(VulkanDescriptorSetPool* pool);
+
+void VulkanInitDescriptorSetPoolManager(VulkanDescriptorSetPoolManager* manager, PulseDevice device);
 VulkanDescriptorSetPool* VulkanGetAvailableDescriptorSetPool(VulkanDescriptorSetPoolManager* manager);
 void VulkanDestroyDescriptorSetPoolManager(VulkanDescriptorSetPoolManager* manager);
 

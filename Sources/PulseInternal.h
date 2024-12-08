@@ -72,6 +72,8 @@ typedef struct PulseDeviceHandler
 	PulseCreateBufferPFN PFN_CreateBuffer;
 	PulseGetBufferMapPFN PFN_GetBufferMap;
 	PulseDestroyBufferPFN PFN_DestroyBuffer;
+	PulseCreateImagePFN PFN_CreateImage;
+	PulseDestroyImagePFN PFN_DestroyImage;
 
 	// Attributes
 	void* driver_data;
@@ -86,7 +88,9 @@ typedef struct PulseFenceHandler
 
 typedef struct PulseImageHandler
 {
+	PulseDevice device;
 	void* driver_data;
+	PulseImageUsageFlags usage;
 } PulseImageHandler;
 
 PulseThreadID PulseGetThreadID();
@@ -102,6 +106,12 @@ void PulseLogBackend(PulseBackend backend, PulseDebugMessageSeverity type, const
 #define PulseLogErrorFmt(backend, msg, ...) PulseLogBackend(backend, PULSE_DEBUG_MESSAGE_SEVERITY_ERROR, msg, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
 #define PulseLogWarningFmt(backend, msg, ...) PulseLogBackend(backend, PULSE_DEBUG_MESSAGE_SEVERITY_WARNING, msg, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
 #define PulseLogInfoFmt(backend, msg, ...) PulseLogBackend(backend, PULSE_DEBUG_MESSAGE_SEVERITY_INFO, msg, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+
+#define PULSE_MAX_STORAGE_TEXTURES_BOUND 8
+#define PULSE_MAX_STORAGE_BUFFERS_BOUND  8
+#define PULSE_MAX_UNIFORM_BUFFERS_BOUND  4
+#define PULSE_MAX_WRITE_TEXTURES_BOUND   8
+#define PULSE_MAX_WRITE_BUFFERS_BOUND    8
 
 #ifdef PULSE_ENABLE_VULKAN_BACKEND
 	extern PulseBackendHandler VulkanDriver;

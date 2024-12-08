@@ -113,6 +113,8 @@ extern "C" {
 	#else
 		#define PULSE_NULLPTR NULL
 	#endif
+#elif defined(__cplusplus) && __cplusplus >= 201103L
+	#define PULSE_NULLPTR nullptr
 #else
 	#define PULSE_NULLPTR NULL
 #endif

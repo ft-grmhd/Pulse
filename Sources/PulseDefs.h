@@ -49,6 +49,33 @@
 
 #define PULSE_CHECK_PTR(handle) PULSE_CHECK_PTR_RETVAL(handle, )
 
+#define PULSE_EXPAND_ARRAY_IF_NEEDED(array, T, size, capacity, increase) \
+	do { \
+		if(size >= capacity) \
+		{ \
+			capacity += increase; \
+			array = (T*)realloc(array, sizeof(T) * capacity); \
+		} \
+	} while(0); \
+
+#define PULSE_DEFRAG_ARRAY(array, size, start) \
+	for(size_t defrag_i = start; defrag_i < size - 1; defrag_i++) \
+		array[defrag_i] = array[defrag_i + 1]; \
+
+#ifndef PULSE_STATIC_ASSERT
+	#ifdef __cplusplus
+		#if __cplusplus >= 201103L
+			#define PULSE_STATIC_ASSERT(name, x)  static_assert(x, #x)
+		#endif
+	#elif PULSE_C_VERSION >= 2023
+		#define PULSE_STATIC_ASSERT(name, x)  static_assert(x, #x)
+	#elif PULSE_C_VERSION >= 2011
+		#define PULSE_STATIC_ASSERT(name, x) _Static_assert(x, #x)
+	#else
+		#define PULSE_STATIC_ASSERT(name, x) typedef int pulse_static_assert_##name[(x) ? 1 : -1]
+	#endif
+#endif
+
 #define PULSE_LOAD_DRIVER_DEVICE_FUNCTION(fn, _namespace) pulse_device->PFN_##fn = _namespace##fn;
 #define PULSE_LOAD_DRIVER_DEVICE(_namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(DestroyDevice, _namespace) \
@@ -65,5 +92,7 @@
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(CreateBuffer, _namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(GetBufferMap, _namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(DestroyBuffer, _namespace) \
+	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(CreateImage, _namespace) \
+	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(DestroyImage, _namespace) \
 
 #endif // PULSE_DEFS_H_
