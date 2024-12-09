@@ -99,7 +99,13 @@ PULSE_API PulseImage PulseCreateImage(PulseDevice device, const PulseImageCreate
 		if(failed)
 			return PULSE_NULL_HANDLE;
 	}
-	return device->PFN_CreateImage(device, create_infos);
+	PulseImage image = device->PFN_CreateImage(device, create_infos);
+	if(image == PULSE_NULL_HANDLE)
+		return PULSE_NULL_HANDLE;
+	PULSE_EXPAND_ARRAY_IF_NEEDED(device->allocated_images, PulseImage, device->allocated_images_size, device->allocated_images_capacity, 64);
+	device->allocated_images[device->allocated_images_size] = image;
+	device->allocated_images_size++;
+	return image;
 }
 
 PULSE_API bool PulseIsImageFormatValid(PulseDevice device, PulseImageFormat format, PulseImageType type, PulseImageUsageFlags usage)
@@ -118,5 +124,20 @@ PULSE_API void PulseDestroyImage(PulseDevice device, PulseImage image)
 			PulseLogWarning(device->backend, "image is NULL, this may be a bug in your application");
 		return;
 	}
-	return device->PFN_DestroyImage(device, image);
+	if(image->device != device)
+	{
+		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(device->backend))
+			PulseLogErrorFmt(device->backend, "cannot destroy image [%p] that have been allocated with device [%p] using device [%p]", image, image->device, device);
+		PulseSetInternalError(PULSE_ERROR_INVALID_DEVICE);
+		return;
+	}
+	for(uint32_t i = 0; i < device->allocated_images_size; i++)
+	{
+		if(device->allocated_images[i] == image)
+		{
+			PULSE_DEFRAG_ARRAY(device->allocated_images, device->allocated_images_size, i);
+			break;
+		}
+	}
+	device->PFN_DestroyImage(device, image);
 }

@@ -23,6 +23,10 @@ extern bool errors_enabled;
 #define DISABLE_ERRORS errors_enabled = false
 #define ENABLE_ERRORS errors_enabled = true
 
+extern bool has_recieved_error;
+#define RESET_ERRORS_CHECK has_recieved_error = false
+#define HAS_RECIEVED_ERROR ((bool)(has_recieved_error == true))
+
 void DebugCallBack(PulseDebugMessageSeverity severity, const char* message);
 void SetupPulse(PulseBackend* backend);
 void SetupDevice(PulseBackend backend, PulseDevice* device);

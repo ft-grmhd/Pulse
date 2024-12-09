@@ -5,6 +5,7 @@
 #include "Pulse.h"
 #include "PulseDefs.h"
 #include "PulseInternal.h"
+#include "PulseProfile.h"
 
 PULSE_API PulseBuffer PulseCreateBuffer(PulseDevice device, const PulseBufferCreateInfo* create_infos)
 {
@@ -18,7 +19,13 @@ PULSE_API PulseBuffer PulseCreateBuffer(PulseDevice device, const PulseBufferCre
 			return PULSE_NULL_HANDLE;
 		}
 	}
-	return device->PFN_CreateBuffer(device, create_infos);
+	PulseBuffer buffer = device->PFN_CreateBuffer(device, create_infos);
+	if(buffer == PULSE_NULL_HANDLE)
+		return PULSE_NULL_HANDLE;
+	PULSE_EXPAND_ARRAY_IF_NEEDED(device->allocated_buffers, PulseBuffer, device->allocated_buffers_size, device->allocated_buffers_capacity, 64);
+	device->allocated_buffers[device->allocated_buffers_size] = buffer;
+	device->allocated_buffers_size++;
+	return buffer;
 }
 
 PULSE_API bool PulseMapBuffer(PulseBuffer buffer, void** data)
@@ -53,5 +60,20 @@ PULSE_API void PulseDestroyBuffer(PulseDevice device, PulseBuffer buffer)
 		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(device->backend))
 			PulseLogWarning(device->backend, "buffer is still mapped, consider unmapping it before destroy");
 	}
-	return device->PFN_DestroyBuffer(device, buffer);
+	if(buffer->device != device)
+	{
+		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(device->backend))
+			PulseLogErrorFmt(device->backend, "cannot destroy buffer [%p] that have been allocated with device [%p] using device [%p]", buffer, buffer->device, device);
+		PulseSetInternalError(PULSE_ERROR_INVALID_DEVICE);
+		return;
+	}
+	for(uint32_t i = 0; i < device->allocated_buffers_size; i++)
+	{
+		if(device->allocated_buffers[i] == buffer)
+		{
+			PULSE_DEFRAG_ARRAY(device->allocated_buffers, device->allocated_buffers_size, i);
+			break;
+		}
+	}
+	device->PFN_DestroyBuffer(device, buffer);
 }

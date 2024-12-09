@@ -3,6 +3,7 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
 #include <Pulse.h>
+#include "PulseDefs.h"
 #include "PulseInternal.h"
 
 PULSE_API PulseDevice PulseCreateDevice(PulseBackend backend, PulseDevice* forbiden_devices, uint32_t forbiden_devices_count)
@@ -14,6 +15,15 @@ PULSE_API PulseDevice PulseCreateDevice(PulseBackend backend, PulseDevice* forbi
 PULSE_API void PulseDestroyDevice(PulseDevice device)
 {
 	PULSE_CHECK_HANDLE(device);
+	if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(device->backend))
+	{
+		if(device->allocated_buffers_size != 0)
+			PulseLogErrorFmt(device->backend, "some buffers allocated using device [%p] were not freed (%d active allocations)", device, device->allocated_buffers_size);
+		if(device->allocated_images_size != 0)
+			PulseLogErrorFmt(device->backend, "some images allocated using device [%p] were not freed (%d active allocations)", device, device->allocated_images_size);
+	}
+	free(device->allocated_buffers);
+	free(device->allocated_images);
 	device->PFN_DestroyDevice(device);
 	device->driver_data = PULSE_NULLPTR;
 }

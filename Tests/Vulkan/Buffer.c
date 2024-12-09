@@ -112,8 +112,38 @@ void TestBufferMapping()
 	CleanupPulse(backend);
 }
 
+void TestBufferDestruction()
+{
+	PulseBackend backend;
+	SetupPulse(&backend);
+	PulseDevice device;
+	SetupDevice(backend, &device);
+
+	PulseDevice other_device;
+	SetupDevice(backend, &other_device);
+
+	{
+		PulseBufferCreateInfo buffer_create_info = { 0 };
+		buffer_create_info.size = 256;
+		buffer_create_info.usage = PULSE_BUFFER_USAGE_STORAGE_READ;
+		PulseBuffer buffer = PulseCreateBuffer(device, &buffer_create_info);
+		TEST_ASSERT_NOT_EQUAL_MESSAGE(buffer, PULSE_NULL_HANDLE, PulseVerbaliseErrorType(PulseGetLastErrorType()));
+
+		DISABLE_ERRORS;
+			RESET_ERRORS_CHECK;
+			PulseDestroyBuffer(other_device, buffer);
+			TEST_ASSERT_TRUE(HAS_RECIEVED_ERROR);
+		ENABLE_ERRORS;
+	}
+
+	CleanupDevice(device);
+	CleanupDevice(other_device);
+	CleanupPulse(backend);
+}
+
 void TestBuffer()
 {
 	RUN_TEST(TestBufferCreation);
 	RUN_TEST(TestBufferMapping);
+	RUN_TEST(TestBufferDestruction);
 }

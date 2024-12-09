@@ -2,11 +2,13 @@
 #include <unity/unity.h>
 
 bool errors_enabled = true;
+bool has_recieved_error = false;
 
 void DebugCallBack(PulseDebugMessageSeverity severity, const char* message)
 {
 	if(errors_enabled && severity == PULSE_DEBUG_MESSAGE_SEVERITY_ERROR)
 		TEST_FAIL_MESSAGE(message);
+	has_recieved_error = true;
 }
 
 #define LOG_MESSAGE_MAX_LENGTH 4096

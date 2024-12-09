@@ -81,6 +81,14 @@ typedef struct PulseDeviceHandler
 	// Attributes
 	void* driver_data;
 	PulseBackend backend;
+
+	PulseBuffer* allocated_buffers;
+	uint32_t allocated_buffers_size;
+	uint32_t allocated_buffers_capacity;
+
+	PulseImage* allocated_images;
+	uint32_t allocated_images_size;
+	uint32_t allocated_images_capacity;
 } PulseDeviceHandler;
 
 typedef struct PulseFenceHandler
