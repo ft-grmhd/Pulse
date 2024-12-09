@@ -9,7 +9,7 @@
 
 typedef PulseBackendFlags (*PulseCheckBackendSupportPFN)(PulseBackendFlags, PulseShaderFormatsFlags);
 
-typedef bool (*PulseLoadBackendPFN)(PulseDebugLevel);
+typedef bool (*PulseLoadBackendPFN)(PulseBackend, PulseDebugLevel);
 typedef void (*PulseUnloadBackendPFN)(PulseBackend);
 typedef PulseDevice (*PulseCreateDevicePFN)(PulseBackend, PulseDevice*, uint32_t);
 
@@ -29,6 +29,7 @@ typedef bool (*PulseMapBufferPFN)(PulseBuffer, void**);
 typedef void (*PulseUnmapBufferPFN)(PulseBuffer);
 typedef void (*PulseDestroyBufferPFN)(PulseDevice, PulseBuffer);
 typedef PulseImage (*PulseCreateImagePFN)(PulseDevice, const PulseImageCreateInfo*);
+typedef bool (*PulseIsImageFormatValidPFN)(PulseDevice, PulseImageFormat, PulseImageType, PulseImageUsageFlags);
 typedef void (*PulseDestroyImagePFN)(PulseDevice, PulseImage);
 
 #endif // PULSE_PFNS_H_

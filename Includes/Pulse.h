@@ -233,7 +233,7 @@ typedef struct PulseImageCreateInfo
 	PulseImageUsageFlags usage;
 	uint32_t width;
 	uint32_t height;
-	uint32_t layer_count_or_depth; // This value is treated as a layer count on 2D array textures, and as a depth value on 3D textures
+	uint32_t layer_count_or_depth; // This value is treated as a layer count on 2D array images, and as a depth value on 3D images
 } PulseImageCreateInfo;
 
 typedef struct PulseImageLocation
@@ -278,6 +278,7 @@ PULSE_API void PulseUnmapBuffer(PulseBuffer buffer);
 PULSE_API void PulseDestroyBuffer(PulseDevice device, PulseBuffer buffer);
 
 PULSE_API PulseImage PulseCreateImage(PulseDevice device, const PulseImageCreateInfo* create_infos);
+PULSE_API bool PulseIsImageFormatValid(PulseDevice device, PulseImageFormat format, PulseImageType type, PulseImageUsageFlags usage);
 PULSE_API void PulseDestroyImage(PulseDevice device, PulseImage image);
 
 PULSE_API PulseCommandList PulseRequestCommandList(PulseDevice device, PulseCommandListUsage usage);

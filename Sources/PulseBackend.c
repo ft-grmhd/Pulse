@@ -105,7 +105,7 @@ PULSE_API PulseBackend PulseLoadBackend(PulseBackendFlags backend_candidates, Pu
 	PulseBackend backend = PulseGetBackendFromFlag(backend_type);
 	if(backend == PULSE_NULL_HANDLE)
 		return PULSE_NULL_HANDLE;
-	if(!backend->PFN_LoadBackend(debug_level))
+	if(!backend->PFN_LoadBackend(backend, debug_level))
 		return PULSE_NULL_HANDLE;
 	backend->PFN_UserDebugCallback = PULSE_NULLPTR;
 	backend->debug_level = debug_level;

@@ -6,6 +6,7 @@
 #include "Vulkan.h"
 #include "VulkanImage.h"
 #include "VulkanDevice.h"
+#include <vulkan/vulkan_core.h>
 
 static VkFormat PulseImageFormatToVkFormat[] = {
 	VK_FORMAT_UNDEFINED,                   // INVALID
@@ -126,26 +127,21 @@ PulseImage VulkanCreateImage(PulseDevice device, const PulseImageCreateInfo* cre
 	else if(create_infos->type == PULSE_IMAGE_TYPE_3D)
 		flags |= VK_IMAGE_CREATE_2D_ARRAY_COMPATIBLE_BIT;
 
-	VkImageCreateInfo image_info = { 0 };
-	image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-	image_info.imageType = VK_IMAGE_TYPE_2D;
-	image_info.extent.width = create_infos->width;
-	image_info.extent.height = create_infos->height;
-	image_info.extent.depth = depth;
-	image_info.mipLevels = 1;
-	image_info.arrayLayers = layer_count;
-	image_info.format = PulseImageFormatToVkFormat[create_infos->format];
-	image_info.tiling = VK_IMAGE_TILING_OPTIMAL;
-	image_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	image_info.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
-	image_info.samples = VK_SAMPLE_COUNT_1_BIT;
-	image_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-	image_info.flags = flags;
-
 	VkImageCreateInfo image_create_info = { 0 };
-	image_create_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-	image_create_info.usage = vulkan_image->usage;
+	image_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+	image_create_info.imageType = VK_IMAGE_TYPE_2D;
+	image_create_info.extent.width = create_infos->width;
+	image_create_info.extent.height = create_infos->height;
+	image_create_info.extent.depth = depth;
+	image_create_info.mipLevels = 1;
+	image_create_info.arrayLayers = layer_count;
+	image_create_info.format = PulseImageFormatToVkFormat[create_infos->format];
+	image_create_info.tiling = VK_IMAGE_TILING_OPTIMAL;
+	image_create_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	image_create_info.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
+	image_create_info.samples = VK_SAMPLE_COUNT_1_BIT;
 	image_create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	image_create_info.flags = flags;
 
 	CHECK_VK_RETVAL(device->backend, vmaCreateImage(vulkan_device->allocator, &image_create_info, &allocation_create_info, &vulkan_image->image, &vulkan_image->allocation, PULSE_NULLPTR), PULSE_ERROR_INITIALIZATION_FAILED, PULSE_NULL_HANDLE);
 	vmaGetAllocationInfo(vulkan_device->allocator, vulkan_image->allocation, &vulkan_image->allocation_info);
@@ -178,6 +174,18 @@ PulseImage VulkanCreateImage(PulseDevice device, const PulseImageCreateInfo* cre
 	}
 
 	return image;
+}
+
+bool VulkanIsImageFormatValid(PulseDevice device, PulseImageFormat format, PulseImageType type, PulseImageUsageFlags usage)
+{
+	(void)usage;
+	VulkanDriverData* vulkan_driver_data = VULKAN_RETRIEVE_DRIVER_DATA_AS(device->backend, VulkanDriverData*);
+	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(device, VulkanDevice*);
+	VkImageCreateFlags vulkan_flags = 0;
+	VkImageFormatProperties properties;
+	if(type == PULSE_IMAGE_TYPE_CUBE || type == PULSE_IMAGE_TYPE_CUBE_ARRAY)
+		vulkan_flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
+	return vulkan_driver_data->instance.vkGetPhysicalDeviceImageFormatProperties(vulkan_device->physical, PulseImageFormatToVkFormat[format], (type == PULSE_IMAGE_TYPE_3D) ? VK_IMAGE_TYPE_3D : VK_IMAGE_TYPE_2D, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_STORAGE_BIT, vulkan_flags, &properties) == VK_SUCCESS;
 }
 
 void VulkanDestroyImage(PulseDevice device, PulseImage image)

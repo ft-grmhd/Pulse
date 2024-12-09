@@ -48,5 +48,10 @@ PULSE_API void PulseDestroyBuffer(PulseDevice device, PulseBuffer buffer)
 			PulseLogWarning(device->backend, "buffer is NULL, this may be a bug in your application");
 		return;
 	}
+	if(buffer->is_mapped)
+	{
+		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(device->backend))
+			PulseLogWarning(device->backend, "buffer is still mapped, consider unmapping it before destroy");
+	}
 	return device->PFN_DestroyBuffer(device, buffer);
 }

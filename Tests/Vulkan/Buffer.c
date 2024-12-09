@@ -98,11 +98,15 @@ void TestBufferMapping()
 		void* ptr;
 		TEST_ASSERT_NOT_EQUAL_MESSAGE(PulseMapBuffer(buffer, &ptr), false, PulseVerbaliseErrorType(PulseGetLastErrorType()));
 		TEST_ASSERT_NOT_NULL(ptr);
-		TEST_ASSERT_EQUAL(memcmp(ptr, data, 8), 0);	
+		TEST_ASSERT_EQUAL(memcmp(ptr, data, 8), 0);
 		PulseUnmapBuffer(buffer);
 	}
 
-	PulseDestroyBuffer(device, buffer);
+	DISABLE_ERRORS;
+		void* ptr;
+		TEST_ASSERT_NOT_EQUAL_MESSAGE(PulseMapBuffer(buffer, &ptr), false, PulseVerbaliseErrorType(PulseGetLastErrorType()));
+		PulseDestroyBuffer(device, buffer);
+	ENABLE_ERRORS;
 
 	CleanupDevice(device);
 	CleanupPulse(backend);

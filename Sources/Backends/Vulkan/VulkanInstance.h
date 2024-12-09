@@ -13,14 +13,16 @@
 
 typedef struct VulkanInstance
 {
-	VkInstance instance;
-
 	#define PULSE_VULKAN_INSTANCE_FUNCTION(fn) PFN_##fn fn;
 		#include "VulkanInstancePrototypes.h"
 	#undef PULSE_VULKAN_INSTANCE_FUNCTION
+
+	VkInstance instance;
+	VkDebugUtilsMessengerEXT debug_messenger;
+	bool validation_layers_enabled;
 } VulkanInstance;
 
-bool VulkanInitInstance(VulkanInstance* instance, PulseDebugLevel debug_level);
+bool VulkanInitInstance(PulseBackend backend, VulkanInstance* instance, PulseDebugLevel debug_level);
 void VulkanDestroyInstance(VulkanInstance* instance);
 
 #endif // PULSE_VULKAN_INSTANCE_H_

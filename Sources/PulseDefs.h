@@ -94,6 +94,7 @@
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(UnmapBuffer, _namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(DestroyBuffer, _namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(CreateImage, _namespace) \
+	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(IsImageFormatValid, _namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(DestroyImage, _namespace) \
 
 #endif // PULSE_DEFS_H_
