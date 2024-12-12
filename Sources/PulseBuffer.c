@@ -76,4 +76,5 @@ PULSE_API void PulseDestroyBuffer(PulseDevice device, PulseBuffer buffer)
 		}
 	}
 	device->PFN_DestroyBuffer(device, buffer);
+	device->allocated_buffers_size--;
 }

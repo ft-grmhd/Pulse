@@ -136,7 +136,11 @@ void TestBufferDestruction()
 		ENABLE_ERRORS;
 	}
 
-	CleanupDevice(device);
+	DISABLE_ERRORS;
+		RESET_ERRORS_CHECK;
+		CleanupDevice(device);
+		TEST_ASSERT_TRUE(HAS_RECIEVED_ERROR);
+	ENABLE_ERRORS;
 	CleanupDevice(other_device);
 	CleanupPulse(backend);
 }

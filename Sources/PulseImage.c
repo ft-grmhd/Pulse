@@ -140,4 +140,5 @@ PULSE_API void PulseDestroyImage(PulseDevice device, PulseImage image)
 		}
 	}
 	device->PFN_DestroyImage(device, image);
+	device->allocated_images_size--;
 }
