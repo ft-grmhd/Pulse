@@ -201,12 +201,6 @@ typedef struct PulseBufferCreateInfo
 	PulseDeviceSize size;
 } PulseBufferCreateInfo;
 
-typedef struct PulseBufferLocation
-{
-	PulseBuffer buffer;
-	PulseDeviceSize offset;
-} PulseBufferLocation;
-
 typedef struct PulseBufferRegion
 {
 	PulseBuffer buffer;
@@ -236,15 +230,6 @@ typedef struct PulseImageCreateInfo
 	uint32_t height;
 	uint32_t layer_count_or_depth; // This value is treated as a layer count on 2D array images, and as a depth value on 3D images
 } PulseImageCreateInfo;
-
-typedef struct PulseImageLocation
-{
-	PulseImage image;
-	uint32_t layer;
-	uint32_t x;
-	uint32_t y;
-	uint32_t z;
-} PulseImageLocation;
 
 typedef struct PulseImageRegion
 {
@@ -276,10 +261,14 @@ PULSE_API void PulseDestroyDevice(PulseDevice device);
 PULSE_API PulseBuffer PulseCreateBuffer(PulseDevice device, const PulseBufferCreateInfo* create_infos);
 PULSE_API bool PulseMapBuffer(PulseBuffer buffer, void** data);
 PULSE_API void PulseUnmapBuffer(PulseBuffer buffer);
+PULSE_API bool PulseCopyBufferToBuffer(const PulseBufferRegion* src, const PulseBufferRegion* dst);
+PULSE_API bool PulseCopyBufferToImage(PulseBuffer src, const PulseBufferRegion* dst);
 PULSE_API void PulseDestroyBuffer(PulseDevice device, PulseBuffer buffer);
 
 PULSE_API PulseImage PulseCreateImage(PulseDevice device, const PulseImageCreateInfo* create_infos);
 PULSE_API bool PulseIsImageFormatValid(PulseDevice device, PulseImageFormat format, PulseImageType type, PulseImageUsageFlags usage);
+PULSE_API bool PulseCopyImageToBuffer(const PulseImageRegion* src, const PulseBufferRegion* dst);
+PULSE_API bool PulseBlitImage(const PulseImageRegion* src, const PulseImageRegion* dst);
 PULSE_API void PulseDestroyImage(PulseDevice device, PulseImage image);
 
 PULSE_API PulseCommandList PulseRequestCommandList(PulseDevice device, PulseCommandListUsage usage);

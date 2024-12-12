@@ -73,9 +73,13 @@ typedef struct PulseDeviceHandler
 	PulseCreateBufferPFN PFN_CreateBuffer;
 	PulseMapBufferPFN PFN_MapBuffer;
 	PulseUnmapBufferPFN PFN_UnmapBuffer;
+	PulseCopyBufferToBufferPFN PFN_CopyBufferToBuffer;
+	PulseCopyBufferToImageFN PFN_CopyBufferToImage;
 	PulseDestroyBufferPFN PFN_DestroyBuffer;
 	PulseCreateImagePFN PFN_CreateImage;
 	PulseIsImageFormatValidPFN PFN_IsImageFormatValid;
+	PulseCopyImageToBufferPFN PFN_CopyImageToBuffer;
+	PulseBlitImagePFN PFN_BlitImage;
 	PulseDestroyImagePFN PFN_DestroyImage;
 
 	// Attributes
