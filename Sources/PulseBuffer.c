@@ -45,6 +45,88 @@ PULSE_API void PulseUnmapBuffer(PulseBuffer buffer)
 	buffer->is_mapped = false;
 }
 
+PULSE_API bool PulseCopyBufferToBuffer(PulseCommandList cmd, const PulseBufferRegion* src, const PulseBufferRegion* dst)
+{
+	PULSE_CHECK_PTR_RETVAL(src, false);
+	PULSE_CHECK_HANDLE_RETVAL(src->buffer, false);
+	PULSE_CHECK_PTR_RETVAL(dst, false);
+	PULSE_CHECK_HANDLE_RETVAL(dst->buffer, false);
+
+	PulseBackend backend = src->buffer->device->backend;
+
+	if(src->buffer->device != dst->buffer->device)
+	{
+		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(backend))
+			PulseLogErrorFmt(backend, "source buffer has been created on a different device (%p) than the destination buffer (%p)", src->buffer->device, dst->buffer->device);
+		PulseSetInternalError(PULSE_ERROR_INVALID_DEVICE);
+		return false;
+	}
+
+	if(src->size + src->offset > src->buffer->size)
+	{
+		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(backend))
+			PulseLogErrorFmt(backend, "source buffer region (%lld) is bigger than the buffer size (%lld)", src->size + src->offset, src->buffer->size);
+		PulseSetInternalError(PULSE_ERROR_INVALID_REGION);
+		return false;
+	}
+
+	if(dst->size + dst->offset > dst->buffer->size)
+	{
+		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(backend))
+			PulseLogErrorFmt(backend, "destination buffer region (%lld) is bigger than the buffer size (%lld)", dst->size + dst->offset, dst->buffer->size);
+		PulseSetInternalError(PULSE_ERROR_INVALID_REGION);
+		return false;
+	}
+
+	if(src->buffer == dst->buffer)
+		return true;
+
+	return src->buffer->device->PFN_CopyBufferToBuffer(cmd, src, dst);
+}
+
+PULSE_API bool PulseCopyBufferToImage(PulseCommandList cmd, const PulseBufferRegion* src, const PulseImageRegion* dst)
+{
+	PULSE_CHECK_HANDLE_RETVAL(src, false);
+	PULSE_CHECK_PTR_RETVAL(dst, false);
+	PULSE_CHECK_HANDLE_RETVAL(dst->image, false);
+
+	PulseBackend backend = src->buffer->device->backend;
+
+	if(src->buffer->device != dst->image->device)
+	{
+		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(backend))
+			PulseLogErrorFmt(backend, "source buffer has been created on a different device (%p) than the destination buffer (%p)", src->buffer->device, dst->image->device);
+		PulseSetInternalError(PULSE_ERROR_INVALID_DEVICE);
+		return false;
+	}
+
+	if(src->size + src->offset > src->buffer->size)
+	{
+		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(backend))
+			PulseLogErrorFmt(backend, "source buffer region (%lld) is bigger than the buffer size (%lld)", src->size + src->offset, src->buffer->size);
+		PulseSetInternalError(PULSE_ERROR_INVALID_REGION);
+		return false;
+	}
+
+	if(dst->width > dst->image->width)
+	{
+		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(backend))
+			PulseLogErrorFmt(backend, "destination image region width (%lld) is bigger than image width (%lld)", dst->width, dst->image->width);
+		PulseSetInternalError(PULSE_ERROR_INVALID_REGION);
+		return false;
+	}
+
+	if(dst->height > dst->image->height)
+	{
+		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(backend))
+			PulseLogErrorFmt(backend, "destination image region height (%lld) is bigger than image height (%lld)", dst->height, dst->image->height);
+		PulseSetInternalError(PULSE_ERROR_INVALID_REGION);
+		return false;
+	}
+
+	return src->buffer->device->PFN_CopyBufferToImage(cmd, src, dst);
+}
+
 PULSE_API void PulseDestroyBuffer(PulseDevice device, PulseBuffer buffer)
 {
 	PULSE_CHECK_HANDLE(device);

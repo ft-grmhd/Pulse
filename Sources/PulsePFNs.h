@@ -31,9 +31,9 @@ typedef void (*PulseDestroyBufferPFN)(PulseDevice, PulseBuffer);
 typedef PulseImage (*PulseCreateImagePFN)(PulseDevice, const PulseImageCreateInfo*);
 typedef bool (*PulseIsImageFormatValidPFN)(PulseDevice, PulseImageFormat, PulseImageType, PulseImageUsageFlags);
 typedef void (*PulseDestroyImagePFN)(PulseDevice, PulseImage);
-typedef bool (*PulseCopyBufferToBufferPFN)(const PulseBufferRegion*, const PulseBufferRegion*);
-typedef bool (*PulseCopyBufferToImageFN)(const PulseBufferRegion*, const PulseImageRegion*);
-typedef bool (*PulseCopyImageToBufferPFN)(const PulseImageRegion*, const PulseBufferRegion*);
+typedef bool (*PulseCopyBufferToBufferPFN)(PulseCommandList, const PulseBufferRegion*, const PulseBufferRegion*);
+typedef bool (*PulseCopyBufferToImageFN)(PulseCommandList, const PulseBufferRegion*, const PulseImageRegion*);
+typedef bool (*PulseCopyImageToBufferPFN)(PulseCommandList, const PulseImageRegion*, const PulseBufferRegion*);
 typedef bool (*PulseBlitImagePFN)(const PulseImageRegion*, const PulseImageRegion*);
 
 #endif // PULSE_PFNS_H_

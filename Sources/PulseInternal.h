@@ -105,7 +105,12 @@ typedef struct PulseImageHandler
 {
 	PulseDevice device;
 	void* driver_data;
+	PulseImageType type;
+	PulseImageFormat format;
 	PulseImageUsageFlags usage;
+	uint32_t width;
+	uint32_t height;
+	uint32_t layer_count_or_depth;
 } PulseImageHandler;
 
 PulseThreadID PulseGetThreadID();

@@ -25,6 +25,8 @@ typedef struct VulkanImage
 
 PulseImage VulkanCreateImage(PulseDevice device, const PulseImageCreateInfo* create_infos);
 bool VulkanIsImageFormatValid(PulseDevice device, PulseImageFormat format, PulseImageType type, PulseImageUsageFlags usage);
+bool VulkanCopyImageToBuffer(PulseCommandList cmd, const PulseImageRegion* src, const PulseBufferRegion* dst);
+bool VulkanBlitImage(PulseCommandList cmd, const PulseImageRegion* src, const PulseImageRegion* dst);
 void VulkanDestroyImage(PulseDevice device, PulseImage image);
 
 #endif // PULSE_VULKAN_IMAGE_H_

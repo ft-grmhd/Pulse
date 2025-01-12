@@ -102,6 +102,14 @@ PULSE_API PulseImage PulseCreateImage(PulseDevice device, const PulseImageCreate
 	PulseImage image = device->PFN_CreateImage(device, create_infos);
 	if(image == PULSE_NULL_HANDLE)
 		return PULSE_NULL_HANDLE;
+
+	image->type = create_infos->type;
+	image->format = create_infos->format;
+	image->usage = create_infos->usage;
+	image->width = create_infos->width;
+	image->height = create_infos->height;
+	image->layer_count_or_depth = create_infos->layer_count_or_depth;
+
 	PULSE_EXPAND_ARRAY_IF_NEEDED(device->allocated_images, PulseImage, device->allocated_images_size, device->allocated_images_capacity, 64);
 	device->allocated_images[device->allocated_images_size] = image;
 	device->allocated_images_size++;
@@ -112,6 +120,14 @@ PULSE_API bool PulseIsImageFormatValid(PulseDevice device, PulseImageFormat form
 {
 	PULSE_CHECK_HANDLE_RETVAL(device, false);
 	return device->PFN_IsImageFormatValid(device, format, type, usage);
+}
+
+PULSE_API bool PulseCopyImageToBuffer(PulseCommandList cmd, const PulseImageRegion* src, const PulseBufferRegion* dst)
+{
+}
+
+PULSE_API bool PulseBlitImage(PulseCommandList cmd, const PulseImageRegion* src, const PulseImageRegion* dst)
+{
 }
 
 PULSE_API void PulseDestroyImage(PulseDevice device, PulseImage image)

@@ -109,6 +109,7 @@ typedef enum PulseErrorType
 	PULSE_ERROR_INVALID_INTERNAL_POINTER,
 	PULSE_ERROR_MAP_FAILED,
 	PULSE_ERROR_INVALID_DEVICE,
+	PULSE_ERROR_INVALID_REGION,
 } PulseErrorType;
 
 typedef enum PulseImageType
@@ -262,14 +263,14 @@ PULSE_API void PulseDestroyDevice(PulseDevice device);
 PULSE_API PulseBuffer PulseCreateBuffer(PulseDevice device, const PulseBufferCreateInfo* create_infos);
 PULSE_API bool PulseMapBuffer(PulseBuffer buffer, void** data);
 PULSE_API void PulseUnmapBuffer(PulseBuffer buffer);
-PULSE_API bool PulseCopyBufferToBuffer(const PulseBufferRegion* src, const PulseBufferRegion* dst);
-PULSE_API bool PulseCopyBufferToImage(PulseBuffer src, const PulseBufferRegion* dst);
+PULSE_API bool PulseCopyBufferToBuffer(PulseCommandList cmd, const PulseBufferRegion* src, const PulseBufferRegion* dst);
+PULSE_API bool PulseCopyBufferToImage(PulseCommandList cmd, const PulseBufferRegion* src, const PulseImageRegion* dst);
 PULSE_API void PulseDestroyBuffer(PulseDevice device, PulseBuffer buffer);
 
 PULSE_API PulseImage PulseCreateImage(PulseDevice device, const PulseImageCreateInfo* create_infos);
 PULSE_API bool PulseIsImageFormatValid(PulseDevice device, PulseImageFormat format, PulseImageType type, PulseImageUsageFlags usage);
-PULSE_API bool PulseCopyImageToBuffer(const PulseImageRegion* src, const PulseBufferRegion* dst);
-PULSE_API bool PulseBlitImage(const PulseImageRegion* src, const PulseImageRegion* dst);
+PULSE_API bool PulseCopyImageToBuffer(PulseCommandList cmd, const PulseImageRegion* src, const PulseBufferRegion* dst);
+PULSE_API bool PulseBlitImage(PulseCommandList cmd, const PulseImageRegion* src, const PulseImageRegion* dst);
 PULSE_API void PulseDestroyImage(PulseDevice device, PulseImage image);
 
 PULSE_API PulseCommandList PulseRequestCommandList(PulseDevice device, PulseCommandListUsage usage);

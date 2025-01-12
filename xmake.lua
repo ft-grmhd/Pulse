@@ -54,6 +54,8 @@ set_dependir("build/.deps")
 
 set_optimize("fastest")
 
+option("unitybuild", { description = "Build the library using unity build", default = false })
+
 for name, module in pairs(backends) do
 	if has_config(module.option) then
 		if module.packages then
@@ -69,6 +71,10 @@ target("pulse_gpu")
 	add_headerfiles("Sources/*.inl", { prefixdir = "private", install = false })
 	
 	add_files("Sources/*.c")
+
+	if has_config("unitybuild") then
+		add_rules("c.unity_build", { batchsize = 6 })
+	end
 
 	for name, module in pairs(backends) do
 		if has_config(module.option) then

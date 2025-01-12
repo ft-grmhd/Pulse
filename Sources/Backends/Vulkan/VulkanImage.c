@@ -115,7 +115,6 @@ PulseImage VulkanCreateImage(PulseDevice device, const PulseImageCreateInfo* cre
 
 	image->device = device;
 	image->driver_data = vulkan_image;
-	image->usage = create_infos->usage;
 
 	VmaAllocationCreateInfo allocation_create_info = { 0 };
 	allocation_create_info.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
@@ -186,6 +185,14 @@ bool VulkanIsImageFormatValid(PulseDevice device, PulseImageFormat format, Pulse
 	if(type == PULSE_IMAGE_TYPE_CUBE || type == PULSE_IMAGE_TYPE_CUBE_ARRAY)
 		vulkan_flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
 	return vulkan_driver_data->instance.vkGetPhysicalDeviceImageFormatProperties(vulkan_device->physical, PulseImageFormatToVkFormat[format], (type == PULSE_IMAGE_TYPE_3D) ? VK_IMAGE_TYPE_3D : VK_IMAGE_TYPE_2D, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_STORAGE_BIT, vulkan_flags, &properties) == VK_SUCCESS;
+}
+
+bool VulkanCopyImageToBuffer(PulseCommandList cmd, const PulseImageRegion* src, const PulseBufferRegion* dst)
+{
+}
+
+bool VulkanBlitImage(PulseCommandList cmd, const PulseImageRegion* src, const PulseImageRegion* dst)
+{
 }
 
 void VulkanDestroyImage(PulseDevice device, PulseImage image)
