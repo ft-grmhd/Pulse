@@ -36,6 +36,8 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - uses: NcStudios/VulkanCI@v1.0
+
     # Setup MSYS2
     - uses: msys2/setup-msys2@v2
       with:
@@ -87,3 +89,10 @@ jobs:
     # Build the engine
     - name: Build Pulse
       run: xmake --yes
+
+    # Test the engine
+    - name: Build Pulse
+      run: |
+        xmake config --vulkan-tests=y --yes
+        xmake build --yes VulkanUnitTests
+        xmake run --yes VulkanUnitTests

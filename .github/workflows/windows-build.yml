@@ -31,6 +31,8 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - uses: NcStudios/VulkanCI@v1.0
+
     # Force xmake to a specific folder (for cache)
     - name: Set xmake env
       run: echo "XMAKE_GLOBALDIR=${{ runner.workspace }}/xmake-global" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
@@ -82,3 +84,10 @@ jobs:
     # Build the engine
     - name: Build Pulse
       run: xmake --yes
+
+    # Test the engine
+    - name: Build Pulse
+      run: |
+        xmake config --vulkan-tests=y --yes
+        xmake build --yes VulkanUnitTests
+        xmake run --yes VulkanUnitTests
