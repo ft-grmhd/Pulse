@@ -9,6 +9,15 @@ void DumbDebugCallBack(PulseDebugMessageSeverity severity, const char* message)
 	(void)message;
 }
 
+void TestVulkanSupport()
+{
+	if(!PulseSupportsBackend(PULSE_BACKEND_VULKAN, PULSE_SHADER_FORMAT_SPIRV_BIT))
+	{
+		TEST_FAIL_MESSAGE("Vulkan is not supported");
+		exit(1);
+	}
+}
+
 void TestBackendSetup()
 {
 	PulseBackend backend = PulseLoadBackend(PULSE_BACKEND_VULKAN, PULSE_SHADER_FORMAT_SPIRV_BIT, PULSE_HIGH_DEBUG);
@@ -36,6 +45,7 @@ void TestWrongBackendSetup()
 
 void TestBackend()
 {
+	RUN_TEST(TestVulkanSupport);
 	RUN_TEST(TestBackendSetup);
 	RUN_TEST(TestBackendAnySetup);
 	RUN_TEST(TestWrongBackendSetup);

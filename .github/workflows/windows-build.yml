@@ -86,7 +86,7 @@ jobs:
       run: xmake --yes
 
     # Test the engine
-    - name: Build Pulse
+    - name: Test Vulkan
       run: |
         xmake config --vulkan-tests=y --yes
         xmake build --yes VulkanUnitTests
