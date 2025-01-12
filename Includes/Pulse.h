@@ -36,7 +36,7 @@ typedef enum PulseBackendBits
 	PULSE_BACKEND_INVALID = PULSE_BIT(1),
 	PULSE_BACKEND_ANY = PULSE_BIT(2),
 	PULSE_BACKEND_VULKAN = PULSE_BIT(3),
-	PULSE_BACKEND_D3D11 = PULSE_BIT(4),
+	PULSE_BACKEND_METAL = PULSE_BIT(4),
 	// More to come
 } PulseBackendBits;
 typedef PulseFlags PulseBackendFlags;
@@ -67,8 +67,9 @@ typedef PulseFlags PulseImageUsageFlags;
 
 typedef enum PulseShaderFormatsBits
 {
-	PULSE_SHADER_FORMAT_SPIRV_BIT   = PULSE_BIT(1), // Can be used by Vulkan | D3D11 backends
-	PULSE_SHADER_FORMAT_DXBC_BIT    = PULSE_BIT(2), // Can be used by D3D11 backend only
+	PULSE_SHADER_FORMAT_SPIRV_BIT       = PULSE_BIT(1), // Can be used by Vulkan
+	PULSE_SHADER_FORMAT_MSL_BIT         = PULSE_BIT(2), // Can be used by Metal
+	PULSE_SHADER_FORMAT_METALLIB_BIT    = PULSE_BIT(3), // Can be used by Metal
 	// More to come
 } PulseShaderFormatsBits;
 typedef PulseFlags PulseShaderFormatsFlags;
@@ -284,7 +285,7 @@ PULSE_API PulseComputePipeline PulseCreateComputePipeline(PulseDevice device, co
 PULSE_API void PulseDispatchComputePipeline(PulseComputePipeline pipeline, PulseCommandList cmd, uint32_t groupcount_x, uint32_t groupcount_y, uint32_t groupcount_z);
 PULSE_API void PulseDestroyComputePipeline(PulseDevice device, PulseComputePipeline pipeline);
 
-PULSE_API PulseErrorType PulseGetLastErrorType(); // /!\ Warning /!\ Call to this function resets the internal last error variable
+PULSE_API PulseErrorType PulseGetLastErrorType(); // Call to this function resets the internal last error variable
 PULSE_API const char* PulseVerbaliseErrorType(PulseErrorType error);
 
 #ifdef __cplusplus

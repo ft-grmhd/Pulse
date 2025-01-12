@@ -131,8 +131,8 @@ void PulseLogBackend(PulseBackend backend, PulseDebugMessageSeverity type, const
 #ifdef PULSE_ENABLE_VULKAN_BACKEND
 	extern PulseBackendHandler VulkanDriver;
 #endif // PULSE_ENABLE_VULKAN_BACKEND
-#ifdef PULSE_ENABLE_D3D11_BACKEND
-	extern PulseBackendHandler D3D11Driver;
-#endif // PULSE_ENABLE_D3D11_BACKEND
+#ifdef PULSE_ENABLE_METAL_BACKEND
+	extern PulseBackendHandler MetalDriver;
+#endif // PULSE_ENABLE_METAL_BACKEND
 
 #endif // PULSE_INTERNAL_H_

@@ -11,8 +11,8 @@
 #ifdef PULSE_ENABLE_VULKAN_BACKEND
 	#include "Backends/Vulkan/Vulkan.h"
 #endif
-#ifdef PULSE_ENABLE_D3D11_BACKEND
-	#include "Backends/D3D11/D3D11.h"
+#ifdef PULSE_ENABLE_METAL_BACKEND
+	#include "Backends/Metal/Metal.h"
 #endif
 
 // Ordered by default preference
@@ -20,8 +20,8 @@ static const PulseCheckBackendSupportPFN backends_supports[] = {
 	#ifdef PULSE_ENABLE_VULKAN_BACKEND
 		VulkanCheckSupport,
 	#endif
-	#ifdef PULSE_ENABLE_D3D11_BACKEND
-		D3D11CheckSupport,
+	#ifdef PULSE_ENABLE_METAL_BACKEND
+		MetalCheckSupport,
 	#endif
 	PULSE_NULLPTR
 };
@@ -87,8 +87,8 @@ static PulseBackend PulseGetBackendFromFlag(PulseBackendBits flag)
 		#ifdef PULSE_ENABLE_VULKAN_BACKEND
 			case PULSE_BACKEND_VULKAN: return &VulkanDriver;
 		#endif
-		#ifdef PULSE_ENABLE_D3D11_BACKEND
-			case PULSE_BACKEND_D3D11: return &D3D11Driver;
+		#ifdef PULSE_ENABLE_METAL_BACKEND
+			case PULSE_BACKEND_METAL: return &MetalDriver;
 		#endif
 
 		default: break;

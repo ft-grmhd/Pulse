@@ -6,16 +6,18 @@ local backends = {
 	Vulkan = {
 		option = "vulkan",
 		default = true,
-		has_cpp_files = true,
 		packages = { "vulkan-headers", "vulkan-memory-allocator" },
 		custom = function()
 			add_defines("VK_NO_PROTOTYPES")
+			add_files("Sources/Backends/Vulkan/**.cpp")
 		end
 	},
-	D3D11 = {
-		option = "d3d11",
-		default = is_plat("windows", "mingw"),
-		has_cpp_files = false,
+	Metal = {
+		option = "metal",
+		default = is_plat("macosx", "iphoneos"),
+		custom = function()
+			add_files("Sources/Backends/Metal/**.m")
+		end
 	}
 }
 
@@ -80,9 +82,6 @@ target("pulse_gpu")
 			add_headerfiles("Sources/Backends/" .. name .. "/**.inl", { prefixdir = "private", install = false })
 
 			add_files("Sources/Backends/" .. name .. "/**.c")
-			if module.has_cpp_files then
-				add_files("Sources/Backends/" .. name .. "/**.cpp")
-			end
 
 			if module.custom then
 				module.custom()
