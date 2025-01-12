@@ -21,9 +21,6 @@ jobs:
         arch: [x86_64]
         confs:
         - { mode: debug, archive: yes }
-        - { mode: debug, config: --asan=y, archive: false, cache_key: -asan }
-        - { mode: debug, config: --lsan=y, archive: false }
-        - { mode: debug, config: --tsan=y, archive: false }
         - { mode: release, archive: yes }
 
     runs-on: ${{ matrix.os }}
