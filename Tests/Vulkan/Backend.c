@@ -28,7 +28,7 @@ void TestBackendAnySetup()
 
 void TestWrongBackendSetup()
 {
-	PulseBackend backend = PulseLoadBackend(PULSE_BACKEND_VULKAN, PULSE_SHADER_FORMAT_DXBC_BIT, PULSE_HIGH_DEBUG);
+	PulseBackend backend = PulseLoadBackend(PULSE_BACKEND_VULKAN, PULSE_SHADER_FORMAT_MSL_BIT, PULSE_HIGH_DEBUG);
 	TEST_ASSERT_EQUAL(backend, PULSE_NULL_HANDLE);
 	PulseSetDebugCallback(backend, DumbDebugCallBack);
 	PulseUnloadBackend(backend);
