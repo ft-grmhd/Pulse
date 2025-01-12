@@ -34,6 +34,8 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - uses: NcStudios/VulkanCI@v1.0
+
     # Install system dependencies
     - name: Install system dependencies
       run: |
@@ -91,3 +93,10 @@ jobs:
     # Build the engine
     - name: Build Pulse
       run: xmake --yes
+
+    # Test the engine
+    - name: Build Pulse
+      run: |
+        xmake config --vulkan-tests=y --yes
+        xmake -- yes
+        xmake run VulkanUnitTests --yes
