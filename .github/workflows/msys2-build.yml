@@ -1,4 +1,4 @@
-name: MSYS2 build (MinGW-w64)
+name: MSYS2 (MinGW-w64)
 
 on:
   pull_request:
