@@ -1,51 +1,39 @@
-name: MSYS2 build (MinGW-w64)
+name: Linux Base
 
 on:
-  pull_request:
-  push:
-    paths-ignore:
-      - '.github/workflows/linux-build.yml'
-      - '.github/workflows/macos-build.yml'
-      - '.github/workflows/windows-build.yml'
-      - '.gitignore'
-      - 'LICENSE'
-      - 'README.md'
+  workflow_call:
 
 jobs:
   build:
-    strategy:
-      matrix:
-        msystem: [mingw64]
-        os: [windows-latest]
-        arch: [x86_64]
-        mode: [debug, release]
-
     runs-on: ${{ matrix.os }}
     if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
-
-    defaults:
-      run:
-        shell: msys2 {0}
 
     steps:
     - name: Get current date as package key
       id: cache_key
-      shell: bash
       run: echo "key=$(date +'%W')" >> $GITHUB_OUTPUT
 
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # Setup MSYS2
-    - uses: msys2/setup-msys2@v2
-      with:
-        msystem: ${{ matrix.msystem }}
-        install: base-devel git unzip p7zip mingw-w64-${{ matrix.arch }}-toolchain mingw-w64-${{ matrix.arch }}-xmake
-        update: true
+    - uses: NcStudios/VulkanCI@v1.0
+
+    # Install system dependencies
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install mesa-common-dev
 
     # Force xmake to a specific folder (for cache)
     - name: Set xmake env
       run: echo "XMAKE_GLOBALDIR=${{ runner.workspace }}/xmake-global" >> $GITHUB_ENV
+
+    # Install xmake
+    - name: Setup xmake
+      uses: xmake-io/github-action-setup-xmake@v1
+      with:
+        xmake-version: branch@dev
+        actions-cache-folder: .xmake-cache-W${{ steps.cache_key.outputs.key }}
 
     # Update xmake repository (in order to have the file that will be cached)
     - name: Update xmake repository
@@ -62,7 +50,7 @@ jobs:
       uses: actions/cache/restore@v4
       with:
         path: ${{ env.XMAKE_GLOBALDIR }}/.xmake/packages
-        key: MinGW-${{ matrix.arch }}-${{ matrix.mode }}-${{ steps.dep_hash.outputs.hash }}-W${{ steps.cache_key.outputs.key }}
+        key: Linux-${{ matrix.arch }}-${{ matrix.confs.mode }}${{ matrix.confs.cache_key }}-${{ steps.dep_hash.outputs.hash }}-W${{ steps.cache_key.outputs.key }}
 
     # Setup compilation mode and install project dependencies
     - name: Configure xmake and install dependencies
@@ -87,3 +75,10 @@ jobs:
     # Build the engine
     - name: Build Pulse
       run: xmake --yes
+
+    # Test the engine
+    - name: Test Vulkan
+      run: |
+        xmake config --vulkan-tests=y --yes
+        xmake build --yes VulkanUnitTests
+        xmake run --yes VulkanUnitTests

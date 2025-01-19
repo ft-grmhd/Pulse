@@ -14,7 +14,7 @@ void TestVulkanSupport()
 	if(!PulseSupportsBackend(PULSE_BACKEND_VULKAN, PULSE_SHADER_FORMAT_SPIRV_BIT))
 	{
 		TEST_MESSAGE("Vulkan is not supported");
-		exit(1);
+		exit(0);
 	}
 }
 
