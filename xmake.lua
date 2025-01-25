@@ -43,7 +43,7 @@ end
 add_rules("mode.debug", "mode.release")
 
 add_includedirs("Includes")
-set_languages("c11", "cxx20")
+set_languages("c17", "cxx20")
 set_encodings("utf-8")
 set_warnings("allextra")
 

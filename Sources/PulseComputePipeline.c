@@ -5,54 +5,74 @@
 #include "PulseDefs.h"
 #include "PulseInternal.h"
 
+
 PULSE_API PulseComputePipeline PulseCreateComputePipeline(PulseDevice device, const PulseComputePipelineCreateInfo* info)
 {
 	PULSE_CHECK_HANDLE_RETVAL(device, PULSE_NULL_HANDLE);
 	if(info == PULSE_NULLPTR && PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(device->backend))
 		PulseLogError(device->backend, "null infos pointer");
 	PULSE_CHECK_PTR_RETVAL(info, PULSE_NULL_HANDLE);
-	return device->PFN_CreateComputePipeline(device, info);
+	PulseComputePipeline pipeline = device->PFN_CreateComputePipeline(device, info);
+	if(pipeline == PULSE_NULL_HANDLE)
+		return PULSE_NULL_HANDLE;
+	pipeline->num_readonly_storage_images = info->num_readonly_storage_images;
+	pipeline->num_readonly_storage_buffers = info->num_readonly_storage_buffers;
+	pipeline->num_readwrite_storage_images = info->num_readwrite_storage_buffers;
+	pipeline->num_readwrite_storage_buffers = info->num_readwrite_storage_buffers;
+	pipeline->num_uniform_buffers = info->num_uniform_buffers;
+	return pipeline;
 }
 
-PULSE_API void PulseDispatchComputePipeline(PulseComputePipeline pipeline, PulseCommandList cmd, uint32_t groupcount_x, uint32_t groupcount_y, uint32_t groupcount_z)
+PULSE_API void PulseBindStorageBuffers(PulseComputePass pass, uint32_t starting_slot, PulseBuffer* const* buffers, uint32_t num_buffers)
 {
+	PULSE_CHECK_HANDLE(pass);
+
+	PULSE_CHECK_COMMAND_LIST_STATE(pass->cmd);
+
+	pass->cmd->device->PFN_BindStorageBuffers(pass, starting_slot, buffers, num_buffers);
+}
+
+PULSE_API void PulseBindUniformData(PulseComputePass pass, uint32_t slot, const void* data, uint32_t data_size)
+{
+	PULSE_CHECK_HANDLE(pass);
+
+	PULSE_CHECK_COMMAND_LIST_STATE(pass->cmd);
+
+	pass->cmd->device->PFN_BindUniformData(pass, slot, data, data_size);
+}
+
+PULSE_API void PulseBindStorageImages(PulseComputePass pass, uint32_t starting_slot, PulseImage* const* images, uint32_t num_images)
+{
+	PULSE_CHECK_HANDLE(pass);
+
+	PULSE_CHECK_COMMAND_LIST_STATE(pass->cmd);
+
+	pass->cmd->device->PFN_BindStorageImages(pass, starting_slot, images, num_images);
+}
+
+PULSE_API void PulseBindComputePipeline(PulseComputePass pass, PulseComputePipeline pipeline)
+{
+	PULSE_CHECK_HANDLE(pass);
 	PULSE_CHECK_HANDLE(pipeline);
-	PULSE_CHECK_HANDLE(cmd);
 
-	if(cmd->state != PULSE_COMMAND_LIST_STATE_RECORDING)
-	{
-		switch(cmd->state)
-		{
-			case PULSE_COMMAND_LIST_STATE_INVALID:
-				if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(cmd->device->backend))
-					PulseLogError(cmd->device->backend, "command list is in invalid state");
-			return;
+	PULSE_CHECK_COMMAND_LIST_STATE(pass->cmd);
 
-			case PULSE_COMMAND_LIST_STATE_READY:
-				if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(cmd->device->backend))
-					PulseLogError(cmd->device->backend, "command list is not recording");
-			return;
+	pass->cmd->device->PFN_BindComputePipeline(pass, pipeline);
 
-			case PULSE_COMMAND_LIST_STATE_SENT:
-				if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(cmd->device->backend))
-					PulseLogWarning(cmd->device->backend, "command list has already been submitted");
-			return;
+	pass->current_pipeline = pipeline;
 
-			default: break;
-		}
-	}
+	PULSE_EXPAND_ARRAY_IF_NEEDED(pass->compute_pipelines_bound, PulseComputePipeline, pass->compute_pipelines_bound_size, pass->compute_pipelines_bound_capacity, 2);
+	pass->compute_pipelines_bound[pass->compute_pipelines_bound_size] = pipeline;
+	pass->compute_pipelines_bound_size++;
+}
 
-	cmd->device->PFN_DispatchComputePipeline(pipeline, cmd, groupcount_x, groupcount_y, groupcount_z);
-	pipeline->cmd = cmd;
+PULSE_API void PulseDispatchComputations(PulseComputePass pass, uint32_t groupcount_x, uint32_t groupcount_y, uint32_t groupcount_z)
+{
+	PULSE_CHECK_HANDLE(pass);
 
-	if(cmd->compute_pipelines_bound_size == cmd->compute_pipelines_bound_capacity)
-	{
-		cmd->compute_pipelines_bound_capacity += 5;
-		cmd->compute_pipelines_bound = (PulseComputePipeline*)realloc(cmd->compute_pipelines_bound, cmd->compute_pipelines_bound_capacity * sizeof(PulseComputePipeline));
-		PULSE_CHECK_ALLOCATION(cmd->compute_pipelines_bound);
-	}
-	cmd->compute_pipelines_bound[cmd->compute_pipelines_bound_size] = pipeline;
-	cmd->compute_pipelines_bound_size++;
+	PULSE_CHECK_COMMAND_LIST_STATE(pass->cmd);
+
+	pass->cmd->device->PFN_DispatchComputations(pass, groupcount_x, groupcount_y, groupcount_z);
 }
 
 PULSE_API void PulseDestroyComputePipeline(PulseDevice device, PulseComputePipeline pipeline)

@@ -62,6 +62,29 @@
 	for(size_t defrag_i = start; defrag_i < size - 1; defrag_i++) \
 		array[defrag_i] = array[defrag_i + 1]; \
 
+#define PULSE_CHECK_COMMAND_LIST_STATE_RETVAL(cmd, retval) \
+	if(cmd->state != PULSE_COMMAND_LIST_STATE_RECORDING) \
+	{ \
+		switch(cmd->state) \
+		{ \
+			case PULSE_COMMAND_LIST_STATE_INVALID: \
+				if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(cmd->device->backend)) \
+					PulseLogError(cmd->device->backend, "command list is in invalid state"); \
+			return retval; \
+			case PULSE_COMMAND_LIST_STATE_READY: \
+				if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(cmd->device->backend)) \
+					PulseLogError(cmd->device->backend, "command list is not recording"); \
+			return retval; \
+			case PULSE_COMMAND_LIST_STATE_SENT: \
+				if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(cmd->device->backend)) \
+					PulseLogWarning(cmd->device->backend, "command list has already been submitted"); \
+			return retval; \
+			default: break; \
+		} \
+	} \
+
+#define PULSE_CHECK_COMMAND_LIST_STATE(cmd) PULSE_CHECK_COMMAND_LIST_STATE_RETVAL(cmd, )
+
 #ifndef PULSE_STATIC_ASSERT
 	#ifdef __cplusplus
 		#if __cplusplus >= 201103L
@@ -81,7 +104,7 @@
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(DestroyDevice, _namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(CreateComputePipeline, _namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(DestroyComputePipeline, _namespace) \
-	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(DispatchComputePipeline, _namespace) \
+	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(DispatchComputations, _namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(CreateFence, _namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(DestroyFence, _namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(IsFenceReady, _namespace) \
@@ -100,5 +123,12 @@
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(CopyImageToBuffer, _namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(BlitImage, _namespace) \
 	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(DestroyImage, _namespace) \
+	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(BeginComputePass, _namespace) \
+	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(EndComputePass, _namespace) \
+	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(BindStorageBuffers, _namespace) \
+	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(BindUniformData, _namespace) \
+	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(BindStorageImages, _namespace) \
+	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(BindStorageImages, _namespace) \
+	PULSE_LOAD_DRIVER_DEVICE_FUNCTION(BindComputePipeline, _namespace) \
 
 #endif // PULSE_DEFS_H_

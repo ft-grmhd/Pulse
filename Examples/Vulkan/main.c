@@ -56,7 +56,12 @@ int main(void)
 	PulseCommandList cmd = PulseRequestCommandList(device, PULSE_COMMAND_LIST_GENERAL);
 	CHECK_PULSE_HANDLE_RETVAL(cmd, 1);
 
-	PulseDispatchComputePipeline(pipeline, cmd, 8, 8, 8);
+	PulseComputePass pass = PulseBeginComputePass(cmd);
+	CHECK_PULSE_HANDLE_RETVAL(pass, 1);
+		PulseBindStorageBuffers(pass, 0, &buffer, 1);
+		PulseBindComputePipeline(pass, pipeline);
+		PulseDispatchComputations(pass, 8, 8, 8);
+	PulseEndComputePass(pass);
 
 	if(!PulseSubmitCommandList(device, cmd, fence))
 		fprintf(stderr, "Could not submit command list, %s\n", PulseVerbaliseErrorType(PulseGetLastErrorType()));

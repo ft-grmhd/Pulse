@@ -228,6 +228,9 @@ PulseDevice VulkanCreateDevice(PulseBackend backend, PulseDevice* forbiden_devic
 	pulse_device->backend = backend;
 	PULSE_LOAD_DRIVER_DEVICE(Vulkan);
 
+	VulkanInitDescriptorSetPoolManager(&device->descriptor_set_pool_manager, pulse_device);
+	VulkanInitDescriptorSetLayoutManager(&device->descriptor_set_layout_manager, pulse_device);
+
 	if(PULSE_IS_BACKEND_HIGH_LEVEL_DEBUG(backend))
 		PulseLogInfoFmt(backend, "(Vulkan) created device from %s", device->properties.deviceName);
 	return pulse_device;
@@ -238,6 +241,8 @@ void VulkanDestroyDevice(PulseDevice device)
 	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(device, VulkanDevice*);
 	if(vulkan_device == PULSE_NULLPTR || vulkan_device->device == VK_NULL_HANDLE)
 		return;
+	VulkanDestroyDescriptorSetPoolManager(&vulkan_device->descriptor_set_pool_manager);
+	VulkanDestroyDescriptorSetLayoutManager(&vulkan_device->descriptor_set_layout_manager);
 	for(uint32_t i = 0; i < vulkan_device->cmd_pools_size; i++)
 		vulkan_device->vkDestroyCommandPool(vulkan_device->device, vulkan_device->cmd_pools[i].pool, PULSE_NULLPTR);
 	vmaDestroyAllocator(vulkan_device->allocator);

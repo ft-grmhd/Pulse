@@ -29,14 +29,15 @@ PULSE_DEFINE_NULLABLE_HANDLE(PulseComputePipeline);
 PULSE_DEFINE_NULLABLE_HANDLE(PulseDevice);
 PULSE_DEFINE_NULLABLE_HANDLE(PulseFence);
 PULSE_DEFINE_NULLABLE_HANDLE(PulseImage);
+PULSE_DEFINE_NULLABLE_HANDLE(PulseComputePass);
 
 // Flags
 typedef enum PulseBackendBits
 {
 	PULSE_BACKEND_INVALID = PULSE_BIT(1),
-	PULSE_BACKEND_ANY = PULSE_BIT(2),
-	PULSE_BACKEND_VULKAN = PULSE_BIT(3),
-	PULSE_BACKEND_METAL = PULSE_BIT(4),
+	PULSE_BACKEND_ANY     = PULSE_BIT(2),
+	PULSE_BACKEND_VULKAN  = PULSE_BIT(3),
+	PULSE_BACKEND_METAL   = PULSE_BIT(4),
 	// More to come
 } PulseBackendBits;
 typedef PulseFlags PulseBackendFlags;
@@ -47,7 +48,6 @@ typedef enum PulseBufferUsageBits
 	PULSE_BUFFER_USAGE_TRANSFER_DOWNLOAD = PULSE_BIT(2),
 	PULSE_BUFFER_USAGE_STORAGE_READ      = PULSE_BIT(3),
 	PULSE_BUFFER_USAGE_STORAGE_WRITE     = PULSE_BIT(4),
-	PULSE_BUFFER_USAGE_UNIFORM_ACCESS    = PULSE_BIT(5),
 } PulseShaderFormatBits;
 typedef PulseFlags PulseBufferUsageFlags;
 
@@ -67,9 +67,9 @@ typedef PulseFlags PulseImageUsageFlags;
 
 typedef enum PulseShaderFormatsBits
 {
-	PULSE_SHADER_FORMAT_SPIRV_BIT       = PULSE_BIT(1), // Can be used by Vulkan
-	PULSE_SHADER_FORMAT_MSL_BIT         = PULSE_BIT(2), // Can be used by Metal
-	PULSE_SHADER_FORMAT_METALLIB_BIT    = PULSE_BIT(3), // Can be used by Metal
+	PULSE_SHADER_FORMAT_SPIRV_BIT    = PULSE_BIT(1), // Can be used by Vulkan
+	PULSE_SHADER_FORMAT_MSL_BIT      = PULSE_BIT(2), // Can be used by Metal
+	PULSE_SHADER_FORMAT_METALLIB_BIT = PULSE_BIT(3), // Can be used by Metal
 	// More to come
 } PulseShaderFormatsBits;
 typedef PulseFlags PulseShaderFormatsFlags;
@@ -133,7 +133,7 @@ typedef enum PulseImageFormat
 	PULSE_IMAGE_FORMAT_R16G16_UNORM,
 	PULSE_IMAGE_FORMAT_R16G16B16A16_UNORM,
 	PULSE_IMAGE_FORMAT_R10G10B10A2_UNORM,
-	PULSE_IMAGE_FORMAT_B5G6R5_UNORM,
+	PULSE_IMAGE_FORMAT_B5G6R5_UNORM, 
 	PULSE_IMAGE_FORMAT_B5G5R5A1_UNORM,
 	PULSE_IMAGE_FORMAT_B4G4R4A4_UNORM,
 	PULSE_IMAGE_FORMAT_B8G8R8A8_UNORM,
@@ -184,14 +184,6 @@ typedef enum PulseImageFormat
 	PULSE_IMAGE_FORMAT_R32_INT,
 	PULSE_IMAGE_FORMAT_R32G32_INT,
 	PULSE_IMAGE_FORMAT_R32G32B32A32_INT,
-	// SRGB Unsigned Normalized Color Formats
-	PULSE_IMAGE_FORMAT_R8G8B8A8_UNORM_SRGB,
-	PULSE_IMAGE_FORMAT_B8G8R8A8_UNORM_SRGB,
-	// Compressed SRGB Unsigned Normalized Color Formats
-	PULSE_IMAGE_FORMAT_BC1_RGBA_UNORM_SRGB,
-	PULSE_IMAGE_FORMAT_BC2_RGBA_UNORM_SRGB,
-	PULSE_IMAGE_FORMAT_BC3_RGBA_UNORM_SRGB,
-	PULSE_IMAGE_FORMAT_BC7_RGBA_UNORM_SRGB,
 
 	PULSE_IMAGE_FORMAT_MAX_ENUM // For internal use only
 } PulseImageFormat;
@@ -283,8 +275,15 @@ PULSE_API bool PulseIsFenceReady(PulseDevice device, PulseFence fence);
 PULSE_API bool PulseWaitForFences(PulseDevice device, const PulseFence* fences, uint32_t fences_count, bool wait_for_all);
 
 PULSE_API PulseComputePipeline PulseCreateComputePipeline(PulseDevice device, const PulseComputePipelineCreateInfo* info);
-PULSE_API void PulseDispatchComputePipeline(PulseComputePipeline pipeline, PulseCommandList cmd, uint32_t groupcount_x, uint32_t groupcount_y, uint32_t groupcount_z);
 PULSE_API void PulseDestroyComputePipeline(PulseDevice device, PulseComputePipeline pipeline);
+
+PULSE_API PulseComputePass PulseBeginComputePass(PulseCommandList cmd);
+PULSE_API void PulseBindStorageBuffers(PulseComputePass pass, uint32_t starting_slot, PulseBuffer* const* buffers, uint32_t num_buffers);
+PULSE_API void PulseBindUniformData(PulseComputePass pass, uint32_t slot, const void* data, uint32_t data_size);
+PULSE_API void PulseBindStorageImages(PulseComputePass pass, uint32_t starting_slot, PulseImage* const* images, uint32_t num_images);
+PULSE_API void PulseBindComputePipeline(PulseComputePass pass, PulseComputePipeline pipeline);
+PULSE_API void PulseDispatchComputations(PulseComputePass pass, uint32_t groupcount_x, uint32_t groupcount_y, uint32_t groupcount_z);
+PULSE_API void PulseEndComputePass(PulseComputePass pass);
 
 PULSE_API PulseErrorType PulseGetLastErrorType(); // Call to this function resets the internal last error variable
 PULSE_API const char* PulseVerbaliseErrorType(PulseErrorType error);

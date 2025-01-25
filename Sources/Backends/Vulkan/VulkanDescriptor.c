@@ -10,28 +10,145 @@
 #include "VulkanDevice.h"
 #include "VulkanDescriptor.h"
 
+#undef NDEBUG
+#include <assert.h>
+
+void VulkanInitDescriptorSetLayoutManager(VulkanDescriptorSetLayoutManager* manager, PulseDevice device)
+{
+	memset(manager, 0, sizeof(VulkanDescriptorSetLayoutManager));
+	manager->device = device;
+}
+
+VulkanDescriptorSetLayout* VulkanGetDescriptorSetLayout(VulkanDescriptorSetLayoutManager* manager,
+														uint32_t read_storage_buffers_count,
+														uint32_t read_storage_images_count,
+														uint32_t write_storage_buffers_count,
+														uint32_t write_storage_images_count,
+														uint32_t uniform_buffers_count)
+{
+	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(manager->device, VulkanDevice*);
+
+	for(uint32_t i = 0; i < manager->layouts_size; i++)
+	{
+		VulkanDescriptorSetLayout* layout = &manager->layouts[i];
+		if( layout->ReadOnly.storage_buffer_count == read_storage_buffers_count &&
+			layout->ReadOnly.storage_texture_count == read_storage_images_count &&
+			layout->ReadWrite.storage_buffer_count == write_storage_buffers_count &&
+			layout->ReadWrite.storage_texture_count == write_storage_images_count &&
+			layout->Uniform.buffer_count == uniform_buffers_count)
+		{
+			return layout;
+		}
+	}
+
+	PULSE_EXPAND_ARRAY_IF_NEEDED(manager->layouts, VulkanDescriptorSetLayout, manager->layouts_size, manager->layouts_capacity, 1);
+	PULSE_CHECK_ALLOCATION_RETVAL(manager->layouts, PULSE_NULLPTR);
+
+	VulkanDescriptorSetLayout* layout = &manager->layouts[manager->layouts_size];
+
+	VkDescriptorSetLayoutBinding* bindings = (VkDescriptorSetLayoutBinding*)PulseStaticAllocStack(PULSE_MAX_READ_BUFFERS_BOUND + PULSE_MAX_READ_TEXTURES_BOUND + PULSE_MAX_WRITE_BUFFERS_BOUND + PULSE_MAX_WRITE_TEXTURES_BOUND + PULSE_MAX_UNIFORM_BUFFERS_BOUND);
+
+	// Category 1
+	for(uint32_t i = 0; i < read_storage_images_count; i++)
+	{
+		bindings[i].binding = i;
+		bindings[i].descriptorCount = 1;
+		bindings[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+		bindings[i].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+		bindings[i].pImmutableSamplers = PULSE_NULLPTR;
+	}
+
+	for(uint32_t i = read_storage_images_count; i < read_storage_images_count + read_storage_buffers_count; i++)
+	{
+		bindings[i].binding = i;
+		bindings[i].descriptorCount = 1;
+		bindings[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		bindings[i].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+		bindings[i].pImmutableSamplers = PULSE_NULLPTR;
+	}
+
+	// Category 2
+	for(uint32_t i = 0; i < write_storage_images_count; i++) {
+		bindings[i].binding = i;
+		bindings[i].descriptorCount = 1;
+		bindings[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+		bindings[i].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+		bindings[i].pImmutableSamplers = PULSE_NULLPTR;
+	}
+
+	for(uint32_t i = write_storage_images_count; i < write_storage_images_count + write_storage_buffers_count; i++)
+	{
+		bindings[i].binding = i;
+		bindings[i].descriptorCount = 1;
+		bindings[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		bindings[i].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+		bindings[i].pImmutableSamplers = PULSE_NULLPTR;
+	}
+
+	// Category 3
+	for(uint32_t i = 0; i < uniform_buffers_count; i++)
+	{
+		bindings[i].binding = i;
+		bindings[i].descriptorCount = 1;
+		bindings[i].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+		bindings[i].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+		bindings[i].pImmutableSamplers = PULSE_NULLPTR;
+	}
+
+	VkDescriptorSetLayoutCreateInfo layout_info = { 0 };
+	layout_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	layout_info.bindingCount = read_storage_buffers_count + read_storage_images_count + write_storage_buffers_count + write_storage_images_count + uniform_buffers_count;
+	layout_info.pBindings = bindings;
+	CHECK_VK_RETVAL(manager->device->backend, vulkan_device->vkCreateDescriptorSetLayout(vulkan_device->device, &layout_info, PULSE_NULLPTR, &layout->layout), PULSE_ERROR_INITIALIZATION_FAILED, PULSE_NULLPTR);
+
+	layout->ReadOnly.storage_buffer_count = read_storage_buffers_count;
+	layout->ReadOnly.storage_texture_count = read_storage_images_count;
+	layout->ReadWrite.storage_buffer_count = write_storage_buffers_count;
+	layout->ReadWrite.storage_texture_count = write_storage_images_count;
+	layout->Uniform.buffer_count = uniform_buffers_count;
+
+	return layout;
+}
+
+void VulkanDestroyDescriptorSetLayout(VulkanDescriptorSetLayout* layout, PulseDevice device)
+{
+	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(device, VulkanDevice*);
+	vulkan_device->vkDestroyDescriptorSetLayout(vulkan_device->device, layout->layout, PULSE_NULLPTR);
+}
+
+void VulkanDestroyDescriptorSetLayoutManager(VulkanDescriptorSetLayoutManager* manager)
+{
+	for(uint32_t i = 0; i < manager->layouts_size; i++)
+	{
+		VulkanDestroyDescriptorSetLayout(&manager->layouts[i], manager->device);
+	}
+	free(manager->layouts);
+	memset(manager, 0, sizeof(VulkanDescriptorSetPoolManager));
+}
+
 void VulkanInitDescriptorSetPool(VulkanDescriptorSetPool* pool, PulseDevice device)
 {
 	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(device, VulkanDevice*);
 	memset(pool, 0, sizeof(VulkanDescriptorSetPool));
 	pool->device = device;
+	pool->thread_id = PulseGetThreadID();
 
 	VkDescriptorPoolSize pool_sizes[
-		PULSE_MAX_STORAGE_TEXTURES_BOUND +
-		PULSE_MAX_STORAGE_BUFFERS_BOUND +
+		PULSE_MAX_READ_TEXTURES_BOUND +
+		PULSE_MAX_READ_BUFFERS_BOUND +
 		PULSE_MAX_WRITE_TEXTURES_BOUND +
 		PULSE_MAX_WRITE_BUFFERS_BOUND +
 		PULSE_MAX_UNIFORM_BUFFERS_BOUND];
 
 	uint32_t i = 0;
 
-	for(uint32_t start = i; i < start + PULSE_MAX_STORAGE_TEXTURES_BOUND; i++)
+	for(uint32_t start = i; i < start + PULSE_MAX_READ_TEXTURES_BOUND; i++)
 	{
 		pool_sizes[i].type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
 		pool_sizes[i].descriptorCount = VULKAN_POOL_SIZE;
 	}
 
-	for(uint32_t start = i; i < start + PULSE_MAX_STORAGE_BUFFERS_BOUND; i++)
+	for(uint32_t start = i; i < start + PULSE_MAX_READ_BUFFERS_BOUND; i++)
 	{
 		pool_sizes[i].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 		pool_sizes[i].descriptorCount = VULKAN_POOL_SIZE;
@@ -146,7 +263,6 @@ void VulkanDestroyDescriptorSetPool(VulkanDescriptorSetPool* pool)
 	memset(pool, 0, sizeof(VulkanDescriptorSetPool));
 }
 
-
 void VulkanInitDescriptorSetPoolManager(VulkanDescriptorSetPoolManager* manager, PulseDevice device)
 {
 	memset(manager, 0, sizeof(VulkanDescriptorSetPoolManager));
@@ -155,9 +271,10 @@ void VulkanInitDescriptorSetPoolManager(VulkanDescriptorSetPoolManager* manager,
 
 VulkanDescriptorSetPool* VulkanGetAvailableDescriptorSetPool(VulkanDescriptorSetPoolManager* manager)
 {
+	PulseThreadID thread_id = PulseGetThreadID();
 	for(uint32_t i = 0; i < manager->pools_size; i++)
 	{
-		if(manager->pools[i]->allocations_count < VULKAN_POOL_SIZE || manager->pools[i]->free_sets[0] != PULSE_NULLPTR)
+		if(thread_id == manager->pools[i]->thread_id && (manager->pools[i]->allocations_count < VULKAN_POOL_SIZE || manager->pools[i]->free_sets[0] != PULSE_NULLPTR))
 			return manager->pools[i];
 	}
 	PULSE_EXPAND_ARRAY_IF_NEEDED(manager->pools, VulkanDescriptorSetPool*, manager->pools_size, manager->pools_capacity, 1);

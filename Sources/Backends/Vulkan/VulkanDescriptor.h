@@ -10,6 +10,7 @@
 #include <vulkan/vulkan_core.h>
 
 #include <Pulse.h>
+#include "../../PulseInternal.h"
 
 #include "VulkanEnums.h"
 
@@ -18,7 +19,6 @@
 typedef struct VulkanDescriptorSetLayout
 {
 	VkDescriptorSetLayout layout;
-	VulkanDescriptorSetType type;
 
 	union
 	{
@@ -55,6 +55,7 @@ typedef struct VulkanDescriptorSetPool
 	uint32_t free_index;
 	PulseDevice device;
 	VkDescriptorPool pool;
+	PulseThreadID thread_id;
 	uint32_t allocations_count;
 } VulkanDescriptorSetPool;
 
@@ -66,10 +67,25 @@ typedef struct VulkanDescriptorSetPoolManager
 	uint32_t pools_size;
 } VulkanDescriptorSetPoolManager;
 
-void VulkanInitDescriptorSetPool(VulkanDescriptorSetPool* pool, PulseDevice device);
+typedef struct VulkanDescriptorSetLayoutManager
+{
+	PulseDevice device;
+	VulkanDescriptorSetLayout* layouts;
+	uint32_t layouts_capacity;
+	uint32_t layouts_size;
+} VulkanDescriptorSetLayoutManager;
+
+void VulkanInitDescriptorSetLayoutManager(VulkanDescriptorSetLayoutManager* manager, PulseDevice device);
+VulkanDescriptorSetLayout* VulkanGetDescriptorSetLayout(VulkanDescriptorSetLayoutManager* manager,
+														uint32_t read_storage_buffers_count,
+														uint32_t read_storage_images_count,
+														uint32_t write_storage_buffers_count,
+														uint32_t write_storage_images_count,
+														uint32_t uniform_buffers_count);
+void VulkanDestroyDescriptorSetLayoutManager(VulkanDescriptorSetLayoutManager* manager);
+
 VulkanDescriptorSet* VulkanRequestDescriptorSetFromPool(VulkanDescriptorSetPool* pool, const VulkanDescriptorSetLayout* layout);
 void VulkanReturnDescriptorSetToPool(VulkanDescriptorSetPool* pool, const VulkanDescriptorSet* set);
-void VulkanDestroyDescriptorSetPool(VulkanDescriptorSetPool* pool);
 
 void VulkanInitDescriptorSetPoolManager(VulkanDescriptorSetPoolManager* manager, PulseDevice device);
 VulkanDescriptorSetPool* VulkanGetAvailableDescriptorSetPool(VulkanDescriptorSetPoolManager* manager);

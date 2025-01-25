@@ -15,15 +15,6 @@ typedef enum VulkanQueueType
 	VULKAN_QUEUE_END_ENUM // For internal use only
 } VulkanQueueType;
 
-typedef enum VulkanDescriptorSetType
-{
-	VULKAN_DESCRIPTOR_SET_READ_ONLY = 0,
-	VULKAN_DESCRIPTOR_SET_READ_WRITE,
-	VULKAN_DESCRIPTOR_SET_UNIFORM,
-
-	VULKAN_DESCRIPTOR_SET_END_ENUM // For internal use only
-} VulkanDescriptorSetType;
-
 #endif // PULSE_VULKAN_ENUMS_H_
 
 #endif // PULSE_ENABLE_VULKAN_BACKEND

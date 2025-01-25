@@ -17,12 +17,16 @@
 #include <Pulse.h>
 
 #include "VulkanEnums.h"
+#include "VulkanDescriptor.h"
 #include "VulkanCommandPool.h"
 
 struct VulkanQueue;
 
 typedef struct VulkanDevice
 {
+	VulkanDescriptorSetPoolManager descriptor_set_pool_manager;
+	VulkanDescriptorSetLayoutManager descriptor_set_layout_manager;
+
 	VulkanCommandPool* cmd_pools;
 	uint32_t cmd_pools_size;
 

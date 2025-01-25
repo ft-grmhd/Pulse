@@ -11,6 +11,17 @@
 #include "PulseDefs.h"
 #include "PulseEnums.h"
 
+#define PULSE_MAX_READ_TEXTURES_BOUND    8
+#define PULSE_MAX_READ_BUFFERS_BOUND     8
+#define PULSE_MAX_WRITE_TEXTURES_BOUND   8
+#define PULSE_MAX_WRITE_BUFFERS_BOUND    8
+#define PULSE_MAX_UNIFORM_BUFFERS_BOUND  8
+
+typedef enum PulseInternalBufferUsageBits
+{
+	PULSE_INTERNAL_BUFFER_USAGE_UNIFORM_ACCESS = PULSE_BIT(31)
+} PulseInternalBufferUsageBits;
+
 typedef uint64_t PulseThreadID;
 
 typedef struct PulseBackendHandler
@@ -40,11 +51,9 @@ typedef struct PulseBufferHandler
 typedef struct PulseCommandListHandler
 {
 	PulseDevice device;
+	PulseComputePass pass;
 	void* driver_data;
 	PulseThreadID thread_id;
-	PulseComputePipeline* compute_pipelines_bound;
-	uint32_t compute_pipelines_bound_capacity;
-	uint32_t compute_pipelines_bound_size;
 	PulseCommandListState state;
 	PulseCommandListUsage usage;
 	bool is_available;
@@ -52,8 +61,12 @@ typedef struct PulseCommandListHandler
 
 typedef struct PulseComputePipelineHandler
 {
-	PulseCommandList cmd;
 	void* driver_data;
+	uint32_t num_readonly_storage_images;
+	uint32_t num_readonly_storage_buffers;
+	uint32_t num_readwrite_storage_images;
+	uint32_t num_readwrite_storage_buffers;
+	uint32_t num_uniform_buffers;
 } PulseComputePipelineHandler;
 
 typedef struct PulseDeviceHandler
@@ -61,7 +74,7 @@ typedef struct PulseDeviceHandler
 	// PFNs
 	PulseDestroyDevicePFN PFN_DestroyDevice;
 	PulseCreateComputePipelinePFN PFN_CreateComputePipeline;
-	PulseDispatchComputePipelinePFN PFN_DispatchComputePipeline;
+	PulseDispatchComputationsPFN PFN_DispatchComputations;
 	PulseDestroyComputePipelinePFN PFN_DestroyComputePipeline;
 	PulseCreateFencePFN PFN_CreateFence;
 	PulseDestroyFencePFN PFN_DestroyFence;
@@ -81,6 +94,12 @@ typedef struct PulseDeviceHandler
 	PulseCopyImageToBufferPFN PFN_CopyImageToBuffer;
 	PulseBlitImagePFN PFN_BlitImage;
 	PulseDestroyImagePFN PFN_DestroyImage;
+	PulseBeginComputePassPFN PFN_BeginComputePass;
+	PulseBindStorageBuffersPFN PFN_BindStorageBuffers;
+	PulseBindUniformDataPFN PFN_BindUniformData;
+	PulseBindStorageImagesPFN PFN_BindStorageImages;
+	PulseBindComputePipelinePFN PFN_BindComputePipeline;
+	PulseEndComputePassPFN PFN_EndComputePass;
 
 	// Attributes
 	void* driver_data;
@@ -113,6 +132,26 @@ typedef struct PulseImageHandler
 	uint32_t layer_count_or_depth;
 } PulseImageHandler;
 
+typedef struct PulseComputePassHandler
+{
+	PulseBuffer readonly_storage_buffers[PULSE_MAX_READ_BUFFERS_BOUND];
+	PulseBuffer readwrite_storage_buffers[PULSE_MAX_WRITE_BUFFERS_BOUND];
+
+	PulseImage readonly_images[PULSE_MAX_READ_TEXTURES_BOUND];
+	PulseImage readwrite_images[PULSE_MAX_WRITE_TEXTURES_BOUND];
+
+	PulseCommandList cmd;
+	PulseComputePipeline current_pipeline;
+
+	void* driver_data;
+
+	PulseComputePipeline* compute_pipelines_bound;
+	uint32_t compute_pipelines_bound_capacity;
+	uint32_t compute_pipelines_bound_size;
+
+	bool is_recording;
+} PulseComputePassHandler;
+
 PulseThreadID PulseGetThreadID();
 
 void PulseSetInternalError(PulseErrorType error);
@@ -126,12 +165,6 @@ void PulseLogBackend(PulseBackend backend, PulseDebugMessageSeverity type, const
 #define PulseLogErrorFmt(backend, msg, ...) PulseLogBackend(backend, PULSE_DEBUG_MESSAGE_SEVERITY_ERROR, msg, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
 #define PulseLogWarningFmt(backend, msg, ...) PulseLogBackend(backend, PULSE_DEBUG_MESSAGE_SEVERITY_WARNING, msg, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
 #define PulseLogInfoFmt(backend, msg, ...) PulseLogBackend(backend, PULSE_DEBUG_MESSAGE_SEVERITY_INFO, msg, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
-
-#define PULSE_MAX_STORAGE_TEXTURES_BOUND 8
-#define PULSE_MAX_STORAGE_BUFFERS_BOUND  8
-#define PULSE_MAX_UNIFORM_BUFFERS_BOUND  4
-#define PULSE_MAX_WRITE_TEXTURES_BOUND   8
-#define PULSE_MAX_WRITE_BUFFERS_BOUND    8
 
 #ifdef PULSE_ENABLE_VULKAN_BACKEND
 	extern PulseBackendHandler VulkanDriver;

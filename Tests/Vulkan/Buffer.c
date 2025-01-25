@@ -37,12 +37,6 @@ void TestBufferCreation()
 	PulseDestroyBuffer(device, buffer);
 
 	buffer_create_info.size = 1024;
-	buffer_create_info.usage = PULSE_BUFFER_USAGE_UNIFORM_ACCESS;
-	buffer = PulseCreateBuffer(device, &buffer_create_info);
-	TEST_ASSERT_NOT_EQUAL_MESSAGE(buffer, PULSE_NULL_HANDLE, PulseVerbaliseErrorType(PulseGetLastErrorType()));
-	PulseDestroyBuffer(device, buffer);
-
-	buffer_create_info.size = 1024;
 	buffer_create_info.usage = PULSE_BUFFER_USAGE_STORAGE_READ | PULSE_BUFFER_USAGE_STORAGE_WRITE;
 	buffer = PulseCreateBuffer(device, &buffer_create_info);
 	TEST_ASSERT_NOT_EQUAL_MESSAGE(buffer, PULSE_NULL_HANDLE, PulseVerbaliseErrorType(PulseGetLastErrorType()));

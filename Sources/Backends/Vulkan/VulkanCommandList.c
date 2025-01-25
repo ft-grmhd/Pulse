@@ -26,14 +26,29 @@ static void VulkanInitCommandList(VulkanCommandPool* pool, PulseCommandList cmd)
 	info.commandBufferCount = 1;
 	CHECK_VK(pool->device->backend, vulkan_device->vkAllocateCommandBuffers(vulkan_device->device, &info, &vulkan_cmd->cmd), PULSE_ERROR_INITIALIZATION_FAILED);
 
-	if(pool->available_command_lists_size == pool->available_command_lists_capacity)
-	{
-		pool->available_command_lists_capacity += 5;
-		pool->available_command_lists = (PulseCommandList*)realloc(pool->available_command_lists, pool->available_command_lists_capacity * sizeof(PulseCommandList));
-		PULSE_CHECK_ALLOCATION(pool->available_command_lists);
-	}
+	PULSE_EXPAND_ARRAY_IF_NEEDED(pool->available_command_lists, PulseCommandList, pool->available_command_lists_size, pool->available_command_lists_capacity, 5);
 	pool->available_command_lists[pool->available_command_lists_size] = cmd;
 	pool->available_command_lists_size++;
+}
+
+PulseComputePass VulkanCreateComputePass(PulseDevice device, PulseCommandList cmd)
+{
+	PulseComputePass pass = (PulseComputePass)calloc(1, sizeof(PulseComputePassHandler));
+	PULSE_CHECK_ALLOCATION_RETVAL(pass, PULSE_NULL_HANDLE);
+
+	VulkanComputePass* vulkan_pass = (VulkanComputePass*)calloc(1, sizeof(VulkanComputePass));
+	PULSE_CHECK_ALLOCATION_RETVAL(vulkan_pass, PULSE_NULL_HANDLE);
+
+	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(device, VulkanDevice*);
+
+//	vulkan_pass->read_only_descriptor_set = VulkanRequestDescriptorSetFromPool(
+//			VulkanGetAvailableDescriptorSetPool(&vulkan_device->descriptor_set_pool_manager),
+//			VulkanGetDescriptorSetLayout(&vulkan_device->descriptor_set_layout_manager, ));
+
+	pass->cmd = cmd;
+	pass->driver_data = vulkan_pass;
+
+	return pass;
 }
 
 PulseCommandList VulkanRequestCommandList(PulseDevice device, PulseCommandListUsage usage)
@@ -77,7 +92,7 @@ PulseCommandList VulkanRequestCommandList(PulseDevice device, PulseCommandListUs
 		VulkanInitCommandList(pool, cmd);
 	}
 
-	cmd->compute_pipelines_bound_size = 0;
+	cmd->pass = VulkanCreateComputePass(device, cmd);
 	cmd->state = PULSE_COMMAND_LIST_STATE_RECORDING;
 	cmd->is_available = false;
 
@@ -168,4 +183,13 @@ void VulkanReleaseCommandList(PulseDevice device, PulseCommandList cmd)
 			break;
 		}
 	}
+}
+
+PulseComputePass VulkanBeginComputePass(PulseCommandList cmd)
+{
+	return cmd->pass;
+}
+
+void VulkanEndComputePass(PulseComputePass pass)
+{
 }

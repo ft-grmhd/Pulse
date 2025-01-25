@@ -37,7 +37,7 @@ PulseBuffer VulkanCreateBuffer(PulseDevice device, const PulseBufferCreateInfo* 
 		vulkan_buffer->usage |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 		allocation_create_info.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
 	}
-	if(buffer->usage & PULSE_BUFFER_USAGE_UNIFORM_ACCESS)
+	if(buffer->usage & PULSE_INTERNAL_BUFFER_USAGE_UNIFORM_ACCESS)
 	{
 		vulkan_buffer->usage |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
 		allocation_create_info.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;

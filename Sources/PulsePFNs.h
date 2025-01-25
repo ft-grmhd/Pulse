@@ -15,7 +15,7 @@ typedef PulseDevice (*PulseCreateDevicePFN)(PulseBackend, PulseDevice*, uint32_t
 
 typedef void (*PulseDestroyDevicePFN)(PulseDevice);
 typedef PulseComputePipeline (*PulseCreateComputePipelinePFN)(PulseDevice, const PulseComputePipelineCreateInfo*);
-typedef void (*PulseDispatchComputePipelinePFN)(PulseComputePipeline, PulseCommandList, uint32_t, uint32_t, uint32_t);
+typedef void (*PulseDispatchComputationsPFN)(PulseComputePass, uint32_t, uint32_t, uint32_t);
 typedef void (*PulseDestroyComputePipelinePFN)(PulseDevice, PulseComputePipeline);
 typedef PulseFence (*PulseCreateFencePFN)(PulseDevice);
 typedef void (*PulseDestroyFencePFN)(PulseDevice, PulseFence);
@@ -35,5 +35,11 @@ typedef bool (*PulseCopyBufferToBufferPFN)(PulseCommandList, const PulseBufferRe
 typedef bool (*PulseCopyBufferToImageFN)(PulseCommandList, const PulseBufferRegion*, const PulseImageRegion*);
 typedef bool (*PulseCopyImageToBufferPFN)(PulseCommandList, const PulseImageRegion*, const PulseBufferRegion*);
 typedef bool (*PulseBlitImagePFN)(PulseCommandList, const PulseImageRegion*, const PulseImageRegion*);
+typedef PulseComputePass (*PulseBeginComputePassPFN)(PulseCommandList);
+typedef void (*PulseBindStorageBuffersPFN)(PulseComputePass, uint32_t, PulseBuffer* const*, uint32_t);
+typedef void (*PulseBindUniformDataPFN)(PulseComputePass, uint32_t, const void*, uint32_t);
+typedef void (*PulseBindStorageImagesPFN)(PulseComputePass, uint32_t, PulseImage* const*, uint32_t);
+typedef void (*PulseBindComputePipelinePFN)(PulseComputePass, PulseComputePipeline);
+typedef void (*PulseEndComputePassPFN)(PulseComputePass);
 
 #endif // PULSE_PFNS_H_

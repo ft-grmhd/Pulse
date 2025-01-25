@@ -124,6 +124,46 @@ PULSE_API bool PulseIsImageFormatValid(PulseDevice device, PulseImageFormat form
 
 PULSE_API bool PulseCopyImageToBuffer(PulseCommandList cmd, const PulseImageRegion* src, const PulseBufferRegion* dst)
 {
+	PULSE_CHECK_PTR_RETVAL(src, false);
+	PULSE_CHECK_HANDLE_RETVAL(src->image, false);
+	PULSE_CHECK_PTR_RETVAL(dst, false);
+	PULSE_CHECK_HANDLE_RETVAL(dst->buffer, false);
+	
+	PulseBackend backend = src->image->device->backend;
+
+	if(src->image->device != dst->buffer->device)
+	{
+		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(backend))
+			PulseLogErrorFmt(backend, "source image has been created on a different device (%p) than the destination buffer (%p)", src->image->device, dst->buffer->device);
+		PulseSetInternalError(PULSE_ERROR_INVALID_DEVICE);
+		return false;
+	}
+
+	if(dst->size + dst->offset > dst->buffer->size)
+	{
+		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(backend))
+			PulseLogErrorFmt(backend, "destination buffer region (%lld) is bigger than the buffer size (%lld)", dst->size + dst->offset, dst->buffer->size);
+		PulseSetInternalError(PULSE_ERROR_INVALID_REGION);
+		return false;
+	}
+
+	if(src->width > src->image->width)
+	{
+		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(backend))
+			PulseLogErrorFmt(backend, "source image region width (%lld) is bigger than image width (%lld)", src->width, src->image->width);
+		PulseSetInternalError(PULSE_ERROR_INVALID_REGION);
+		return false;
+	}
+
+	if(src->height > src->image->height)
+	{
+		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(backend))
+			PulseLogErrorFmt(backend, "source image region height (%lld) is bigger than image height (%lld)", src->height, src->image->height);
+		PulseSetInternalError(PULSE_ERROR_INVALID_REGION);
+		return false;
+	}
+
+	return src->image->device->PFN_CopyImageToBuffer(cmd, src, dst);
 }
 
 PULSE_API bool PulseBlitImage(PulseCommandList cmd, const PulseImageRegion* src, const PulseImageRegion* dst)

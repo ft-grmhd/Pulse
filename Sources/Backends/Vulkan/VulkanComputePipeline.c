@@ -60,16 +60,6 @@ PulseComputePipeline VulkanCreateComputePipeline(PulseDevice device, const Pulse
 	return pipeline;
 }
 
-void VulkanDispatchComputePipeline(PulseComputePipeline pipeline, PulseCommandList cmd, uint32_t groupcount_x, uint32_t groupcount_y, uint32_t groupcount_z)
-{
-	VulkanComputePipeline* vulkan_pipeline = VULKAN_RETRIEVE_DRIVER_DATA_AS(pipeline, VulkanComputePipeline*);
-	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(cmd->device, VulkanDevice*);
-	VulkanCommandList* vulkan_cmd = VULKAN_RETRIEVE_DRIVER_DATA_AS(cmd, VulkanCommandList*);
-
-	vulkan_device->vkCmdBindPipeline(vulkan_cmd->cmd, VK_PIPELINE_BIND_POINT_COMPUTE, vulkan_pipeline->pipeline);
-	vulkan_device->vkCmdDispatch(vulkan_cmd->cmd, groupcount_x, groupcount_y, groupcount_z);
-}
-
 void VulkanDestroyComputePipeline(PulseDevice device, PulseComputePipeline pipeline)
 {
 	if(pipeline == PULSE_NULL_HANDLE)
@@ -90,4 +80,33 @@ void VulkanDestroyComputePipeline(PulseDevice device, PulseComputePipeline pipel
 
 	if(PULSE_IS_BACKEND_HIGH_LEVEL_DEBUG(device->backend))
 		PulseLogInfoFmt(device->backend, "(Vulkan) destroyed compute pipeline %p", pipeline);
+}
+
+void VulkanBindStorageBuffers(PulseComputePass pass, uint32_t starting_slot, PulseBuffer* const* buffers, uint32_t num_buffers)
+{
+}
+
+void VulkanBindUniformData(PulseComputePass pass, uint32_t slot, const void* data, uint32_t data_size)
+{
+}
+
+void VulkanBindStorageImages(PulseComputePass pass, uint32_t starting_slot, PulseImage* const* images, uint32_t num_images)
+{
+}
+
+void VulkanBindComputePipeline(PulseComputePass pass, PulseComputePipeline pipeline)
+{
+	VulkanComputePipeline* vulkan_pipeline = VULKAN_RETRIEVE_DRIVER_DATA_AS(pipeline, VulkanComputePipeline*);
+	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(pass->cmd->device, VulkanDevice*);
+	VulkanCommandList* vulkan_cmd = VULKAN_RETRIEVE_DRIVER_DATA_AS(pass->cmd, VulkanCommandList*);
+
+	vulkan_device->vkCmdBindPipeline(vulkan_cmd->cmd, VK_PIPELINE_BIND_POINT_COMPUTE, vulkan_pipeline->pipeline);
+}
+
+void VulkanDispatchComputations(PulseComputePass pass, uint32_t groupcount_x, uint32_t groupcount_y, uint32_t groupcount_z)
+{
+	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(pass->cmd->device, VulkanDevice*);
+	VulkanCommandList* vulkan_cmd = VULKAN_RETRIEVE_DRIVER_DATA_AS(pass->cmd, VulkanCommandList*);
+
+	vulkan_device->vkCmdDispatch(vulkan_cmd->cmd, groupcount_x, groupcount_y, groupcount_z);
 }

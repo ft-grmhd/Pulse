@@ -5,8 +5,9 @@
 #include "Pulse.h"
 #include "Vulkan.h"
 #include "VulkanImage.h"
+#include "VulkanBuffer.h"
 #include "VulkanDevice.h"
-#include <vulkan/vulkan_core.h>
+#include "VulkanCommandList.h"
 
 static VkFormat PulseImageFormatToVkFormat[] = {
 	VK_FORMAT_UNDEFINED,                   // INVALID
@@ -61,12 +62,6 @@ static VkFormat PulseImageFormatToVkFormat[] = {
 	VK_FORMAT_R32_SINT,                    // R32_INT
 	VK_FORMAT_R32G32_SINT,                 // R32G32_INT
 	VK_FORMAT_R32G32B32A32_SINT,           // R32G32B32A32_INT
-	VK_FORMAT_R8G8B8A8_SRGB,               // R8G8B8A8_UNORM_SRGB
-	VK_FORMAT_B8G8R8A8_SRGB,               // B8G8R8A8_UNORM_SRGB
-	VK_FORMAT_BC1_RGBA_SRGB_BLOCK,         // BC1_UNORM_SRGB
-	VK_FORMAT_BC2_SRGB_BLOCK,              // BC3_UNORM_SRGB
-	VK_FORMAT_BC3_SRGB_BLOCK,              // BC3_UNORM_SRGB
-	VK_FORMAT_BC7_SRGB_BLOCK,              // BC7_UNORM_SRGB
 };
 PULSE_STATIC_ASSERT(PulseImageFormatToVkFormat, (sizeof(PulseImageFormatToVkFormat) / sizeof(VkFormat)) == PULSE_IMAGE_FORMAT_MAX_ENUM);
 
@@ -189,6 +184,25 @@ bool VulkanIsImageFormatValid(PulseDevice device, PulseImageFormat format, Pulse
 
 bool VulkanCopyImageToBuffer(PulseCommandList cmd, const PulseImageRegion* src, const PulseBufferRegion* dst)
 {
+	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(src->image->device, VulkanDevice*);
+	VulkanImage* vulkan_image = VULKAN_RETRIEVE_DRIVER_DATA_AS(src->image, VulkanImage*);
+	VulkanBuffer* vulkan_buffer = VULKAN_RETRIEVE_DRIVER_DATA_AS(dst->buffer, VulkanBuffer*);
+	VulkanCommandList* vulkan_cmd = VULKAN_RETRIEVE_DRIVER_DATA_AS(cmd, VulkanCommandList*);
+
+	VkOffset3D offset = { src->x, src->y, src->z };
+	VkExtent3D extent = { src->width, src->height, src->depth };
+	VkBufferImageCopy region = {};
+	region.bufferOffset = dst->offset;
+	region.bufferRowLength = 0;
+	region.bufferImageHeight = 0;
+	region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	region.imageSubresource.mipLevel = 0;
+	region.imageSubresource.baseArrayLayer = 0;
+	region.imageSubresource.layerCount = 1;
+	region.imageOffset = offset;
+	region.imageExtent = extent;
+	vulkan_device->vkCmdCopyImageToBuffer(vulkan_cmd->cmd, vulkan_image->image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, vulkan_buffer->buffer, 1, &region);
+	return true;
 }
 
 bool VulkanBlitImage(PulseCommandList cmd, const PulseImageRegion* src, const PulseImageRegion* dst)
