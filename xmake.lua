@@ -54,6 +54,8 @@ set_dependir("build/.deps")
 
 set_optimize("fastest")
 
+includes("Xmake/**.lua")
+
 option("unitybuild", { description = "Build the library using unity build", default = false })
 
 for name, module in pairs(backends) do
@@ -102,6 +104,5 @@ target("pulse_gpu")
 	end)
 target_end()
 
-includes("Xmake/**.lua")
 includes("Examples/*.lua")
 includes("Tests/Vulkan/*.lua")

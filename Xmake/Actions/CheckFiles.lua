@@ -47,7 +47,7 @@ on_run(function()
 			local files = table.join(
 				os.files("Sources/**.h"),
 				os.files("Sources/**.inl"),
-				os.files("Sources/**.c")
+				os.files("Sources/**.c"),
 				os.files("Sources/**.cpp")
 			)
 
