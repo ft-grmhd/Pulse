@@ -1,4 +1,4 @@
-// Copyright (C) 2024 kanel
+// Copyright (C) 2025 kanel
 // This file is part of "Pulse"
 // For conditions of distribution and use, see copyright notice in LICENSE
 
@@ -90,7 +90,7 @@ VulkanDescriptorSetLayout* VulkanGetDescriptorSetLayout(VulkanDescriptorSetLayou
 	{
 		bindings[i].binding = i;
 		bindings[i].descriptorCount = 1;
-		bindings[i].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+		bindings[i].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		bindings[i].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
 		bindings[i].pImmutableSamplers = PULSE_NULLPTR;
 	}

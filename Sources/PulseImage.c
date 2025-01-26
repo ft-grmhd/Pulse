@@ -1,6 +1,6 @@
-// Copyright (C) 2024 kanel
+// Copyright (C) 2025 kanel
 // This file is part of "Pulse"
-// conditions of distribution and use, see copyright notice in LICENSE
+// For conditions of distribution and use, see copyright notice in LICENSE
 
 #include "Pulse.h"
 #include "PulseDefs.h"

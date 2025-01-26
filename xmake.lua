@@ -102,6 +102,6 @@ target("pulse_gpu")
 	end)
 target_end()
 
+includes("Xmake/**.lua")
 includes("Examples/*.lua")
-
 includes("Tests/Vulkan/*.lua")

@@ -8,6 +8,7 @@
 !/Sources/
 !/Tests/
 !/Examples/
+!/Xmake/
 !/.github/
 build/
 Build/
