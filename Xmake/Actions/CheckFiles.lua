@@ -48,6 +48,7 @@ on_run(function()
 				os.files("Sources/**.h"),
 				os.files("Sources/**.inl"),
 				os.files("Sources/**.c"),
+				os.files("Sources/**.m"),
 				os.files("Sources/**.cpp")
 			)
 
@@ -90,6 +91,7 @@ on_run(function()
 				os.files("Sources/**.h"),
 				os.files("Sources/**.inl"),
 				os.files("Sources/**.c"),
+				os.files("Sources/**.m"),
 				os.files("Sources/**.cpp")
 			)
 

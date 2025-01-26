@@ -6,6 +6,7 @@
 #include "VulkanCommandPool.h"
 #include "VulkanDevice.h"
 #include "VulkanQueue.h"
+#include "VulkanComputePass.h"
 
 bool VulkanInitCommandPool(PulseDevice device, VulkanCommandPool* pool, VulkanQueueType queue_type)
 {
@@ -35,6 +36,9 @@ bool VulkanInitCommandPool(PulseDevice device, VulkanCommandPool* pool, VulkanQu
 void VulkanUninitCommandPool(VulkanCommandPool* pool)
 {
 	PULSE_CHECK_PTR(pool);
+
+	for(uint32_t i = 0; i < pool->available_command_lists_size; i++)
+		VulkanDestroyComputePass(pool->device, pool->available_command_lists[i]->pass);
 
 	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(pool->device, VulkanDevice*);
 	vulkan_device->vkDestroyCommandPool(vulkan_device->device, pool->pool, PULSE_NULLPTR);

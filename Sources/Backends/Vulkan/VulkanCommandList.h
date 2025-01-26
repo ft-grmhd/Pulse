@@ -20,19 +20,9 @@ typedef struct VulkanCommandList
 	VkCommandBuffer cmd;
 } VulkanCommandList;
 
-typedef struct VulkanComputePass
-{
-	VulkanDescriptorSet* read_only_descriptor_set;
-	VulkanDescriptorSet* read_write_descriptor_set;
-	VulkanDescriptorSet* uniform_descriptor_set;
-	PulseBuffer uniform_buffer;
-} VulkanComputePass;
-
 PulseCommandList VulkanRequestCommandList(PulseDevice device, PulseCommandListUsage usage);
 bool VulkanSubmitCommandList(PulseDevice device, PulseCommandList cmd, PulseFence fence);
 void VulkanReleaseCommandList(PulseDevice device, PulseCommandList cmd);
-PulseComputePass VulkanBeginComputePass(PulseCommandList cmd);
-void VulkanEndComputePass(PulseComputePass pass);
 
 #endif // PULSE_VULKAN_COMMAND_LIST_H_
 
