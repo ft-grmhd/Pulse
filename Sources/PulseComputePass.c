@@ -6,7 +6,24 @@
 #include "PulseDefs.h"
 #include "PulseInternal.h"
 
-PULSE_API void PulseBindStorageBuffers(PulseComputePass pass, uint32_t starting_slot, PulseBuffer* const* buffers, uint32_t num_buffers)
+PULSE_API PulseComputePass PulseBeginComputePass(PulseCommandList cmd)
+{
+	PULSE_CHECK_HANDLE_RETVAL(cmd, PULSE_NULL_HANDLE);
+	PULSE_CHECK_HANDLE_RETVAL(cmd->device, PULSE_NULL_HANDLE);
+
+	PULSE_CHECK_COMMAND_LIST_STATE_RETVAL(cmd, PULSE_NULL_HANDLE);
+	PulseComputePass pass = cmd->device->PFN_BeginComputePass(cmd);
+	if(pass->is_recording == true)
+	{
+		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(cmd->device->backend))
+			PulseLogWarning(cmd->device->backend, "a compute pass is already recording in this command buffer, please call PulseEndComputePass before beginning a new one");
+		return PULSE_NULL_HANDLE;
+	}
+	pass->is_recording = true;
+	return pass;
+}
+
+PULSE_API void PulseBindStorageBuffers(PulseComputePass pass, uint32_t starting_slot, const PulseBuffer* buffers, uint32_t num_buffers)
 {
 	PULSE_CHECK_HANDLE(pass);
 
@@ -24,7 +41,7 @@ PULSE_API void PulseBindUniformData(PulseComputePass pass, uint32_t slot, const 
 	pass->cmd->device->PFN_BindUniformData(pass, slot, data, data_size);
 }
 
-PULSE_API void PulseBindStorageImages(PulseComputePass pass, uint32_t starting_slot, PulseImage* const* images, uint32_t num_images)
+PULSE_API void PulseBindStorageImages(PulseComputePass pass, uint32_t starting_slot, const PulseImage* images, uint32_t num_images)
 {
 	PULSE_CHECK_HANDLE(pass);
 
@@ -55,24 +72,14 @@ PULSE_API void PulseDispatchComputations(PulseComputePass pass, uint32_t groupco
 
 	PULSE_CHECK_COMMAND_LIST_STATE(pass->cmd);
 
-	pass->cmd->device->PFN_DispatchComputations(pass, groupcount_x, groupcount_y, groupcount_z);
-}
-
-PULSE_API PulseComputePass PulseBeginComputePass(PulseCommandList cmd)
-{
-	PULSE_CHECK_HANDLE_RETVAL(cmd, PULSE_NULL_HANDLE);
-	PULSE_CHECK_HANDLE_RETVAL(cmd->device, PULSE_NULL_HANDLE);
-
-	PULSE_CHECK_COMMAND_LIST_STATE_RETVAL(cmd, PULSE_NULL_HANDLE);
-	PulseComputePass pass = cmd->device->PFN_BeginComputePass(cmd);
-	if(pass->is_recording == true)
+	if(pass->current_pipeline == PULSE_NULL_HANDLE)
 	{
-		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(cmd->device->backend))
-			PulseLogWarning(cmd->device->backend, "a compute pass is already recording in this command buffer, please call PulseEndComputePass before beginning a new one");
-		return PULSE_NULL_HANDLE;
+		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(pass->cmd->device->backend))
+			PulseLogWarning(pass->cmd->device->backend, "cannot dispatch computations, no pipeline bound");
+		PulseSetInternalError(PULSE_ERROR_INVALID_HANDLE);
 	}
-	pass->is_recording = true;
-	return pass;
+
+	pass->cmd->device->PFN_DispatchComputations(pass, groupcount_x, groupcount_y, groupcount_z);
 }
 
 PULSE_API void PulseEndComputePass(PulseComputePass pass)

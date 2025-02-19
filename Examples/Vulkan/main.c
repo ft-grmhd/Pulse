@@ -60,7 +60,7 @@ int main(void)
 	CHECK_PULSE_HANDLE_RETVAL(pass, 1);
 		PulseBindStorageBuffers(pass, 0, &buffer, 1);
 		PulseBindComputePipeline(pass, pipeline);
-		PulseDispatchComputations(pass, 8, 8, 8);
+		PulseDispatchComputations(pass, 32, 32, 1);
 	PulseEndComputePass(pass);
 
 	if(!PulseSubmitCommandList(device, cmd, fence))
@@ -70,8 +70,9 @@ int main(void)
 
 	PulseReleaseCommandList(device, cmd);
 	PulseDestroyFence(device, fence);
-	PulseDestroyBuffer(device, buffer);
 	PulseDestroyComputePipeline(device, pipeline);
+
+	PulseDestroyBuffer(device, buffer);
 
 	PulseDestroyDevice(device);
 	PulseUnloadBackend(backend);

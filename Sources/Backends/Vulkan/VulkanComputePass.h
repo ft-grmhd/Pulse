@@ -31,9 +31,9 @@ void VulkanDestroyComputePass(PulseDevice device, PulseComputePass pass);
 
 PulseComputePass VulkanBeginComputePass(PulseCommandList cmd);
 void VulkanEndComputePass(PulseComputePass pass);
-void VulkanBindStorageBuffers(PulseComputePass pass, uint32_t starting_slot, PulseBuffer* const* buffers, uint32_t num_buffers);
+void VulkanBindStorageBuffers(PulseComputePass pass, uint32_t starting_slot, const PulseBuffer* buffers, uint32_t num_buffers);
 void VulkanBindUniformData(PulseComputePass pass, uint32_t slot, const void* data, uint32_t data_size);
-void VulkanBindStorageImages(PulseComputePass pass, uint32_t starting_slot, PulseImage* const* images, uint32_t num_images);
+void VulkanBindStorageImages(PulseComputePass pass, uint32_t starting_slot, const PulseImage* images, uint32_t num_images);
 void VulkanBindComputePipeline(PulseComputePass pass, PulseComputePipeline pipeline);
 void VulkanDispatchComputations(PulseComputePass pass, uint32_t groupcount_x, uint32_t groupcount_y, uint32_t groupcount_z);
 

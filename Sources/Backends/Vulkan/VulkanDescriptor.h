@@ -87,6 +87,8 @@ void VulkanDestroyDescriptorSetLayoutManager(VulkanDescriptorSetLayoutManager* m
 VulkanDescriptorSet* VulkanRequestDescriptorSetFromPool(VulkanDescriptorSetPool* pool, const VulkanDescriptorSetLayout* layout);
 void VulkanReturnDescriptorSetToPool(VulkanDescriptorSetPool* pool, const VulkanDescriptorSet* set);
 
+void VulkanBindDescriptorSets(PulseComputePass pass);
+
 void VulkanInitDescriptorSetPoolManager(VulkanDescriptorSetPoolManager* manager, PulseDevice device);
 VulkanDescriptorSetPool* VulkanGetAvailableDescriptorSetPool(VulkanDescriptorSetPoolManager* manager);
 void VulkanDestroyDescriptorSetPoolManager(VulkanDescriptorSetPoolManager* manager);

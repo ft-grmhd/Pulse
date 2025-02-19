@@ -9,9 +9,7 @@
 #include "Vulkan.h"
 #include "VulkanDevice.h"
 #include "VulkanDescriptor.h"
-
-#undef NDEBUG
-#include <assert.h>
+#include "VulkanComputePass.h"
 
 void VulkanInitDescriptorSetLayoutManager(VulkanDescriptorSetLayoutManager* manager, PulseDevice device)
 {
@@ -232,6 +230,37 @@ void VulkanReturnDescriptorSetToPool(VulkanDescriptorSetPool* pool, const Vulkan
 			pool->free_index++;
 			return;
 		}
+	}
+}
+
+void VulkanBindDescriptorSets(PulseComputePass pass)
+{
+	VulkanComputePass* vulkan_pass = VULKAN_RETRIEVE_DRIVER_DATA_AS(pass, VulkanComputePass*);
+	if(!vulkan_pass->should_recreate_read_only_descriptor_sets && !vulkan_pass->should_recreate_write_descriptor_sets && !vulkan_pass->should_recreate_uniform_descriptor_sets)
+		return;
+
+	VkWriteDescriptorSet writes[
+		PULSE_MAX_READ_TEXTURES_BOUND +
+		PULSE_MAX_READ_BUFFERS_BOUND +
+		PULSE_MAX_WRITE_TEXTURES_BOUND +
+		PULSE_MAX_WRITE_BUFFERS_BOUND +
+		PULSE_MAX_UNIFORM_BUFFERS_BOUND];
+	VkDescriptorBufferInfo buffer_infos[PULSE_MAX_UNIFORM_BUFFERS_BOUND + PULSE_MAX_WRITE_BUFFERS_BOUND + PULSE_MAX_READ_BUFFERS_BOUND];
+	VkDescriptorImageInfo image_infos[PULSE_MAX_READ_TEXTURES_BOUND + PULSE_MAX_WRITE_TEXTURES_BOUND];
+	uint32_t write_count = 0;
+	uint32_t buffer_info_count = 0;
+	uint32_t image_info_count = 0;
+
+	if(vulkan_pass->should_recreate_read_only_descriptor_sets)
+	{
+	}
+
+	if(vulkan_pass->should_recreate_write_descriptor_sets)
+	{
+	}
+
+	if(vulkan_pass->should_recreate_uniform_descriptor_sets)
+	{
 	}
 }
 

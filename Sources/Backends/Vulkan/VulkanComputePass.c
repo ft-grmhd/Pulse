@@ -34,16 +34,46 @@ void VulkanDestroyComputePass(PulseDevice device, PulseComputePass pass)
 	free(pass);
 }
 
-void VulkanBindStorageBuffers(PulseComputePass pass, uint32_t starting_slot, PulseBuffer* const* buffers, uint32_t num_buffers)
+void VulkanBindStorageBuffers(PulseComputePass pass, uint32_t starting_slot, const PulseBuffer* buffers, uint32_t num_buffers)
 {
+	PulseBufferUsageFlags usage = buffers[0]->usage;
+	PulseBuffer* array = ((usage & PULSE_BUFFER_USAGE_STORAGE_WRITE) == 1) ? pass->readwrite_storage_buffers : pass->readonly_storage_buffers;
+	VulkanComputePass* vulkan_pass = VULKAN_RETRIEVE_DRIVER_DATA_AS(pass, VulkanComputePass*);
+
+	for(uint32_t i = 0; i < num_buffers; i++)
+	{
+		if(array[starting_slot + i] == buffers[i])
+			continue;
+		array[starting_slot + i] = buffers[i];
+		
+		if((usage & PULSE_BUFFER_USAGE_STORAGE_WRITE) == 1)
+			vulkan_pass->should_recreate_write_descriptor_sets = true;
+		else
+			vulkan_pass->should_recreate_read_only_descriptor_sets = true;
+	}
 }
 
 void VulkanBindUniformData(PulseComputePass pass, uint32_t slot, const void* data, uint32_t data_size)
 {
 }
 
-void VulkanBindStorageImages(PulseComputePass pass, uint32_t starting_slot, PulseImage* const* images, uint32_t num_images)
+void VulkanBindStorageImages(PulseComputePass pass, uint32_t starting_slot, const PulseImage* images, uint32_t num_images)
 {
+	PulseImageUsageFlags usage = images[0]->usage;
+	PulseImage* array = ((usage & PULSE_IMAGE_USAGE_STORAGE_WRITE) == 1) ? pass->readwrite_images : pass->readonly_images;
+	VulkanComputePass* vulkan_pass = VULKAN_RETRIEVE_DRIVER_DATA_AS(pass, VulkanComputePass*);
+
+	for(uint32_t i = 0; i < num_images; i++)
+	{
+		if(array[starting_slot + i] == images[i])
+			continue;
+		array[starting_slot + i] = images[i];
+		
+		if((usage & PULSE_IMAGE_USAGE_STORAGE_WRITE) == 1)
+			vulkan_pass->should_recreate_write_descriptor_sets = true;
+		else
+			vulkan_pass->should_recreate_read_only_descriptor_sets = true;
+	}
 }
 
 void VulkanBindComputePipeline(PulseComputePass pass, PulseComputePipeline pipeline)
@@ -51,14 +81,21 @@ void VulkanBindComputePipeline(PulseComputePass pass, PulseComputePipeline pipel
 	VulkanComputePipeline* vulkan_pipeline = VULKAN_RETRIEVE_DRIVER_DATA_AS(pipeline, VulkanComputePipeline*);
 	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(pass->cmd->device, VulkanDevice*);
 	VulkanCommandList* vulkan_cmd = VULKAN_RETRIEVE_DRIVER_DATA_AS(pass->cmd, VulkanCommandList*);
+	VulkanComputePass* vulkan_pass = VULKAN_RETRIEVE_DRIVER_DATA_AS(pass, VulkanComputePass*);
 
 	vulkan_device->vkCmdBindPipeline(vulkan_cmd->cmd, VK_PIPELINE_BIND_POINT_COMPUTE, vulkan_pipeline->pipeline);
+
+	vulkan_pass->should_recreate_read_only_descriptor_sets = true;
+	vulkan_pass->should_recreate_write_descriptor_sets = true;
+	vulkan_pass->should_recreate_uniform_descriptor_sets = true;
 }
 
 void VulkanDispatchComputations(PulseComputePass pass, uint32_t groupcount_x, uint32_t groupcount_y, uint32_t groupcount_z)
 {
 	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(pass->cmd->device, VulkanDevice*);
 	VulkanCommandList* vulkan_cmd = VULKAN_RETRIEVE_DRIVER_DATA_AS(pass->cmd, VulkanCommandList*);
+
+	VulkanBindDescriptorSets(pass);
 
 	vulkan_device->vkCmdDispatch(vulkan_cmd->cmd, groupcount_x, groupcount_y, groupcount_z);
 }

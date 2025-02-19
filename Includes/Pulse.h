@@ -1,4 +1,4 @@
-// Copyright (C) 2024 kanel
+// Copyright (C) 2025 kanel
 // This file is part of "Pulse"
 // For conditions of distribution and use, see copyright notice in LICENSE
 
@@ -278,11 +278,12 @@ PULSE_API PulseComputePipeline PulseCreateComputePipeline(PulseDevice device, co
 PULSE_API void PulseDestroyComputePipeline(PulseDevice device, PulseComputePipeline pipeline);
 
 PULSE_API PulseComputePass PulseBeginComputePass(PulseCommandList cmd);
-PULSE_API void PulseBindStorageBuffers(PulseComputePass pass, uint32_t starting_slot, PulseBuffer* const* buffers, uint32_t num_buffers);
+PULSE_API void PulseBindStorageBuffers(PulseComputePass pass, uint32_t starting_slot, const PulseBuffer* buffers, uint32_t num_buffers);
 PULSE_API void PulseBindUniformData(PulseComputePass pass, uint32_t slot, const void* data, uint32_t data_size);
-PULSE_API void PulseBindStorageImages(PulseComputePass pass, uint32_t starting_slot, PulseImage* const* images, uint32_t num_images);
+PULSE_API void PulseBindStorageImages(PulseComputePass pass, uint32_t starting_slot, const PulseImage* images, uint32_t num_images);
 PULSE_API void PulseBindComputePipeline(PulseComputePass pass, PulseComputePipeline pipeline);
 PULSE_API void PulseDispatchComputations(PulseComputePass pass, uint32_t groupcount_x, uint32_t groupcount_y, uint32_t groupcount_z);
+PULSE_API void PulseDispatchComputationsIndirect(PulseComputePass pass, PulseBuffer buffer, uint32_t offset);
 PULSE_API void PulseEndComputePass(PulseComputePass pass);
 
 PULSE_API PulseErrorType PulseGetLastErrorType(); // Call to this function resets the internal last error variable

@@ -45,6 +45,7 @@ on_run(function()
 		Name = "empty lines",
 		Check = function()
 			local files = table.join(
+				os.files("Includes/**.h"),
 				os.files("Sources/**.h"),
 				os.files("Sources/**.inl"),
 				os.files("Sources/**.c"),
@@ -88,6 +89,7 @@ on_run(function()
 		Name = "copyright",
 		Check = function()
 			local files = table.join(
+				os.files("Includes/**.h"),
 				os.files("Sources/**.h"),
 				os.files("Sources/**.inl"),
 				os.files("Sources/**.c"),
