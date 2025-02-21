@@ -275,8 +275,6 @@ void VulkanBindDescriptorSets(PulseComputePass pass)
 
 		for(uint32_t i = 0; i < pass->current_pipeline->num_readonly_storage_images; i++)
 		{
-			if(pass->readonly_images[i] == PULSE_NULL_HANDLE)
-				continue;
 			VkWriteDescriptorSet* write_descriptor_set = &writes[write_count];
 
 			write_descriptor_set->sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -303,8 +301,6 @@ void VulkanBindDescriptorSets(PulseComputePass pass)
 
 		for(uint32_t i = 0; i < pass->current_pipeline->num_readonly_storage_buffers; i++)
 		{
-			if(pass->readonly_storage_buffers[i] == PULSE_NULL_HANDLE)
-				continue;
 			VkWriteDescriptorSet* write_descriptor_set = &writes[write_count];
 
 			write_descriptor_set->sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -340,8 +336,6 @@ void VulkanBindDescriptorSets(PulseComputePass pass)
 
 		for(uint32_t i = 0; i < pass->current_pipeline->num_readwrite_storage_images; i++)
 		{
-			if(pass->readwrite_images[i] == PULSE_NULL_HANDLE)
-				continue;
 			VkWriteDescriptorSet* write_descriptor_set = &writes[write_count];
 
 			write_descriptor_set->sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -368,8 +362,6 @@ void VulkanBindDescriptorSets(PulseComputePass pass)
 
 		for(uint32_t i = 0; i < pass->current_pipeline->num_readwrite_storage_buffers; i++)
 		{
-			if(pass->readwrite_storage_buffers[i] == PULSE_NULL_HANDLE)
-				continue;
 			VkWriteDescriptorSet* write_descriptor_set = &writes[write_count];
 
 			write_descriptor_set->sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

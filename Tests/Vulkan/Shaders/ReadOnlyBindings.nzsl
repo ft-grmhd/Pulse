@@ -14,8 +14,8 @@ struct SSBO
 
 external
 {
-    [set(0), binding(0)] read_ssbo: storage[SSBO, readonly],
-    [set(0), binding(1)] read_texture: texture2D[f32, readonly, rgba8],
+    [set(0), binding(0)] read_texture: texture2D[f32, readonly, rgba8],
+    [set(0), binding(1)] read_ssbo: storage[SSBO, readonly],
 }
 
 [entry(compute)]

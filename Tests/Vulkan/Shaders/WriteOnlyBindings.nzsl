@@ -14,8 +14,8 @@ struct SSBO
 
 external
 {
-    [set(1), binding(0)] write_ssbo: storage[SSBO],
-    [set(1), binding(1)] write_texture: texture2D[f32, readonly, rgba8],
+    [set(1), binding(0)] write_texture: texture2D[f32, readonly, rgba8],
+    [set(1), binding(1)] write_ssbo: storage[SSBO],
 }
 
 [entry(compute)]

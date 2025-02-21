@@ -46,7 +46,7 @@ int main(void)
 	CHECK_PULSE_HANDLE_RETVAL(pipeline, 1);
 
 	PulseBufferCreateInfo buffer_create_info = { 0 };
-	buffer_create_info.size = 1024;
+	buffer_create_info.size = 256 * sizeof(uint32_t);
 	buffer_create_info.usage = PULSE_BUFFER_USAGE_STORAGE_READ | PULSE_BUFFER_USAGE_STORAGE_WRITE | PULSE_BUFFER_USAGE_TRANSFER_DOWNLOAD;
 
 	PulseBuffer buffer = PulseCreateBuffer(device, &buffer_create_info);
@@ -59,7 +59,7 @@ int main(void)
 
 	PulseComputePass pass = PulseBeginComputePass(cmd);
 	CHECK_PULSE_HANDLE_RETVAL(pass, 1);
-		PulseBindStorageBuffers(pass, 0, &buffer, 1);
+		PulseBindStorageBuffers(pass, &buffer, 1);
 		PulseBindComputePipeline(pass, pipeline);
 		PulseDispatchComputations(pass, 32, 32, 1);
 	PulseEndComputePass(pass);
@@ -71,7 +71,7 @@ int main(void)
 
 	void* ptr;
 	PulseMapBuffer(buffer, &ptr);
-	for(uint32_t i = 0; i < 1024; i++)
+	for(uint32_t i = 0; i < 256; i++)
 		printf("%d, ", ((int32_t*)ptr)[i]);
 	puts("");
 	PulseUnmapBuffer(buffer);
@@ -84,6 +84,6 @@ int main(void)
 
 	PulseDestroyDevice(device);
 	PulseUnloadBackend(backend);
-	puts("Successfully loaded Pulse using Vulkan !");
+	puts("Successfully executed Pulse example using Vulkan !");
 	return 0;
 }

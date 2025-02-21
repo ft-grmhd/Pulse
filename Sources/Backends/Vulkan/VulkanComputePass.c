@@ -34,7 +34,7 @@ void VulkanDestroyComputePass(PulseDevice device, PulseComputePass pass)
 	free(pass);
 }
 
-void VulkanBindStorageBuffers(PulseComputePass pass, uint32_t starting_slot, const PulseBuffer* buffers, uint32_t num_buffers)
+void VulkanBindStorageBuffers(PulseComputePass pass, const PulseBuffer* buffers, uint32_t num_buffers)
 {
 	PulseBufferUsageFlags usage = buffers[0]->usage;
 	bool is_readwrite = (usage & PULSE_BUFFER_USAGE_STORAGE_WRITE) != 0;
@@ -58,9 +58,9 @@ void VulkanBindStorageBuffers(PulseComputePass pass, uint32_t starting_slot, con
 			return;
 		}
 
-		if(array[starting_slot + i] == buffers[i])
+		if(array[i] == buffers[i])
 			continue;
-		array[starting_slot + i] = buffers[i];
+		array[i] = buffers[i];
 
 		if(is_readwrite)
 			vulkan_pass->should_recreate_write_descriptor_sets = true;
@@ -73,7 +73,7 @@ void VulkanBindUniformData(PulseComputePass pass, uint32_t slot, const void* dat
 {
 }
 
-void VulkanBindStorageImages(PulseComputePass pass, uint32_t starting_slot, const PulseImage* images, uint32_t num_images)
+void VulkanBindStorageImages(PulseComputePass pass, const PulseImage* images, uint32_t num_images)
 {
 	PulseImageUsageFlags usage = images[0]->usage;
 	bool is_readwrite = (usage & PULSE_IMAGE_USAGE_STORAGE_WRITE) != 0;
@@ -97,9 +97,9 @@ void VulkanBindStorageImages(PulseComputePass pass, uint32_t starting_slot, cons
 			return;
 		}
 
-		if(array[starting_slot + i] == images[i])
+		if(array[i] == images[i])
 			continue;
-		array[starting_slot + i] = images[i];
+		array[i] = images[i];
 		
 		if((usage & PULSE_IMAGE_USAGE_STORAGE_WRITE) != 0)
 			vulkan_pass->should_recreate_write_descriptor_sets = true;

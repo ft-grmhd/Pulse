@@ -298,7 +298,7 @@ void TestBufferComputeWrite()
 
 	PulseComputePass pass = PulseBeginComputePass(cmd);
 	TEST_ASSERT_NOT_EQUAL_MESSAGE(pass, PULSE_NULL_HANDLE, PulseVerbaliseErrorType(PulseGetLastErrorType()));
-		PulseBindStorageBuffers(pass, 0, &buffer, 1);
+		PulseBindStorageBuffers(pass, &buffer, 1);
 		PulseBindComputePipeline(pass, pipeline);
 		PulseDispatchComputations(pass, 32, 32, 1);
 	PulseEndComputePass(pass);
@@ -367,8 +367,8 @@ void TestBufferComputeCopy()
 
 	PulseComputePass pass = PulseBeginComputePass(cmd);
 	TEST_ASSERT_NOT_EQUAL_MESSAGE(pass, PULSE_NULL_HANDLE, PulseVerbaliseErrorType(PulseGetLastErrorType()));
-		PulseBindStorageBuffers(pass, 0, &read_buffer, 1);
-		PulseBindStorageBuffers(pass, 0, &write_buffer, 1);
+		PulseBindStorageBuffers(pass, &read_buffer, 1);
+		PulseBindStorageBuffers(pass, &write_buffer, 1);
 		PulseBindComputePipeline(pass, pipeline);
 		PulseDispatchComputations(pass, 32, 32, 1);
 	PulseEndComputePass(pass);

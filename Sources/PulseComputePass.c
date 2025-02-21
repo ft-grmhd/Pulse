@@ -23,13 +23,13 @@ PULSE_API PulseComputePass PulseBeginComputePass(PulseCommandList cmd)
 	return pass;
 }
 
-PULSE_API void PulseBindStorageBuffers(PulseComputePass pass, uint32_t starting_slot, const PulseBuffer* buffers, uint32_t num_buffers)
+PULSE_API void PulseBindStorageBuffers(PulseComputePass pass, const PulseBuffer* buffers, uint32_t num_buffers)
 {
 	PULSE_CHECK_HANDLE(pass);
 
 	PULSE_CHECK_COMMAND_LIST_STATE(pass->cmd);
 
-	pass->cmd->device->PFN_BindStorageBuffers(pass, starting_slot, buffers, num_buffers);
+	pass->cmd->device->PFN_BindStorageBuffers(pass, buffers, num_buffers);
 }
 
 PULSE_API void PulseBindUniformData(PulseComputePass pass, uint32_t slot, const void* data, uint32_t data_size)
@@ -41,13 +41,13 @@ PULSE_API void PulseBindUniformData(PulseComputePass pass, uint32_t slot, const 
 	pass->cmd->device->PFN_BindUniformData(pass, slot, data, data_size);
 }
 
-PULSE_API void PulseBindStorageImages(PulseComputePass pass, uint32_t starting_slot, const PulseImage* images, uint32_t num_images)
+PULSE_API void PulseBindStorageImages(PulseComputePass pass, const PulseImage* images, uint32_t num_images)
 {
 	PULSE_CHECK_HANDLE(pass);
 
 	PULSE_CHECK_COMMAND_LIST_STATE(pass->cmd);
 
-	pass->cmd->device->PFN_BindStorageImages(pass, starting_slot, images, num_images);
+	pass->cmd->device->PFN_BindStorageImages(pass, images, num_images);
 }
 
 PULSE_API void PulseBindComputePipeline(PulseComputePass pass, PulseComputePipeline pipeline)

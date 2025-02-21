@@ -76,8 +76,8 @@ void TestPipelineReadOnlyBindings()
 
 	PulseComputePass pass = PulseBeginComputePass(cmd);
 	TEST_ASSERT_NOT_EQUAL_MESSAGE(pass, PULSE_NULL_HANDLE, PulseVerbaliseErrorType(PulseGetLastErrorType()));
-		PulseBindStorageBuffers(pass, 0, &buffer, 1);
-		PulseBindStorageImages(pass, 1, &image, 1);
+		PulseBindStorageImages(pass, &image, 1);
+		PulseBindStorageBuffers(pass, &buffer, 1);
 		PulseBindComputePipeline(pass, pipeline);
 		PulseDispatchComputations(pass, 32, 32, 1);
 	PulseEndComputePass(pass);
@@ -132,8 +132,8 @@ void TestPipelineWriteOnlyBindings()
 
 	PulseComputePass pass = PulseBeginComputePass(cmd);
 	TEST_ASSERT_NOT_EQUAL_MESSAGE(pass, PULSE_NULL_HANDLE, PulseVerbaliseErrorType(PulseGetLastErrorType()));
-		PulseBindStorageBuffers(pass, 0, &buffer, 1);
-		PulseBindStorageImages(pass, 1, &image, 1);
+		PulseBindStorageImages(pass, &image, 1);
+		PulseBindStorageBuffers(pass, &buffer, 1);
 		PulseBindComputePipeline(pass, pipeline);
 		PulseDispatchComputations(pass, 32, 32, 1);
 	PulseEndComputePass(pass);
@@ -196,10 +196,10 @@ void TestPipelineReadWriteBindings()
 
 	PulseComputePass pass = PulseBeginComputePass(cmd);
 	TEST_ASSERT_NOT_EQUAL_MESSAGE(pass, PULSE_NULL_HANDLE, PulseVerbaliseErrorType(PulseGetLastErrorType()));
-		PulseBindStorageBuffers(pass, 0, &read_buffer, 1);
-		PulseBindStorageBuffers(pass, 0, &write_buffer, 1);
-		PulseBindStorageImages(pass, 1, &read_image, 1);
-		PulseBindStorageImages(pass, 1, &write_image, 1);
+		PulseBindStorageImages(pass, &read_image, 1);
+		PulseBindStorageImages(pass, &write_image, 1);
+		PulseBindStorageBuffers(pass, &read_buffer, 1);
+		PulseBindStorageBuffers(pass, &write_buffer, 1);
 		PulseBindComputePipeline(pass, pipeline);
 		PulseDispatchComputations(pass, 32, 32, 1);
 	PulseEndComputePass(pass);

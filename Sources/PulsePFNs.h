@@ -36,9 +36,9 @@ typedef bool (*PulseCopyBufferToImageFN)(PulseCommandList, const PulseBufferRegi
 typedef bool (*PulseCopyImageToBufferPFN)(PulseCommandList, const PulseImageRegion*, const PulseBufferRegion*);
 typedef bool (*PulseBlitImagePFN)(PulseCommandList, const PulseImageRegion*, const PulseImageRegion*);
 typedef PulseComputePass (*PulseBeginComputePassPFN)(PulseCommandList);
-typedef void (*PulseBindStorageBuffersPFN)(PulseComputePass, uint32_t, const PulseBuffer*, uint32_t);
+typedef void (*PulseBindStorageBuffersPFN)(PulseComputePass, const PulseBuffer*, uint32_t);
 typedef void (*PulseBindUniformDataPFN)(PulseComputePass, uint32_t, const void*, uint32_t);
-typedef void (*PulseBindStorageImagesPFN)(PulseComputePass, uint32_t, const PulseImage*, uint32_t);
+typedef void (*PulseBindStorageImagesPFN)(PulseComputePass, const PulseImage*, uint32_t);
 typedef void (*PulseBindComputePipelinePFN)(PulseComputePass, PulseComputePipeline);
 typedef void (*PulseEndComputePassPFN)(PulseComputePass);
 
