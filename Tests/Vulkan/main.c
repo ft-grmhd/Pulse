@@ -7,6 +7,7 @@ extern void TestBackend();
 extern void TestDevice();
 extern void TestBuffer();
 extern void TestImage();
+extern void TestPipeline();
 
 int main(void)
 {
@@ -15,5 +16,6 @@ int main(void)
 	TestDevice();
 	TestBuffer();
 	TestImage();
+	TestPipeline();
 	return UNITY_END();
 }

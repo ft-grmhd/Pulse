@@ -37,16 +37,32 @@ void VulkanDestroyComputePass(PulseDevice device, PulseComputePass pass)
 void VulkanBindStorageBuffers(PulseComputePass pass, uint32_t starting_slot, const PulseBuffer* buffers, uint32_t num_buffers)
 {
 	PulseBufferUsageFlags usage = buffers[0]->usage;
-	PulseBuffer* array = ((usage & PULSE_BUFFER_USAGE_STORAGE_WRITE) != 0) ? pass->readwrite_storage_buffers : pass->readonly_storage_buffers;
+	bool is_readwrite = (usage & PULSE_BUFFER_USAGE_STORAGE_WRITE) != 0;
+	PulseBuffer* array = is_readwrite ? pass->readwrite_storage_buffers : pass->readonly_storage_buffers;
 	VulkanComputePass* vulkan_pass = VULKAN_RETRIEVE_DRIVER_DATA_AS(pass, VulkanComputePass*);
 
 	for(uint32_t i = 0; i < num_buffers; i++)
 	{
+		if(is_readwrite && (buffers[i]->usage & PULSE_BUFFER_USAGE_STORAGE_WRITE) == 0)
+		{
+			if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(pass->cmd->device->backend))
+				PulseLogError(pass->cmd->device->backend, "cannot bind a read only buffer with read-write buffers");
+			PulseSetInternalError(PULSE_ERROR_INVALID_BUFFER_USAGE);
+			return;
+		}
+		else if(!is_readwrite && (buffers[i]->usage & PULSE_BUFFER_USAGE_STORAGE_WRITE) != 0)
+		{
+			if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(pass->cmd->device->backend))
+				PulseLogError(pass->cmd->device->backend, "cannot bind a read-write buffer with read only buffers");
+			PulseSetInternalError(PULSE_ERROR_INVALID_BUFFER_USAGE);
+			return;
+		}
+
 		if(array[starting_slot + i] == buffers[i])
 			continue;
 		array[starting_slot + i] = buffers[i];
-		
-		if((usage & PULSE_BUFFER_USAGE_STORAGE_WRITE) != 0)
+
+		if(is_readwrite)
 			vulkan_pass->should_recreate_write_descriptor_sets = true;
 		else
 			vulkan_pass->should_recreate_read_only_descriptor_sets = true;
@@ -60,11 +76,27 @@ void VulkanBindUniformData(PulseComputePass pass, uint32_t slot, const void* dat
 void VulkanBindStorageImages(PulseComputePass pass, uint32_t starting_slot, const PulseImage* images, uint32_t num_images)
 {
 	PulseImageUsageFlags usage = images[0]->usage;
-	PulseImage* array = ((usage & PULSE_IMAGE_USAGE_STORAGE_WRITE) != 0) ? pass->readwrite_images : pass->readonly_images;
+	bool is_readwrite = (usage & PULSE_IMAGE_USAGE_STORAGE_WRITE) != 0;
+	PulseImage* array = is_readwrite ? pass->readwrite_images : pass->readonly_images;
 	VulkanComputePass* vulkan_pass = VULKAN_RETRIEVE_DRIVER_DATA_AS(pass, VulkanComputePass*);
 
 	for(uint32_t i = 0; i < num_images; i++)
 	{
+		if(is_readwrite && (images[i]->usage & PULSE_IMAGE_USAGE_STORAGE_WRITE) == 0)
+		{
+			if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(pass->cmd->device->backend))
+				PulseLogError(pass->cmd->device->backend, "cannot bind a read only image with read-write images");
+			PulseSetInternalError(PULSE_ERROR_INVALID_IMAGE_USAGE);
+			return;
+		}
+		else if(!is_readwrite && (images[i]->usage & PULSE_IMAGE_USAGE_STORAGE_WRITE) != 0)
+		{
+			if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(pass->cmd->device->backend))
+				PulseLogError(pass->cmd->device->backend, "cannot bind a read-write image with read only images");
+			PulseSetInternalError(PULSE_ERROR_INVALID_IMAGE_USAGE);
+			return;
+		}
+
 		if(array[starting_slot + i] == images[i])
 			continue;
 		array[starting_slot + i] = images[i];

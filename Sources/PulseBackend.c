@@ -164,8 +164,10 @@ PULSE_API const char* PulseVerbaliseErrorType(PulseErrorType error)
 		case PULSE_ERROR_DEVICE_LOST:                                return "device has been lost";
 		case PULSE_ERROR_INVALID_INTERNAL_POINTER:                   return "invalid internal pointer";
 		case PULSE_ERROR_MAP_FAILED:                                 return "memory mapping failed";
-		case PULSE_ERROR_INVALID_DEVICE:                             return "device is invalid";
-		case PULSE_ERROR_INVALID_REGION:                             return "region is invalid";
+		case PULSE_ERROR_INVALID_DEVICE:                             return "invalid device";
+		case PULSE_ERROR_INVALID_REGION:                             return "invalid region";
+		case PULSE_ERROR_INVALID_BUFFER_USAGE:                       return "invalid buffer usage";
+		case PULSE_ERROR_INVALID_IMAGE_USAGE:                        return "invalid image usage";
 
 		default: return "invalid error type";
 	};

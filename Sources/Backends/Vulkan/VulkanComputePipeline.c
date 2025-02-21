@@ -89,8 +89,9 @@ void VulkanDestroyComputePipeline(PulseDevice device, PulseComputePipeline pipel
 	vulkan_device->vkDestroyPipelineLayout(vulkan_device->device, vulkan_pipeline->layout, PULSE_NULLPTR);
 	vulkan_device->vkDestroyPipeline(vulkan_device->device, vulkan_pipeline->pipeline, PULSE_NULLPTR);
 	free(vulkan_pipeline);
-	free(pipeline);
 
 	if(PULSE_IS_BACKEND_HIGH_LEVEL_DEBUG(device->backend))
 		PulseLogInfoFmt(device->backend, "(Vulkan) destroyed compute pipeline %p", pipeline);
+
+	free(pipeline);
 }
