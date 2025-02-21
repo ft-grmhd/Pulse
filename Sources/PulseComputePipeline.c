@@ -16,7 +16,7 @@ PULSE_API PulseComputePipeline PulseCreateComputePipeline(PulseDevice device, co
 		return PULSE_NULL_HANDLE;
 	pipeline->num_readonly_storage_images = info->num_readonly_storage_images;
 	pipeline->num_readonly_storage_buffers = info->num_readonly_storage_buffers;
-	pipeline->num_readwrite_storage_images = info->num_readwrite_storage_buffers;
+	pipeline->num_readwrite_storage_images = info->num_readwrite_storage_images;
 	pipeline->num_readwrite_storage_buffers = info->num_readwrite_storage_buffers;
 	pipeline->num_uniform_buffers = info->num_uniform_buffers;
 	return pipeline;

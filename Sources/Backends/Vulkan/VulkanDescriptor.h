@@ -37,6 +37,8 @@ typedef struct VulkanDescriptorSetLayout
 			uint32_t buffer_count;
 		} Uniform;
 	};
+
+	bool is_used;
 } VulkanDescriptorSetLayout;
 
 typedef struct VulkanDescriptorSet
@@ -70,17 +72,17 @@ typedef struct VulkanDescriptorSetPoolManager
 typedef struct VulkanDescriptorSetLayoutManager
 {
 	PulseDevice device;
-	VulkanDescriptorSetLayout* layouts;
+	VulkanDescriptorSetLayout** layouts;
 	uint32_t layouts_capacity;
 	uint32_t layouts_size;
 } VulkanDescriptorSetLayoutManager;
 
 void VulkanInitDescriptorSetLayoutManager(VulkanDescriptorSetLayoutManager* manager, PulseDevice device);
 VulkanDescriptorSetLayout* VulkanGetDescriptorSetLayout(VulkanDescriptorSetLayoutManager* manager,
-														uint32_t read_storage_buffers_count,
 														uint32_t read_storage_images_count,
-														uint32_t write_storage_buffers_count,
+														uint32_t read_storage_buffers_count,
 														uint32_t write_storage_images_count,
+														uint32_t write_storage_buffers_count,
 														uint32_t uniform_buffers_count);
 void VulkanDestroyDescriptorSetLayoutManager(VulkanDescriptorSetLayoutManager* manager);
 

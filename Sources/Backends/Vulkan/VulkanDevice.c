@@ -129,7 +129,7 @@ PulseDevice VulkanCreateDevice(PulseBackend backend, PulseDevice* forbiden_devic
 
 	const float queue_priority = 1.0f;
 
-	VkDeviceQueueCreateInfo* queue_create_infos = (VkDeviceQueueCreateInfo*)PulseStaticAllocStack(VULKAN_QUEUE_END_ENUM * sizeof(VkDeviceQueueCreateInfo));
+	VkDeviceQueueCreateInfo queue_create_infos[VULKAN_QUEUE_END_ENUM * sizeof(VkDeviceQueueCreateInfo)] = { 0 };
 	// No need to check allocation, it is allocated on the stack
 
 	uint32_t unique_queues_count = 1;
@@ -167,7 +167,7 @@ PulseDevice VulkanCreateDevice(PulseBackend backend, PulseDevice* forbiden_devic
 	instance->vkGetPhysicalDeviceMemoryProperties(device->physical, &device->memory_properties);
 	instance->vkGetPhysicalDeviceFeatures(device->physical, &device->features);
 
-	VkDeviceCreateInfo create_info = {};
+	VkDeviceCreateInfo create_info = { 0 };
 	create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 	create_info.queueCreateInfoCount = unique_queues_count;
 	create_info.pQueueCreateInfos = queue_create_infos;
@@ -197,7 +197,7 @@ PulseDevice VulkanCreateDevice(PulseBackend backend, PulseDevice* forbiden_devic
 		}
 	}
 
-	VmaVulkanFunctions vma_vulkan_func = {};
+	VmaVulkanFunctions vma_vulkan_func = { 0 };
 	vma_vulkan_func.vkAllocateMemory                    = device->vkAllocateMemory;
 	vma_vulkan_func.vkBindBufferMemory                  = device->vkBindBufferMemory;
 	vma_vulkan_func.vkBindImageMemory                   = device->vkBindImageMemory;
@@ -216,7 +216,7 @@ PulseDevice VulkanCreateDevice(PulseBackend backend, PulseDevice* forbiden_devic
 	vma_vulkan_func.vkGetPhysicalDeviceMemoryProperties = instance->vkGetPhysicalDeviceMemoryProperties;
 	vma_vulkan_func.vkGetPhysicalDeviceProperties       = instance->vkGetPhysicalDeviceProperties;
 
-	VmaAllocatorCreateInfo allocator_create_info = {};
+	VmaAllocatorCreateInfo allocator_create_info = { 0 };
 	allocator_create_info.vulkanApiVersion = VK_API_VERSION_1_0;
 	allocator_create_info.physicalDevice = device->physical;
 	allocator_create_info.device = device->device;

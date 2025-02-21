@@ -191,7 +191,7 @@ bool VulkanCopyImageToBuffer(PulseCommandList cmd, const PulseImageRegion* src, 
 
 	VkOffset3D offset = { src->x, src->y, src->z };
 	VkExtent3D extent = { src->width, src->height, src->depth };
-	VkBufferImageCopy region = {};
+	VkBufferImageCopy region = { 0 };
 	region.bufferOffset = dst->offset;
 	region.bufferRowLength = 0;
 	region.bufferImageHeight = 0;

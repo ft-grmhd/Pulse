@@ -32,5 +32,12 @@ void SetupPulse(PulseBackend* backend);
 void SetupDevice(PulseBackend backend, PulseDevice* device);
 void CleanupDevice(PulseDevice device);
 void CleanupPulse(PulseBackend backend);
+void LoadComputePipeline(PulseDevice device, PulseComputePipeline* pipeline, const uint8_t* code, uint32_t code_size,
+		uint32_t num_readonly_storage_images,
+		uint32_t num_readonly_storage_buffers,
+		uint32_t num_readwrite_storage_images,
+		uint32_t num_readwrite_storage_buffers,
+		uint32_t num_uniform_buffers);
+void CleanupPipeline(PulseDevice device, PulseComputePipeline pipeline);
 
 #endif

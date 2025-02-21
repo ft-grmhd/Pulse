@@ -7,8 +7,6 @@
 
 #include <Pulse.h>
 
-#define PulseStaticAllocStack(size) ((char[size]){ 0 })
-
 #define PULSE_CHECK_ALLOCATION_RETVAL(ptr, retval) \
 	do { \
 		if(ptr == PULSE_NULLPTR) \

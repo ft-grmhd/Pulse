@@ -79,7 +79,7 @@ bool VulkanCopyBufferToBuffer(PulseCommandList cmd, const PulseBufferRegion* src
 	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(src->buffer->device, VulkanDevice*);
 	VulkanCommandList* vulkan_cmd = VULKAN_RETRIEVE_DRIVER_DATA_AS(cmd, VulkanCommandList*);
 
-	VkBufferCopy copy_region = {};
+	VkBufferCopy copy_region = { 0 };
 	copy_region.srcOffset = src->offset;
 	copy_region.dstOffset = dst->offset;
 	copy_region.size = (src->size < dst->size ? src->size : dst->size);

@@ -140,6 +140,8 @@ typedef struct PulseComputePassHandler
 	PulseImage readonly_images[PULSE_MAX_READ_TEXTURES_BOUND];
 	PulseImage readwrite_images[PULSE_MAX_WRITE_TEXTURES_BOUND];
 
+	PulseBuffer uniform_buffers[PULSE_MAX_UNIFORM_BUFFERS_BOUND];
+
 	PulseCommandList cmd;
 	PulseComputePipeline current_pipeline;
 

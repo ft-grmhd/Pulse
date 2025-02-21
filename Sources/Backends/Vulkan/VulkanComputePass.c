@@ -37,7 +37,7 @@ void VulkanDestroyComputePass(PulseDevice device, PulseComputePass pass)
 void VulkanBindStorageBuffers(PulseComputePass pass, uint32_t starting_slot, const PulseBuffer* buffers, uint32_t num_buffers)
 {
 	PulseBufferUsageFlags usage = buffers[0]->usage;
-	PulseBuffer* array = ((usage & PULSE_BUFFER_USAGE_STORAGE_WRITE) == 1) ? pass->readwrite_storage_buffers : pass->readonly_storage_buffers;
+	PulseBuffer* array = ((usage & PULSE_BUFFER_USAGE_STORAGE_WRITE) != 0) ? pass->readwrite_storage_buffers : pass->readonly_storage_buffers;
 	VulkanComputePass* vulkan_pass = VULKAN_RETRIEVE_DRIVER_DATA_AS(pass, VulkanComputePass*);
 
 	for(uint32_t i = 0; i < num_buffers; i++)
@@ -46,7 +46,7 @@ void VulkanBindStorageBuffers(PulseComputePass pass, uint32_t starting_slot, con
 			continue;
 		array[starting_slot + i] = buffers[i];
 		
-		if((usage & PULSE_BUFFER_USAGE_STORAGE_WRITE) == 1)
+		if((usage & PULSE_BUFFER_USAGE_STORAGE_WRITE) != 0)
 			vulkan_pass->should_recreate_write_descriptor_sets = true;
 		else
 			vulkan_pass->should_recreate_read_only_descriptor_sets = true;
@@ -60,7 +60,7 @@ void VulkanBindUniformData(PulseComputePass pass, uint32_t slot, const void* dat
 void VulkanBindStorageImages(PulseComputePass pass, uint32_t starting_slot, const PulseImage* images, uint32_t num_images)
 {
 	PulseImageUsageFlags usage = images[0]->usage;
-	PulseImage* array = ((usage & PULSE_IMAGE_USAGE_STORAGE_WRITE) == 1) ? pass->readwrite_images : pass->readonly_images;
+	PulseImage* array = ((usage & PULSE_IMAGE_USAGE_STORAGE_WRITE) != 0) ? pass->readwrite_images : pass->readonly_images;
 	VulkanComputePass* vulkan_pass = VULKAN_RETRIEVE_DRIVER_DATA_AS(pass, VulkanComputePass*);
 
 	for(uint32_t i = 0; i < num_images; i++)
@@ -69,7 +69,7 @@ void VulkanBindStorageImages(PulseComputePass pass, uint32_t starting_slot, cons
 			continue;
 		array[starting_slot + i] = images[i];
 		
-		if((usage & PULSE_IMAGE_USAGE_STORAGE_WRITE) == 1)
+		if((usage & PULSE_IMAGE_USAGE_STORAGE_WRITE) != 0)
 			vulkan_pass->should_recreate_write_descriptor_sets = true;
 		else
 			vulkan_pass->should_recreate_read_only_descriptor_sets = true;

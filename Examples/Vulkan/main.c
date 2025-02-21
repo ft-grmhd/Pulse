@@ -35,16 +35,17 @@ int main(void)
 		#include "shader.spv.h"
 	};
 
-	PulseComputePipelineCreateInfo info = {};
+	PulseComputePipelineCreateInfo info = { 0 };
 	info.code_size = sizeof(shader_bytecode);
 	info.code = shader_bytecode;
 	info.entrypoint = "main";
 	info.format = PULSE_SHADER_FORMAT_SPIRV_BIT;
+	info.num_readwrite_storage_buffers = 1;
 
 	PulseComputePipeline pipeline = PulseCreateComputePipeline(device, &info);
 	CHECK_PULSE_HANDLE_RETVAL(pipeline, 1);
 
-	PulseBufferCreateInfo buffer_create_info = {};
+	PulseBufferCreateInfo buffer_create_info = { 0 };
 	buffer_create_info.size = 1024;
 	buffer_create_info.usage = PULSE_BUFFER_USAGE_STORAGE_READ | PULSE_BUFFER_USAGE_STORAGE_WRITE | PULSE_BUFFER_USAGE_TRANSFER_DOWNLOAD;
 
@@ -67,6 +68,13 @@ int main(void)
 		fprintf(stderr, "Could not submit command list, %s\n", PulseVerbaliseErrorType(PulseGetLastErrorType()));
 	if(!PulseWaitForFences(device, &fence, 1, true))
 		fprintf(stderr, "Could not wait for fences, %s\n", PulseVerbaliseErrorType(PulseGetLastErrorType()));
+
+	void* ptr;
+	PulseMapBuffer(buffer, &ptr);
+	for(uint32_t i = 0; i < 1024; i++)
+		printf("%d, ", ((int32_t*)ptr)[i]);
+	puts("");
+	PulseUnmapBuffer(buffer);
 
 	PulseReleaseCommandList(device, cmd);
 	PulseDestroyFence(device, fence);

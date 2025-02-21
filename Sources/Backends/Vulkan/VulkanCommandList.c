@@ -20,7 +20,7 @@ static void VulkanInitCommandList(VulkanCommandPool* pool, PulseCommandList cmd)
 
 	vulkan_cmd->pool = pool;
 
-	VkCommandBufferAllocateInfo info = {};
+	VkCommandBufferAllocateInfo info = { 0 };
 	info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 	info.commandPool = pool->pool;
 	info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
@@ -82,7 +82,7 @@ PulseCommandList VulkanRequestCommandList(PulseDevice device, PulseCommandListUs
 
 	CHECK_VK_RETVAL(device->backend, vulkan_device->vkResetCommandBuffer(vulkan_cmd->cmd, 0), PULSE_ERROR_DEVICE_ALLOCATION_FAILED, PULSE_NULL_HANDLE);
 
-	VkCommandBufferBeginInfo begin_info = {};
+	VkCommandBufferBeginInfo begin_info = { 0 };
 	begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 	begin_info.flags = 0;
 	VkResult res = vulkan_device->vkBeginCommandBuffer(vulkan_cmd->cmd, &begin_info);
@@ -130,7 +130,7 @@ bool VulkanSubmitCommandList(PulseDevice device, PulseCommandList cmd, PulseFenc
 
 	PULSE_CHECK_PTR_RETVAL(vulkan_queue, false);
 
-	VkSubmitInfo submit_info = {};
+	VkSubmitInfo submit_info = { 0 };
 	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	submit_info.commandBufferCount = 1;
 	submit_info.pCommandBuffers = &vulkan_cmd->cmd;

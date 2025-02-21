@@ -12,8 +12,8 @@ set_menu({
 on_run(function()
 	import("core.base.option")
 
-	local file_lines = {}
-	local updated_files = {}
+	local file_lines = { 0 }
+	local updated_files = { 0 }
 	local function GetFile(file_path)
 		file_path = path.translate(file_path)
 
@@ -38,7 +38,7 @@ on_run(function()
 		updated_files[file_path] = true
 	end
 
-	local checks = {}
+	local checks = { 0 }
 
 	-- Remove empty lines at the beginning of files
 	table.insert(checks, {
@@ -53,7 +53,7 @@ on_run(function()
 				os.files("Sources/**.cpp")
 			)
 
-			local fixes = {}
+			local fixes = { 0 }
 
 			for _, file_path in pairs(files) do
 				local lines = GetFile(file_path)
@@ -98,7 +98,7 @@ on_run(function()
 			)
 
 			local current_year = os.date("%Y")
-			local fixes = {}
+			local fixes = { 0 }
 
 			-- Headers
 			for _, file_path in pairs(files) do
@@ -168,7 +168,7 @@ on_run(function()
 	for _, check in pairs(checks) do
 		print("Running " .. check.Name .. " check...")
 
-		local fixes = {}
+		local fixes = { 0 }
 		table.join2(fixes, check.Check())
 
 		if sould_fix then

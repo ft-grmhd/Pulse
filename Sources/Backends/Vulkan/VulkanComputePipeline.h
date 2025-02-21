@@ -10,12 +10,17 @@
 #include <vulkan/vulkan_core.h>
 
 #include <Pulse.h>
+#include "VulkanDescriptor.h"
 
 typedef struct VulkanComputePipeline
 {
 	VkShaderModule module;
 	VkPipelineLayout layout;
 	VkPipeline pipeline;
+
+	VulkanDescriptorSetLayout* read_only_descriptor_set_layout;
+	VulkanDescriptorSetLayout* read_write_descriptor_set_layout;
+	VulkanDescriptorSetLayout* uniform_descriptor_set_layout;
 } VulkanComputePipeline;
 
 PulseComputePipeline VulkanCreateComputePipeline(PulseDevice device, const PulseComputePipelineCreateInfo* info);

@@ -271,6 +271,60 @@ void TestBufferCopyImage()
 	CleanupPulse(backend);
 }
 
+void TestBufferComputeWrite()
+{
+	PulseBackend backend;
+	SetupPulse(&backend);
+	PulseDevice device;
+	SetupDevice(backend, &device);
+
+	const uint8_t shader_bytecode[] = {
+		#include "Shaders/SimpleBufferWrite.spv.h"
+	};
+
+	PulseBufferCreateInfo buffer_create_info = { 0 };
+	buffer_create_info.size = 256 * sizeof(int32_t);
+	buffer_create_info.usage = PULSE_BUFFER_USAGE_STORAGE_READ | PULSE_BUFFER_USAGE_STORAGE_WRITE | PULSE_BUFFER_USAGE_TRANSFER_DOWNLOAD;
+	PulseBuffer buffer = PulseCreateBuffer(device, &buffer_create_info);
+	TEST_ASSERT_NOT_EQUAL_MESSAGE(buffer, PULSE_NULL_HANDLE, PulseVerbaliseErrorType(PulseGetLastErrorType()));
+
+	PulseComputePipeline pipeline;
+	LoadComputePipeline(device, &pipeline, shader_bytecode, sizeof(shader_bytecode), 0, 0, 0, 1, 0);
+
+	PulseFence fence = PulseCreateFence(device);
+	TEST_ASSERT_NOT_EQUAL_MESSAGE(fence, PULSE_NULL_HANDLE, PulseVerbaliseErrorType(PulseGetLastErrorType()));
+	PulseCommandList cmd = PulseRequestCommandList(device, PULSE_COMMAND_LIST_GENERAL);
+	TEST_ASSERT_NOT_EQUAL_MESSAGE(cmd, PULSE_NULL_HANDLE, PulseVerbaliseErrorType(PulseGetLastErrorType()));
+
+	PulseComputePass pass = PulseBeginComputePass(cmd);
+	TEST_ASSERT_NOT_EQUAL_MESSAGE(pass, PULSE_NULL_HANDLE, PulseVerbaliseErrorType(PulseGetLastErrorType()));
+		PulseBindStorageBuffers(pass, 0, &buffer, 1);
+		PulseBindComputePipeline(pass, pipeline);
+		PulseDispatchComputations(pass, 32, 32, 1);
+	PulseEndComputePass(pass);
+
+	TEST_ASSERT_TRUE_MESSAGE(PulseSubmitCommandList(device, cmd, fence), PulseVerbaliseErrorType(PulseGetLastErrorType()));
+	TEST_ASSERT_TRUE_MESSAGE(PulseWaitForFences(device, &fence, 1, true), PulseVerbaliseErrorType(PulseGetLastErrorType()));
+
+	{
+		void* ptr;
+		uint32_t data[256];
+		memset(data, 0xFF, 256 * sizeof(uint32_t));
+		TEST_ASSERT_NOT_EQUAL_MESSAGE(PulseMapBuffer(buffer, &ptr), false, PulseVerbaliseErrorType(PulseGetLastErrorType()));
+		TEST_ASSERT_NOT_NULL(ptr);
+		TEST_ASSERT_EQUAL(memcmp(ptr, data, 256 * sizeof(uint32_t)), 0);
+		PulseUnmapBuffer(buffer);
+	}
+
+	PulseReleaseCommandList(device, cmd);
+	PulseDestroyFence(device, fence);
+	PulseDestroyBuffer(device, buffer);
+
+	CleanupPipeline(device, pipeline);
+	CleanupDevice(device);
+	CleanupPulse(backend);
+}
+
 void TestBufferDestruction()
 {
 	PulseBackend backend;
@@ -310,5 +364,6 @@ void TestBuffer()
 	RUN_TEST(TestBufferMapping);
 	RUN_TEST(TestBufferCopy);
 	RUN_TEST(TestBufferCopyImage);
+	RUN_TEST(TestBufferComputeWrite);
 	RUN_TEST(TestBufferDestruction);
 }

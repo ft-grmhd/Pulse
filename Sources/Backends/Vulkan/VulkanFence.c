@@ -12,7 +12,7 @@ PulseFence VulkanCreateFence(PulseDevice device)
 {
 	PULSE_CHECK_HANDLE_RETVAL(device, PULSE_NULL_HANDLE);
 
-	VkFenceCreateInfo fence_info = {};
+	VkFenceCreateInfo fence_info = { 0 };
 	fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 	fence_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 	VkFence vulkan_fence;

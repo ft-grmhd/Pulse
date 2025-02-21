@@ -15,7 +15,7 @@ bool VulkanInitCommandPool(PulseDevice device, VulkanCommandPool* pool, VulkanQu
 
 	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(device, VulkanDevice*);
 
-	VkCommandPoolCreateInfo create_info = {};
+	VkCommandPoolCreateInfo create_info = { 0 };
 	create_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 	create_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 	create_info.queueFamilyIndex = vulkan_device->queues[queue_type]->queue_family_index;

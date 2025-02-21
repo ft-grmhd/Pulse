@@ -104,7 +104,7 @@ static VkInstance VulkanCreateInstance(PulseBackend backend, const char** extens
 {
 	VkInstance instance = VK_NULL_HANDLE;
 
-	VkApplicationInfo app_info = {};
+	VkApplicationInfo app_info = { 0 };
 	app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 	app_info.pEngineName = "PulseGPU";
 	app_info.engineVersion = PULSE_VERSION;
