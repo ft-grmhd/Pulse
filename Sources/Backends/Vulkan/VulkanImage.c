@@ -2,7 +2,7 @@
 // This file is part of "Pulse"
 // For conditions of distribution and use, see copyright notice in LICENSE
 
-#include "Pulse.h"
+#include <Pulse.h>
 #include "Vulkan.h"
 #include "VulkanImage.h"
 #include "VulkanBuffer.h"

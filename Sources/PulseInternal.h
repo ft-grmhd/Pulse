@@ -155,6 +155,7 @@ typedef struct PulseComputePassHandler
 } PulseComputePassHandler;
 
 PulseThreadID PulseGetThreadID();
+void PulseSleep(int32_t ms);
 
 void PulseSetInternalError(PulseErrorType error);
 
@@ -174,5 +175,8 @@ void PulseLogBackend(PulseBackend backend, PulseDebugMessageSeverity type, const
 #ifdef PULSE_ENABLE_METAL_BACKEND
 	extern PulseBackendHandler MetalDriver;
 #endif // PULSE_ENABLE_METAL_BACKEND
+#ifdef PULSE_ENABLE_WEBGPU_BACKEND
+	extern PulseBackendHandler WebGPUDriver;
+#endif // PULSE_ENABLE_WEBGPU_BACKEND
 
 #endif // PULSE_INTERNAL_H_

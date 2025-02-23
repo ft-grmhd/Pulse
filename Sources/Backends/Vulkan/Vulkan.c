@@ -29,6 +29,7 @@ PulseBackendFlags VulkanCheckSupport(PulseBackendFlags candidates, PulseShaderFo
 	VulkanInstance instance;
 	if(!VulkanInitInstance(PULSE_NULL_HANDLE, &instance, PULSE_NO_DEBUG)) // Instance creation will fail if Vulkan is not supported
 	{
+		VulkanLoaderShutdown();
 		PulseGetLastErrorType(); // Clearing out the errors set by the failed instance creation
 		return PULSE_BACKEND_INVALID;
 	}
@@ -44,7 +45,10 @@ bool VulkanLoadBackend(PulseBackend backend, PulseDebugLevel debug_level)
 	VulkanDriverData* driver_data = (VulkanDriverData*)calloc(1, sizeof(VulkanDriverData));
 	PULSE_CHECK_ALLOCATION_RETVAL(driver_data, false);
 	if(!VulkanInitInstance(backend, &driver_data->instance, debug_level))
+	{
+		free(driver_data);
 		return false;
+	}
 	VulkanDriver.driver_data = driver_data;
 	return true;
 }
@@ -53,6 +57,7 @@ void VulkanUnloadBackend(PulseBackend backend)
 {
 	VulkanDestroyInstance(&VULKAN_RETRIEVE_DRIVER_DATA_AS(backend, VulkanDriverData*)->instance);
 	VulkanLoaderShutdown();
+	free(backend->driver_data);
 }
 
 const char* VulkanVerbaliseResult(VkResult res)

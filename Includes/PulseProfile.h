@@ -35,6 +35,8 @@ extern "C" {
 	#define PULSE_COMPILER_INTEL
 #elif defined(_MSC_VER)
 	#define PULSE_COMPILER_MSVC
+#elif __EMSCRIPTEN__
+	#define PULSE_COMPILER_EMSCRIPTEN
 #else
 	#define PULSE_COMPILER_UNKNOWN
 	#warning "This compiler is not fully supported"

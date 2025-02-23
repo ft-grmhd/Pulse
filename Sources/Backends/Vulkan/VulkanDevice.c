@@ -46,6 +46,7 @@ static int32_t VulkanScorePhysicalDevice(VulkanInstance* instance, VkPhysicalDev
 			break;
 		}
 	}
+	free(props);
 	if(are_there_required_device_extensions == false)
 		return -1;
 
@@ -76,7 +77,6 @@ static bool VulkanIsDeviceForbidden(VkPhysicalDevice device, PulseDevice* forbid
 {
 	if(device == VK_NULL_HANDLE)
 		return true;
-	#pragma omp parallel for
 	for(uint32_t i = 0; i < forbiden_devices_count; i++)
 	{
 		if(device == ((VulkanDevice*)forbiden_devices[i]->driver_data)->physical)
@@ -97,7 +97,6 @@ static VkPhysicalDevice VulkanPickPhysicalDevice(VulkanInstance* instance, Pulse
 	PULSE_CHECK_ALLOCATION_RETVAL(devices, VK_NULL_HANDLE);
 	instance->vkEnumeratePhysicalDevices(instance->instance, &device_count, devices);
 
-	#pragma omp parallel for
 	for(uint32_t i = 0; i < device_count; i++)
 	{
 		if(VulkanIsDeviceForbidden(devices[i], forbiden_devices, forbiden_devices_count))
@@ -120,12 +119,12 @@ PulseDevice VulkanCreateDevice(PulseBackend backend, PulseDevice* forbiden_devic
 	PULSE_CHECK_ALLOCATION_RETVAL(pulse_device, PULSE_NULL_HANDLE);
 
 	VulkanDevice* device = (VulkanDevice*)calloc(1, sizeof(VulkanDevice));
-	PULSE_CHECK_ALLOCATION_RETVAL(device, PULSE_NULLPTR);
+	PULSE_CHECK_ALLOCATION_RETVAL(device, PULSE_NULL_HANDLE);
 
 	VulkanInstance* instance = &VULKAN_RETRIEVE_DRIVER_DATA_AS(backend, VulkanDriverData*)->instance;
 
 	device->physical = VulkanPickPhysicalDevice(instance, forbiden_devices, forbiden_devices_count);
-	PULSE_CHECK_HANDLE_RETVAL(device->physical, PULSE_NULLPTR);
+	PULSE_CHECK_HANDLE_RETVAL(device->physical, PULSE_NULL_HANDLE);
 
 	const float queue_priority = 1.0f;
 
@@ -139,6 +138,8 @@ PulseDevice VulkanCreateDevice(PulseBackend backend, PulseDevice* forbiden_devic
 		if(!VulkanPrepareDeviceQueue(instance, device, i))
 		{
 			PulseSetInternalError(PULSE_ERROR_INITIALIZATION_FAILED);
+			free(device);
+			free(pulse_device);
 			return PULSE_NULLPTR;
 		}
 	}
@@ -185,6 +186,8 @@ PulseDevice VulkanCreateDevice(PulseBackend backend, PulseDevice* forbiden_devic
 		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(backend))
 			PulseLogInfoFmt(backend, "(Vulkan) Could not load device functions from %s", device->properties.deviceName);
 		PulseSetInternalError(PULSE_ERROR_INITIALIZATION_FAILED);
+		free(device);
+		free(pulse_device);
 		return PULSE_NULLPTR;
 	}
 
@@ -193,6 +196,8 @@ PulseDevice VulkanCreateDevice(PulseBackend backend, PulseDevice* forbiden_devic
 		if(!VulkanRetrieveDeviceQueue(device, (VulkanQueueType)i))
 		{
 			PulseSetInternalError(PULSE_ERROR_INITIALIZATION_FAILED);
+			free(device);
+			free(pulse_device);
 			return PULSE_NULLPTR;
 		}
 	}

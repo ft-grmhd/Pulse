@@ -38,6 +38,7 @@ typedef enum PulseBackendBits
 	PULSE_BACKEND_ANY     = PULSE_BIT(2),
 	PULSE_BACKEND_VULKAN  = PULSE_BIT(3),
 	PULSE_BACKEND_METAL   = PULSE_BIT(4),
+	PULSE_BACKEND_WEBGPU  = PULSE_BIT(5),
 	// More to come
 } PulseBackendBits;
 typedef PulseFlags PulseBackendFlags;
@@ -67,9 +68,10 @@ typedef PulseFlags PulseImageUsageFlags;
 
 typedef enum PulseShaderFormatsBits
 {
-	PULSE_SHADER_FORMAT_SPIRV_BIT    = PULSE_BIT(1), // Can be used by Vulkan
+	PULSE_SHADER_FORMAT_SPIRV_BIT    = PULSE_BIT(1), // Can be used by Vulkan and WebGPU
 	PULSE_SHADER_FORMAT_MSL_BIT      = PULSE_BIT(2), // Can be used by Metal
 	PULSE_SHADER_FORMAT_METALLIB_BIT = PULSE_BIT(3), // Can be used by Metal
+	PULSE_SHADER_FORMAT_WGSL_BIT     = PULSE_BIT(4), // Can be used by WebGPU
 	// More to come
 } PulseShaderFormatsBits;
 typedef PulseFlags PulseShaderFormatsFlags;

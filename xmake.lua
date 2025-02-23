@@ -5,7 +5,7 @@
 local backends = {
 	Vulkan = {
 		option = "vulkan",
-		default = true,
+		default = not is_plat("wasm"),
 		packages = { "vulkan-headers", "vulkan-memory-allocator" },
 		custom = function()
 			add_defines("VK_NO_PROTOTYPES")
@@ -17,6 +17,16 @@ local backends = {
 		default = is_plat("macosx", "iphoneos"),
 		custom = function()
 			add_files("Sources/Backends/Metal/**.m")
+		end
+	},
+	WebGPU = {
+		option = "webgpu",
+		packages = { "wgpu-native" },
+		default = is_plat("wasm"),
+		custom = function()
+			if is_plat("wasm") then
+				add_defines("PULSE_PLAT_WASM")
+			end
 		end
 	}
 }
@@ -57,6 +67,10 @@ set_optimize("fastest")
 includes("Xmake/**.lua")
 
 option("unitybuild", { description = "Build the library using unity build", default = false })
+
+if is_plat("wasm") then
+	backends.Vulkan = nil
+end
 
 for name, module in pairs(backends) do
 	if has_config(module.option) then

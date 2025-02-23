@@ -5,7 +5,7 @@
 [![Msys2 build](https://github.com/ft-grmhd/Pulse/actions/workflows/msys2-build.yml/badge.svg)](https://github.com/ft-grmhd/Pulse/actions/workflows/msys2-build.yml)
 [![Windows build](https://github.com/ft-grmhd/Pulse/actions/workflows/windows-build.yml/badge.svg)](https://github.com/ft-grmhd/Pulse/actions/workflows/windows-build.yml)
 
-Pulse is a low level GPGPU library designed for highly intensive general GPU computations with high control over the hardware. It is built on top of Vulkan and a Metal support is in discussion.
+Pulse is a low level GPGPU library designed for highly intensive general GPU computations with high control over the hardware. It is built on top of Vulkan. A Metal and WebGPU backends are in development.
 
 ```cpp
 #include <Pulse.h>
@@ -36,7 +36,7 @@ int main(void)
 	PulseCommandList cmd = PulseRequestCommandList(device, PULSE_COMMAND_LIST_GENERAL);
 
 	PulseComputePass pass = PulseBeginComputePass(cmd);
-		PulseBindStorageBuffers(pass, 0, &buffer, 1);
+		PulseBindStorageBuffers(pass, &buffer, 1);
 		PulseBindComputePipeline(pass, pipeline);
 		PulseDispatchComputations(pass, 32, 32, 1);
 	PulseEndComputePass(pass);

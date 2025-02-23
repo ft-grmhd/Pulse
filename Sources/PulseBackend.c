@@ -14,6 +14,9 @@
 #ifdef PULSE_ENABLE_METAL_BACKEND
 	#include "Backends/Metal/Metal.h"
 #endif
+#ifdef PULSE_ENABLE_WEBGPU_BACKEND
+	#include "Backends/WebGPU/WebGPU.h"
+#endif
 
 // Ordered by default preference
 static const PulseCheckBackendSupportPFN backends_supports[] = {
@@ -22,6 +25,9 @@ static const PulseCheckBackendSupportPFN backends_supports[] = {
 	#endif
 	#ifdef PULSE_ENABLE_METAL_BACKEND
 		MetalCheckSupport,
+	#endif
+	#ifdef PULSE_ENABLE_WEBGPU_BACKEND
+		WebGPUCheckSupport,
 	#endif
 	PULSE_NULLPTR
 };
@@ -89,6 +95,9 @@ static PulseBackend PulseGetBackendFromFlag(PulseBackendBits flag)
 		#endif
 		#ifdef PULSE_ENABLE_METAL_BACKEND
 			case PULSE_BACKEND_METAL: return &MetalDriver;
+		#endif
+		#ifdef PULSE_ENABLE_WEBGPU_BACKEND
+			case PULSE_BACKEND_WEBGPU: return &WebGPUDriver;
 		#endif
 
 		default: break;
