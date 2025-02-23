@@ -25,7 +25,7 @@ void DebugCallBack(PulseDebugMessageSeverity severity, const char* message)
 
 int main(void)
 {
-	PulseBackend backend = PulseLoadBackend(PULSE_BACKEND_WEBGPU, PULSE_SHADER_FORMAT_SPIRV_BIT, PULSE_HIGH_DEBUG);
+	PulseBackend backend = PulseLoadBackend(PULSE_BACKEND_WEBGPU, PULSE_SHADER_FORMAT_WGSL_BIT, PULSE_HIGH_DEBUG);
 	CHECK_PULSE_HANDLE_RETVAL(backend, 1);
 	PulseSetDebugCallback(backend, DebugCallBack);
 	PulseDevice device = PulseCreateDevice(backend, NULL, 0);

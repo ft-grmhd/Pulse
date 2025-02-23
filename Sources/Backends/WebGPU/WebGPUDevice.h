@@ -17,6 +17,7 @@ typedef struct WebGPUDevice
 	WGPULimits limits;
 	WGPUAdapter adapter;
 	WGPUDevice device;
+	WGPUQueue queue;
 
 	bool has_error;
 } WebGPUDevice;

@@ -68,7 +68,7 @@ typedef PulseFlags PulseImageUsageFlags;
 
 typedef enum PulseShaderFormatsBits
 {
-	PULSE_SHADER_FORMAT_SPIRV_BIT    = PULSE_BIT(1), // Can be used by Vulkan and WebGPU
+	PULSE_SHADER_FORMAT_SPIRV_BIT    = PULSE_BIT(1), // Can be used by Vulkan
 	PULSE_SHADER_FORMAT_MSL_BIT      = PULSE_BIT(2), // Can be used by Metal
 	PULSE_SHADER_FORMAT_METALLIB_BIT = PULSE_BIT(3), // Can be used by Metal
 	PULSE_SHADER_FORMAT_WGSL_BIT     = PULSE_BIT(4), // Can be used by WebGPU

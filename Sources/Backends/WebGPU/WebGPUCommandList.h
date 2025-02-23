@@ -14,6 +14,7 @@
 
 typedef struct WebGPUCommandList
 {
+	WGPUCommandEncoder encoder;
 } WebGPUCommandList;
 
 PulseCommandList WebGPURequestCommandList(PulseDevice device, PulseCommandListUsage usage);

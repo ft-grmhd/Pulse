@@ -12,7 +12,7 @@ PulseBackendFlags WebGPUCheckSupport(PulseBackendFlags candidates, PulseShaderFo
 {
 	if(candidates != PULSE_BACKEND_ANY && (candidates & PULSE_BACKEND_WEBGPU) == 0)
 		return PULSE_BACKEND_INVALID;
-	if((shader_formats_used & PULSE_SHADER_FORMAT_SPIRV_BIT) == 0 && (shader_formats_used & PULSE_SHADER_FORMAT_WGSL_BIT) == 0)
+	if((shader_formats_used & PULSE_SHADER_FORMAT_WGSL_BIT) == 0)
 		return PULSE_BACKEND_INVALID;
 
 	WGPUInstance instance = wgpuCreateInstance(PULSE_NULLPTR);
@@ -48,6 +48,6 @@ PulseBackendHandler WebGPUDriver = {
 	.PFN_UnloadBackend = WebGPUUnloadBackend,
 	.PFN_CreateDevice = WebGPUCreateDevice,
 	.backend = PULSE_BACKEND_WEBGPU,
-	.supported_shader_formats = PULSE_SHADER_FORMAT_SPIRV_BIT | PULSE_SHADER_FORMAT_WGSL_BIT,
+	.supported_shader_formats = PULSE_SHADER_FORMAT_WGSL_BIT,
 	.driver_data = PULSE_NULLPTR
 };

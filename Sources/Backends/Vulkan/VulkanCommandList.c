@@ -2,7 +2,6 @@
 // This file is part of "Pulse"
 // For conditions of distribution and use, see copyright notice in LICENSE
 
-#include "Pulse.h"
 #include "Vulkan.h"
 #include "VulkanCommandList.h"
 #include "VulkanCommandPool.h"
@@ -98,8 +97,6 @@ PulseCommandList VulkanRequestCommandList(PulseDevice device, PulseCommandListUs
 
 bool VulkanSubmitCommandList(PulseDevice device, PulseCommandList cmd, PulseFence fence)
 {
-	PULSE_CHECK_HANDLE_RETVAL(cmd, false);
-
 	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(device, VulkanDevice*);
 	VulkanCommandList* vulkan_cmd = VULKAN_RETRIEVE_DRIVER_DATA_AS(cmd, VulkanCommandList*);
 
