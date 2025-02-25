@@ -9,17 +9,12 @@
 
 PulseComputePass VulkanCreateComputePass(PulseDevice device, PulseCommandList cmd)
 {
+	PULSE_UNUSED(device);
 	PulseComputePass pass = (PulseComputePass)calloc(1, sizeof(PulseComputePassHandler));
 	PULSE_CHECK_ALLOCATION_RETVAL(pass, PULSE_NULL_HANDLE);
 
 	VulkanComputePass* vulkan_pass = (VulkanComputePass*)calloc(1, sizeof(VulkanComputePass));
 	PULSE_CHECK_ALLOCATION_RETVAL(vulkan_pass, PULSE_NULL_HANDLE);
-
-	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(device, VulkanDevice*);
-
-//	vulkan_pass->read_only_descriptor_set = VulkanRequestDescriptorSetFromPool(
-//			VulkanGetAvailableDescriptorSetPool(&vulkan_device->descriptor_set_pool_manager),
-//			VulkanGetDescriptorSetLayout(&vulkan_device->descriptor_set_layout_manager, ));
 
 	pass->cmd = cmd;
 	pass->driver_data = vulkan_pass;
@@ -29,7 +24,7 @@ PulseComputePass VulkanCreateComputePass(PulseDevice device, PulseCommandList cm
 
 void VulkanDestroyComputePass(PulseDevice device, PulseComputePass pass)
 {
-	(void)device; // Maybe reserved for future use
+	PULSE_UNUSED(device);
 	free(pass->driver_data);
 	free(pass);
 }

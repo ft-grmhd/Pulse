@@ -15,6 +15,7 @@
 
 typedef struct WebGPUComputePass
 {
+	WGPUComputePassEncoder encoder;
 } WebGPUComputePass;
 
 PulseComputePass WebGPUCreateComputePass(PulseDevice device, PulseCommandList cmd);

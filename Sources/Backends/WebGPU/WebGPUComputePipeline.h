@@ -13,6 +13,8 @@
 
 typedef struct WebGPUComputePipeline
 {
+	WGPUComputePipeline pipeline;
+	WGPUShaderModule shader;
 } WebGPUComputePipeline;
 
 PulseComputePipeline WebGPUCreateComputePipeline(PulseDevice device, const PulseComputePipelineCreateInfo* info);
