@@ -18,7 +18,7 @@
 
 #include <string.h>
 
-static int32_t VulkanScorePhysicalDevice(VulkanInstance* instance, VkPhysicalDevice device, const char** device_extensions, uint32_t device_extensions_count)
+static uint64_t VulkanScorePhysicalDevice(VulkanInstance* instance, VkPhysicalDevice device, const char** device_extensions, uint32_t device_extensions_count)
 {
 	// Check extensions support
 	uint32_t extension_count;
@@ -61,7 +61,7 @@ static int32_t VulkanScorePhysicalDevice(VulkanInstance* instance, VkPhysicalDev
 	VkPhysicalDeviceFeatures device_features;
 	instance->vkGetPhysicalDeviceFeatures(device, &device_features);
 
-	int32_t score = -1;
+	uint64_t score = 0;
 	if(device_props.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
 		score += 10000;
 
@@ -90,7 +90,7 @@ static VkPhysicalDevice VulkanPickPhysicalDevice(VulkanInstance* instance, Pulse
 	VkPhysicalDevice* devices = PULSE_NULLPTR;
 	VkPhysicalDevice chosen_one = VK_NULL_HANDLE;
 	uint32_t device_count;
-	int32_t best_device_score = -1;
+	uint64_t best_device_score = 0;
 
 	instance->vkEnumeratePhysicalDevices(instance->instance, &device_count, PULSE_NULLPTR);
 	devices = (VkPhysicalDevice*)calloc(device_count, sizeof(VkPhysicalDevice));
@@ -101,7 +101,7 @@ static VkPhysicalDevice VulkanPickPhysicalDevice(VulkanInstance* instance, Pulse
 	{
 		if(VulkanIsDeviceForbidden(devices[i], forbiden_devices, forbiden_devices_count))
 			continue;
-		int32_t current_device_score = VulkanScorePhysicalDevice(instance, devices[i], PULSE_NULLPTR, 0);
+		uint64_t current_device_score = VulkanScorePhysicalDevice(instance, devices[i], PULSE_NULLPTR, 0);
 		if(current_device_score > best_device_score)
 		{
 			best_device_score = current_device_score;
