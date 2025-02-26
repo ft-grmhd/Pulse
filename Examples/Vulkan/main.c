@@ -6,7 +6,7 @@
 #define CHECK_PULSE_HANDLE_RETVAL(handle, retval) \
 	if(handle == PULSE_NULL_HANDLE) \
 	{ \
-		fprintf(stderr, "Error: %s", PulseVerbaliseErrorType(PulseGetLastErrorType())); \
+		fprintf(stderr, "Error: %s\n", PulseVerbaliseErrorType(PulseGetLastErrorType())); \
 		return retval; \
 	} \
 

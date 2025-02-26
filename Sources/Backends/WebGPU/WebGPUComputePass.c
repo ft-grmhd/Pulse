@@ -6,6 +6,7 @@
 #include "WebGPU.h"
 #include "WebGPUDevice.h"
 #include "WebGPUComputePass.h"
+#include "WebGPUComputePipeline.h"
 
 PulseComputePass WebGPUCreateComputePass(PulseDevice device, PulseCommandList cmd)
 {
@@ -58,6 +59,9 @@ void WebGPUBindStorageImages(PulseComputePass pass, const PulseImage* images, ui
 
 void WebGPUBindComputePipeline(PulseComputePass pass, PulseComputePipeline pipeline)
 {
+	WebGPUComputePass* webgpu_pass = WEBGPU_RETRIEVE_DRIVER_DATA_AS(pass, WebGPUComputePass*);
+	WebGPUComputePipeline* webgpu_pipeline = WEBGPU_RETRIEVE_DRIVER_DATA_AS(pipeline, WebGPUComputePipeline*);
+	wgpuComputePassEncoderSetPipeline(webgpu_pass->encoder, webgpu_pipeline->pipeline);
 }
 
 void WebGPUDispatchComputations(PulseComputePass pass, uint32_t groupcount_x, uint32_t groupcount_y, uint32_t groupcount_z)

@@ -134,4 +134,11 @@ PulseComputePass VulkanBeginComputePass(PulseCommandList cmd)
 
 void VulkanEndComputePass(PulseComputePass pass)
 {
+	VulkanComputePass* vulkan_pass = VULKAN_RETRIEVE_DRIVER_DATA_AS(pass, VulkanComputePass*);
+	VulkanReturnDescriptorSetToPool(vulkan_pass->read_only_descriptor_set->pool, vulkan_pass->read_only_descriptor_set);
+	VulkanReturnDescriptorSetToPool(vulkan_pass->read_write_descriptor_set->pool, vulkan_pass->read_write_descriptor_set);
+	VulkanReturnDescriptorSetToPool(vulkan_pass->uniform_descriptor_set->pool, vulkan_pass->uniform_descriptor_set);
+	vulkan_pass->read_only_descriptor_set = VK_NULL_HANDLE;
+	vulkan_pass->read_write_descriptor_set = VK_NULL_HANDLE;
+	vulkan_pass->uniform_descriptor_set = VK_NULL_HANDLE;
 }

@@ -44,8 +44,8 @@ PulseComputePipeline WebGPUCreateComputePipeline(PulseDevice device, const Pulse
 	webgpu_pipeline->shader = wgpuDeviceCreateShaderModule(webgpu_device->device, &shader_descriptor);
 
 	WGPUStringView entrypoint = { 0 };
-	code.length = WGPU_STRLEN;
-	code.data = info->entrypoint;
+	entrypoint.length = WGPU_STRLEN;
+	entrypoint.data = info->entrypoint;
 	WGPUProgrammableStageDescriptor state = { 0 };
 	state.module = webgpu_pipeline->shader;
 	state.entryPoint = entrypoint;
@@ -53,9 +53,29 @@ PulseComputePipeline WebGPUCreateComputePipeline(PulseDevice device, const Pulse
 	pipeline_descriptor.compute = state;
 	webgpu_pipeline->pipeline = wgpuDeviceCreateComputePipeline(webgpu_device->device, &pipeline_descriptor);
 
+	if(PULSE_IS_BACKEND_HIGH_LEVEL_DEBUG(device->backend))
+		PulseLogInfoFmt(device->backend, "(WebGPU) created new compute pipeline %p", pipeline);
+
 	return pipeline;
 }
 
 void WebGPUDestroyComputePipeline(PulseDevice device, PulseComputePipeline pipeline)
 {
+	if(pipeline == PULSE_NULL_HANDLE)
+	{
+		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(device->backend))
+			PulseLogWarning(device->backend, "compute pipeline is NULL, this may be a bug in your application");
+		return;
+	}
+
+	PULSE_UNUSED(device);
+	WebGPUComputePipeline* webgpu_pipeline = WEBGPU_RETRIEVE_DRIVER_DATA_AS(pipeline, WebGPUComputePipeline*);
+	wgpuComputePipelineRelease(webgpu_pipeline->pipeline);
+	wgpuShaderModuleRelease(webgpu_pipeline->shader);
+	free(webgpu_pipeline);
+
+	if(PULSE_IS_BACKEND_HIGH_LEVEL_DEBUG(device->backend))
+		PulseLogInfoFmt(device->backend, "(WebGPU) destroyed compute pipeline %p", pipeline);
+
+	free(pipeline);
 }

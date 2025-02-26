@@ -99,6 +99,8 @@ PULSE_API void PulseEndComputePass(PulseComputePass pass)
 	memset(pass->readonly_storage_buffers, 0, PULSE_MAX_READ_BUFFERS_BOUND * sizeof(PulseBuffer));
 	memset(pass->readwrite_storage_buffers, 0, PULSE_MAX_WRITE_BUFFERS_BOUND * sizeof(PulseBuffer));
 
+	pass->cmd->device->PFN_EndComputePass(pass);
+
 	pass->current_pipeline = PULSE_NULL_HANDLE;
 
 	pass->is_recording = false;
