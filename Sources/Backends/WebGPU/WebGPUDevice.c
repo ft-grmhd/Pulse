@@ -62,7 +62,6 @@
 		score += limits.maxComputeWorkgroupSizeZ;
 		score += limits.maxComputeWorkgroupStorageSize;
 		score += limits.maxComputeInvocationsPerWorkgroup;
-		score += limits.maxComputeWorkgroupsPerDimension;
 		score += limits.maxTextureDimension2D;
 
 		return score;
