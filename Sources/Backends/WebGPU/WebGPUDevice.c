@@ -13,7 +13,6 @@
 #include "WebGPUBuffer.h"
 #include "WebGPUImage.h"
 #include "WebGPUComputePass.h"
-#include "webgpu.h"
 
 #ifndef PULSE_PLAT_WASM
 	#include <wgpu.h>

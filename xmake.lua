@@ -23,11 +23,10 @@ local backends = {
 	},
 	WebGPU = {
 		option = "webgpu",
-		packages = { "wgpu-native" },
 		default = is_plat("wasm"),
 		custom = function()
-			if is_plat("wasm") then
-				add_defines("PULSE_PLAT_WASM")
+			if not is_plat("wasm") then
+				add_packages("wgpu-native")
 			end
 		end
 	}
@@ -72,9 +71,9 @@ option("unitybuild", { description = "Build the library using unity build", defa
 
 if is_plat("wasm") then
 	backends.Vulkan = nil
+else
+	add_requires("tiny-c-thread", "wgpu-native")
 end
-
-add_requires("tiny-c-thread")
 
 for name, module in pairs(backends) do
 	if has_config(module.option) then
@@ -89,16 +88,23 @@ target("pulse_gpu")
 	add_defines("PULSE_BUILD")
 	add_headerfiles("Sources/*.h", { prefixdir = "private", install = false })
 	add_headerfiles("Sources/*.inl", { prefixdir = "private", install = false })
-	add_packages("tiny-c-thread")
-	
+
+	if not is_plat("wasm") then
+		add_packages("tiny-c-thread")
+	end
+
 	add_files("Sources/*.c")
 
 	if has_config("unitybuild") then
 		add_rules("c.unity_build", { batchsize = 6 })
 	end
 
+	if is_plat("wasm") then
+		add_defines("PULSE_PLAT_WASM")
+	end
+
 	for name, module in pairs(backends) do
-		if has_config(module.option) then
+		if module ~= nil and has_config(module.option) then
 			if module.packages then
 				add_packages(table.unpack(module.packages))
 			end
@@ -124,4 +130,7 @@ target("pulse_gpu")
 target_end()
 
 includes("Examples/*.lua")
-includes("Tests/Vulkan/*.lua")
+
+if not is_plat("wasm") then
+	includes("Tests/Vulkan/*.lua")
+end

@@ -49,6 +49,8 @@ int main(void)
 	PulseComputePipeline pipeline = PulseCreateComputePipeline(device, &info);
 	CHECK_PULSE_HANDLE_RETVAL(pipeline, 1);
 
+	PulseFence fence = PulseCreateFence(device);
+	CHECK_PULSE_HANDLE_RETVAL(fence, 1);
 	PulseCommandList cmd = PulseRequestCommandList(device, PULSE_COMMAND_LIST_GENERAL);
 	CHECK_PULSE_HANDLE_RETVAL(cmd, 1);
 
@@ -58,8 +60,13 @@ int main(void)
 		PulseDispatchComputations(pass, 32, 32, 1);
 	PulseEndComputePass(pass);
 
-	PulseReleaseCommandList(device, cmd);
+	if(!PulseSubmitCommandList(device, cmd, fence))
+		fprintf(stderr, "Could not submit command list, %s\n", PulseVerbaliseErrorType(PulseGetLastErrorType()));
+	if(!PulseWaitForFences(device, &fence, 1, true))
+		fprintf(stderr, "Could not wait for fences, %s\n", PulseVerbaliseErrorType(PulseGetLastErrorType()));
 
+	PulseReleaseCommandList(device, cmd);
+	PulseDestroyFence(device, fence);
 	PulseDestroyComputePipeline(device, pipeline);
 
 	PulseDestroyDevice(device);

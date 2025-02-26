@@ -8,8 +8,14 @@
 #define PULSE_WEBGPU_FENCE_H_
 
 #include <webgpu/webgpu.h>
+#include <stdatomic.h>
 
 #include <Pulse.h>
+
+typedef struct WebGPUFence
+{
+	atomic_bool signal;
+} WebGPUFence;
 
 PulseFence WebGPUCreateFence(PulseDevice device);
 void WebGPUDestroyFence(PulseDevice device, PulseFence fence);

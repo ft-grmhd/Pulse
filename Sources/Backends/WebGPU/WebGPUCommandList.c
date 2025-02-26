@@ -2,9 +2,12 @@
 // This file is part of "Pulse"
 // For conditions of distribution and use, see copyright notice in LICENSE
 
+#include <stdatomic.h>
+
 #include <Pulse.h>
 #include "WebGPU.h"
 #include "WebGPUDevice.h"
+#include "WebGPUFence.h"
 #include "WebGPUCommandList.h"
 #include "WebGPUComputePass.h"
 #include "../../PulseInternal.h"
@@ -38,6 +41,17 @@ PulseCommandList WebGPURequestCommandList(PulseDevice device, PulseCommandListUs
 	return cmd;
 }
 
+#include <stdio.h>
+
+static void WebGPUFenceCallback(WGPUQueueWorkDoneStatus status, void* userdata1, void* userdata2)
+{
+	PULSE_UNUSED(userdata2);
+	WebGPUFence* webgpu_fence = (WebGPUFence*)userdata1;
+	if(status == WGPUQueueWorkDoneStatus_Success)
+		atomic_store(&webgpu_fence->signal, true);
+	puts("test");
+}
+
 bool WebGPUSubmitCommandList(PulseDevice device, PulseCommandList cmd, PulseFence fence)
 {
 	WebGPUDevice* webgpu_device = WEBGPU_RETRIEVE_DRIVER_DATA_AS(device, WebGPUDevice*);
@@ -47,6 +61,15 @@ bool WebGPUSubmitCommandList(PulseDevice device, PulseCommandList cmd, PulseFenc
 	WGPUCommandBuffer command_buffer = wgpuCommandEncoderFinish(webgpu_cmd->encoder, &command_buffer_descriptor);
 
 	wgpuQueueSubmit(webgpu_device->queue, 1, &command_buffer);
+
+	WebGPUFence* webgpu_fence = WEBGPU_RETRIEVE_DRIVER_DATA_AS(fence, WebGPUFence*);
+	atomic_store(&webgpu_fence->signal, false);
+
+	WGPUQueueWorkDoneCallbackInfo callback = { 0 };
+	callback.mode = WGPUCallbackMode_AllowSpontaneous;
+	callback.callback = WebGPUFenceCallback;
+	callback.userdata1 = webgpu_fence;
+	wgpuQueueOnSubmittedWorkDone(webgpu_device->queue, callback);
 
 	wgpuCommandBufferRelease(command_buffer);
 	return true;
