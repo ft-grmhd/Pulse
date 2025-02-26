@@ -43,6 +43,7 @@ void WebGPUEndComputePass(PulseComputePass pass)
 {
 	WebGPUComputePass* webgpu_pass = WEBGPU_RETRIEVE_DRIVER_DATA_AS(pass, WebGPUComputePass*);
 	wgpuComputePassEncoderEnd(webgpu_pass->encoder);
+	wgpuComputePassEncoderRelease(webgpu_pass->encoder);
 }
 
 void WebGPUBindStorageBuffers(PulseComputePass pass, const PulseBuffer* buffers, uint32_t num_buffers)

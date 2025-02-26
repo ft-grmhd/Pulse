@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define WGSL_SOURCE(...) #__VA_ARGS__
 #define CHECK_PULSE_HANDLE_RETVAL(handle, retval) \
 	if(handle == PULSE_NULL_HANDLE) \
 	{ \
@@ -23,8 +24,6 @@ void DebugCallBack(PulseDebugMessageSeverity severity, const char* message)
 	else
 		printf("Pulse: %s\n", message);
 }
-
-#define WGSL_SOURCE(...) #__VA_ARGS__
 
 const char* wgsl_source = WGSL_SOURCE(
 	@compute @workgroup_size(32, 32, 1)
@@ -49,6 +48,17 @@ int main(void)
 
 	PulseComputePipeline pipeline = PulseCreateComputePipeline(device, &info);
 	CHECK_PULSE_HANDLE_RETVAL(pipeline, 1);
+
+	PulseCommandList cmd = PulseRequestCommandList(device, PULSE_COMMAND_LIST_GENERAL);
+	CHECK_PULSE_HANDLE_RETVAL(cmd, 1);
+
+	PulseComputePass pass = PulseBeginComputePass(cmd);
+	CHECK_PULSE_HANDLE_RETVAL(pass, 1);
+		PulseBindComputePipeline(pass, pipeline);
+		PulseDispatchComputations(pass, 32, 32, 1);
+	PulseEndComputePass(pass);
+
+	PulseReleaseCommandList(device, cmd);
 
 	PulseDestroyComputePipeline(device, pipeline);
 
