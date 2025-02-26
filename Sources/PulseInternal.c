@@ -4,7 +4,7 @@
 
 #include "PulseInternal.h"
 
-#include <threads.h>
+#include <tinycthread.h>
 
 PulseThreadID PulseGetThreadID()
 {

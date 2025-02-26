@@ -2,6 +2,8 @@
 -- This file is part of "Pulse"
 -- For conditions of distribution and use, see copyright notice in LICENSE
 
+add_repositories("local-repo Xmake")
+
 local backends = {
 	Vulkan = {
 		option = "vulkan",
@@ -72,6 +74,8 @@ if is_plat("wasm") then
 	backends.Vulkan = nil
 end
 
+add_requires("tiny-c-thread")
+
 for name, module in pairs(backends) do
 	if has_config(module.option) then
 		if module.packages then
@@ -85,6 +89,7 @@ target("pulse_gpu")
 	add_defines("PULSE_BUILD")
 	add_headerfiles("Sources/*.h", { prefixdir = "private", install = false })
 	add_headerfiles("Sources/*.inl", { prefixdir = "private", install = false })
+	add_packages("tiny-c-thread")
 	
 	add_files("Sources/*.c")
 
