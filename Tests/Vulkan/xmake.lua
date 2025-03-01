@@ -108,6 +108,7 @@ if has_config("vulkan-tests") then
 		if is_plat("linux") then
 			add_packages("libbacktrace")
 			set_extension(".x86_64")
+			add_defines("BACKTRACE")
 		end
 	target_end()
 end

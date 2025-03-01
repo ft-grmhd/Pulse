@@ -140,32 +140,29 @@ PulseImage VulkanCreateImage(PulseDevice device, const PulseImageCreateInfo* cre
 	CHECK_VK_RETVAL(device->backend, vmaCreateImage(vulkan_device->allocator, &image_create_info, &allocation_create_info, &vulkan_image->image, &vulkan_image->allocation, PULSE_NULLPTR), PULSE_ERROR_INITIALIZATION_FAILED, PULSE_NULL_HANDLE);
 	vmaGetAllocationInfo(vulkan_device->allocator, vulkan_image->allocation, &vulkan_image->allocation_info);
 
-	if(create_infos->usage & PULSE_IMAGE_USAGE_STORAGE_READ)
-	{
-		VkImageViewCreateInfo image_view_create_info = { 0 };
-		image_view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		image_view_create_info.image = vulkan_image->image;
-		image_view_create_info.format = PulseImageFormatToVkFormat[create_infos->format];
-		image_view_create_info.components = SwizzleForFormat(create_infos->format);
-		image_view_create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		image_view_create_info.subresourceRange.baseMipLevel = 0;
-		image_view_create_info.subresourceRange.levelCount = 1;
-		image_view_create_info.subresourceRange.baseArrayLayer = 0;
-		image_view_create_info.subresourceRange.layerCount = layer_count;
+	VkImageViewCreateInfo image_view_create_info = { 0 };
+	image_view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	image_view_create_info.image = vulkan_image->image;
+	image_view_create_info.format = PulseImageFormatToVkFormat[create_infos->format];
+	image_view_create_info.components = SwizzleForFormat(create_infos->format);
+	image_view_create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	image_view_create_info.subresourceRange.baseMipLevel = 0;
+	image_view_create_info.subresourceRange.levelCount = 1;
+	image_view_create_info.subresourceRange.baseArrayLayer = 0;
+	image_view_create_info.subresourceRange.layerCount = layer_count;
 
-		if(create_infos->type == PULSE_IMAGE_TYPE_CUBE)
-			image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_CUBE;
-		else if(create_infos->type == PULSE_IMAGE_TYPE_CUBE_ARRAY)
-			image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_CUBE_ARRAY;
-		else if(create_infos->type == PULSE_IMAGE_TYPE_3D)
-			image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_3D;
-		else if(create_infos->type == PULSE_IMAGE_TYPE_2D_ARRAY)
-			image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY;
-		else
-			image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+	if(create_infos->type == PULSE_IMAGE_TYPE_CUBE)
+		image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_CUBE;
+	else if(create_infos->type == PULSE_IMAGE_TYPE_CUBE_ARRAY)
+		image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_CUBE_ARRAY;
+	else if(create_infos->type == PULSE_IMAGE_TYPE_3D)
+		image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_3D;
+	else if(create_infos->type == PULSE_IMAGE_TYPE_2D_ARRAY)
+		image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY;
+	else
+		image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
 
-		CHECK_VK_RETVAL(device->backend, vulkan_device->vkCreateImageView(vulkan_device->device, &image_view_create_info, PULSE_NULLPTR, &vulkan_image->view), PULSE_ERROR_INITIALIZATION_FAILED, PULSE_NULL_HANDLE);
-	}
+	CHECK_VK_RETVAL(device->backend, vulkan_device->vkCreateImageView(vulkan_device->device, &image_view_create_info, PULSE_NULLPTR, &vulkan_image->view), PULSE_ERROR_INITIALIZATION_FAILED, PULSE_NULL_HANDLE);
 
 	return image;
 }
