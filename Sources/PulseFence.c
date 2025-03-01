@@ -28,5 +28,11 @@ PULSE_API bool PulseWaitForFences(PulseDevice device, const PulseFence* fences, 
 {
 	PULSE_CHECK_HANDLE_RETVAL(device, false);
 	PULSE_CHECK_PTR_RETVAL(fences, false);
-	return device->PFN_WaitForFences(device, fences, fences_count, wait_for_all);
+	bool res = device->PFN_WaitForFences(device, fences, fences_count, wait_for_all);
+	if(res)
+	{
+		for(uint32_t i = 0; i < fences_count; i++)
+			fences[i]->cmd->state = PULSE_COMMAND_LIST_STATE_READY;
+	}
+	return res;
 }

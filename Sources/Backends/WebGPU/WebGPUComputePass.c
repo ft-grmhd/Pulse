@@ -3,6 +3,7 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
 #include <Pulse.h>
+#include "../../PulseInternal.h"
 #include "WebGPU.h"
 #include "WebGPUDevice.h"
 #include "WebGPUComputePass.h"

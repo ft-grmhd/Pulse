@@ -127,7 +127,7 @@ typedef enum PulseImageType
 
 typedef enum PulseImageFormat
 {
-	PULSE_IMAGE_FORMAT_INVALID,
+	PULSE_IMAGE_FORMAT_INVALID = 0,
 	// Unsigned Normalized Float Color Formats
 	PULSE_IMAGE_FORMAT_A8_UNORM,
 	PULSE_IMAGE_FORMAT_R8_UNORM,
@@ -191,6 +191,12 @@ typedef enum PulseImageFormat
 
 	PULSE_IMAGE_FORMAT_MAX_ENUM // For internal use only
 } PulseImageFormat;
+
+typedef enum PulseMapMode
+{
+	PULSE_MAP_READ,
+	PULSE_MAP_WRITE,
+} PulseMapMode;
 
 // Structs
 typedef struct PulseBufferCreateInfo
@@ -257,7 +263,7 @@ PULSE_API bool PulseDeviceSupportsShaderFormats(PulseDevice device, PulseShaderF
 PULSE_API void PulseDestroyDevice(PulseDevice device);
 
 PULSE_API PulseBuffer PulseCreateBuffer(PulseDevice device, const PulseBufferCreateInfo* create_infos);
-PULSE_API bool PulseMapBuffer(PulseBuffer buffer, void** data);
+PULSE_API bool PulseMapBuffer(PulseBuffer buffer, PulseMapMode mode, void** data);
 PULSE_API void PulseUnmapBuffer(PulseBuffer buffer);
 PULSE_API bool PulseCopyBufferToBuffer(PulseCommandList cmd, const PulseBufferRegion* src, const PulseBufferRegion* dst);
 PULSE_API bool PulseCopyBufferToImage(PulseCommandList cmd, const PulseBufferRegion* src, const PulseImageRegion* dst);

@@ -24,6 +24,8 @@ PulseBackendFlags WebGPUCheckSupport(PulseBackendFlags candidates, PulseShaderFo
 
 bool WebGPULoadBackend(PulseBackend backend, PulseDebugLevel debug_level)
 {
+	PULSE_UNUSED(backend);
+	PULSE_UNUSED(debug_level);
 	WebGPUDriverData* driver_data = (WebGPUDriverData*)calloc(1, sizeof(WebGPUDriverData));
 	PULSE_CHECK_ALLOCATION_RETVAL(driver_data, false);
 	driver_data->instance = wgpuCreateInstance(PULSE_NULLPTR);

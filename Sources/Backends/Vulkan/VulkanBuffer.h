@@ -23,7 +23,7 @@ typedef struct VulkanBuffer
 } VulkanBuffer;
 
 PulseBuffer VulkanCreateBuffer(PulseDevice device, const PulseBufferCreateInfo* create_infos);
-bool VulkanMapBuffer(PulseBuffer buffer, void** data);
+bool VulkanMapBuffer(PulseBuffer buffer, PulseMapMode mode, void** data);
 void VulkanUnmapBuffer(PulseBuffer buffer);
 bool VulkanCopyBufferToBuffer(PulseCommandList cmd, const PulseBufferRegion* src, const PulseBufferRegion* dst);
 bool VulkanCopyBufferToImage(PulseCommandList cmd, const PulseBufferRegion* src, const PulseImageRegion* dst);

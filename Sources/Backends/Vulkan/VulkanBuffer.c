@@ -29,12 +29,12 @@ PulseBuffer VulkanCreateBuffer(PulseDevice device, const PulseBufferCreateInfo* 
 
 	if(buffer->usage & PULSE_BUFFER_USAGE_TRANSFER_UPLOAD)
 	{
-		vulkan_buffer->usage |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+		vulkan_buffer->usage |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 		allocation_create_info.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
 	}
 	if(buffer->usage & PULSE_BUFFER_USAGE_TRANSFER_DOWNLOAD)
 	{
-		vulkan_buffer->usage |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+		vulkan_buffer->usage |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 		allocation_create_info.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
 	}
 	if(buffer->usage & PULSE_INTERNAL_BUFFER_USAGE_UNIFORM_ACCESS)
@@ -57,8 +57,9 @@ PulseBuffer VulkanCreateBuffer(PulseDevice device, const PulseBufferCreateInfo* 
 	return buffer;
 }
 
-bool VulkanMapBuffer(PulseBuffer buffer, void** data)
+bool VulkanMapBuffer(PulseBuffer buffer, PulseMapMode mode, void** data)
 {
+	PULSE_UNUSED(mode);
 	VulkanBuffer* vulkan_buffer = VULKAN_RETRIEVE_DRIVER_DATA_AS(buffer, VulkanBuffer*);
 	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(buffer->device, VulkanDevice*);
 	CHECK_VK_RETVAL(buffer->device->backend, vmaMapMemory(vulkan_device->allocator, vulkan_buffer->allocation, data), PULSE_ERROR_MAP_FAILED, false);

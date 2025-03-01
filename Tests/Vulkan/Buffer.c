@@ -78,20 +78,20 @@ void TestBufferMapping()
 
 	PulseBufferCreateInfo buffer_create_info = { 0 };
 	buffer_create_info.size = 8;
-	buffer_create_info.usage = PULSE_BUFFER_USAGE_TRANSFER_UPLOAD;
+	buffer_create_info.usage = PULSE_BUFFER_USAGE_TRANSFER_UPLOAD | PULSE_BUFFER_USAGE_TRANSFER_DOWNLOAD;
 	PulseBuffer buffer = PulseCreateBuffer(device, &buffer_create_info);
 	TEST_ASSERT_NOT_EQUAL_MESSAGE(buffer, PULSE_NULL_HANDLE, PulseVerbaliseErrorType(PulseGetLastErrorType()));
 
 	{
 		void* ptr;
-		TEST_ASSERT_NOT_EQUAL_MESSAGE(PulseMapBuffer(buffer, &ptr), false, PulseVerbaliseErrorType(PulseGetLastErrorType()));
+		TEST_ASSERT_NOT_EQUAL_MESSAGE(PulseMapBuffer(buffer, PULSE_MAP_WRITE, &ptr), false, PulseVerbaliseErrorType(PulseGetLastErrorType()));
 		TEST_ASSERT_NOT_NULL(ptr);
 		memcpy(ptr, data, 8);
 		PulseUnmapBuffer(buffer);
 	}
 	{
 		void* ptr;
-		TEST_ASSERT_NOT_EQUAL_MESSAGE(PulseMapBuffer(buffer, &ptr), false, PulseVerbaliseErrorType(PulseGetLastErrorType()));
+		TEST_ASSERT_NOT_EQUAL_MESSAGE(PulseMapBuffer(buffer, PULSE_MAP_READ, &ptr), false, PulseVerbaliseErrorType(PulseGetLastErrorType()));
 		TEST_ASSERT_NOT_NULL(ptr);
 		TEST_ASSERT_EQUAL(memcmp(ptr, data, 8), 0);
 		PulseUnmapBuffer(buffer);
@@ -99,7 +99,7 @@ void TestBufferMapping()
 
 	DISABLE_ERRORS;
 		void* ptr;
-		TEST_ASSERT_NOT_EQUAL_MESSAGE(PulseMapBuffer(buffer, &ptr), false, PulseVerbaliseErrorType(PulseGetLastErrorType()));
+		TEST_ASSERT_NOT_EQUAL_MESSAGE(PulseMapBuffer(buffer, PULSE_MAP_READ, &ptr), false, PulseVerbaliseErrorType(PulseGetLastErrorType()));
 		PulseDestroyBuffer(device, buffer);
 	ENABLE_ERRORS;
 
@@ -124,7 +124,7 @@ void TestBufferCopy()
 
 	{
 		void* ptr;
-		TEST_ASSERT_NOT_EQUAL_MESSAGE(PulseMapBuffer(src_buffer, &ptr), false, PulseVerbaliseErrorType(PulseGetLastErrorType()));
+		TEST_ASSERT_NOT_EQUAL_MESSAGE(PulseMapBuffer(src_buffer, PULSE_MAP_WRITE, &ptr), false, PulseVerbaliseErrorType(PulseGetLastErrorType()));
 		TEST_ASSERT_NOT_NULL(ptr);
 		memcpy(ptr, data, 8);
 		PulseUnmapBuffer(src_buffer);
@@ -158,7 +158,7 @@ void TestBufferCopy()
 
 	{
 		void* ptr;
-		TEST_ASSERT_NOT_EQUAL_MESSAGE(PulseMapBuffer(dst_buffer, &ptr), false, PulseVerbaliseErrorType(PulseGetLastErrorType()));
+		TEST_ASSERT_NOT_EQUAL_MESSAGE(PulseMapBuffer(dst_buffer, PULSE_MAP_READ, &ptr), false, PulseVerbaliseErrorType(PulseGetLastErrorType()));
 		TEST_ASSERT_NOT_NULL(ptr);
 		TEST_ASSERT_EQUAL(memcmp(ptr, data, 8), 0);
 		PulseUnmapBuffer(dst_buffer);
@@ -192,7 +192,7 @@ void TestBufferCopy()
 
 	DISABLE_ERRORS;
 		void* ptr;
-		TEST_ASSERT_NOT_EQUAL_MESSAGE(PulseMapBuffer(src_buffer, &ptr), false, PulseVerbaliseErrorType(PulseGetLastErrorType()));
+		TEST_ASSERT_NOT_EQUAL_MESSAGE(PulseMapBuffer(src_buffer, PULSE_MAP_READ, &ptr), false, PulseVerbaliseErrorType(PulseGetLastErrorType()));
 		PulseDestroyBuffer(device, src_buffer);
 	ENABLE_ERRORS;
 
@@ -219,7 +219,7 @@ void TestBufferCopyImage()
 
 	{
 		void* ptr;
-		TEST_ASSERT_NOT_EQUAL_MESSAGE(PulseMapBuffer(buffer, &ptr), false, PulseVerbaliseErrorType(PulseGetLastErrorType()));
+		TEST_ASSERT_NOT_EQUAL_MESSAGE(PulseMapBuffer(buffer, PULSE_MAP_WRITE, &ptr), false, PulseVerbaliseErrorType(PulseGetLastErrorType()));
 		TEST_ASSERT_NOT_NULL(ptr);
 		memcpy(ptr, data, 8);
 		PulseUnmapBuffer(buffer);
@@ -310,7 +310,7 @@ void TestBufferComputeWrite()
 		void* ptr;
 		uint32_t data[256];
 		memset(data, 0xFF, 256 * sizeof(uint32_t));
-		TEST_ASSERT_NOT_EQUAL_MESSAGE(PulseMapBuffer(buffer, &ptr), false, PulseVerbaliseErrorType(PulseGetLastErrorType()));
+		TEST_ASSERT_NOT_EQUAL_MESSAGE(PulseMapBuffer(buffer, PULSE_MAP_READ, &ptr), false, PulseVerbaliseErrorType(PulseGetLastErrorType()));
 		TEST_ASSERT_NOT_NULL(ptr);
 		TEST_ASSERT_EQUAL(memcmp(ptr, data, 256 * sizeof(uint32_t)), 0);
 		PulseUnmapBuffer(buffer);
@@ -347,7 +347,7 @@ void TestBufferComputeCopy()
 
 	{
 		void* ptr;
-		TEST_ASSERT_NOT_EQUAL_MESSAGE(PulseMapBuffer(read_buffer, &ptr), false, PulseVerbaliseErrorType(PulseGetLastErrorType()));
+		TEST_ASSERT_NOT_EQUAL_MESSAGE(PulseMapBuffer(read_buffer, PULSE_MAP_WRITE, &ptr), false, PulseVerbaliseErrorType(PulseGetLastErrorType()));
 		TEST_ASSERT_NOT_NULL(ptr);
 		memcpy(ptr, data, 256 * sizeof(uint32_t));
 		PulseUnmapBuffer(read_buffer);
@@ -378,7 +378,7 @@ void TestBufferComputeCopy()
 
 	{
 		void* ptr;
-		TEST_ASSERT_NOT_EQUAL_MESSAGE(PulseMapBuffer(write_buffer, &ptr), false, PulseVerbaliseErrorType(PulseGetLastErrorType()));
+		TEST_ASSERT_NOT_EQUAL_MESSAGE(PulseMapBuffer(write_buffer, PULSE_MAP_READ, &ptr), false, PulseVerbaliseErrorType(PulseGetLastErrorType()));
 		TEST_ASSERT_NOT_NULL(ptr);
 		TEST_ASSERT_EQUAL(memcmp(ptr, data, 256 * sizeof(uint32_t)), 0);
 		PulseUnmapBuffer(write_buffer);

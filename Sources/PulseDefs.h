@@ -61,35 +61,37 @@
 		array[defrag_i] = array[defrag_i + 1]; \
 
 #define PULSE_CHECK_COMMAND_LIST_STATE_RETVAL(cmd, retval) \
-	if(cmd->state != PULSE_COMMAND_LIST_STATE_RECORDING) \
-	{ \
-		switch(cmd->state) \
+	do { \
+		if(cmd->state != PULSE_COMMAND_LIST_STATE_RECORDING) \
 		{ \
-			case PULSE_COMMAND_LIST_STATE_INVALID: \
-				if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(cmd->device->backend)) \
-					PulseLogError(cmd->device->backend, "command list is in invalid state"); \
-			return retval; \
-			case PULSE_COMMAND_LIST_STATE_READY: \
-				if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(cmd->device->backend)) \
-					PulseLogError(cmd->device->backend, "command list is not recording"); \
-			return retval; \
-			case PULSE_COMMAND_LIST_STATE_SENT: \
-				if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(cmd->device->backend)) \
-					PulseLogWarning(cmd->device->backend, "command list has already been submitted"); \
-			return retval; \
-			default: break; \
+			switch(cmd->state) \
+			{ \
+				case PULSE_COMMAND_LIST_STATE_INVALID: \
+					if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(cmd->device->backend)) \
+						PulseLogError(cmd->device->backend, "command list is in invalid state"); \
+				return retval; \
+				case PULSE_COMMAND_LIST_STATE_READY: \
+					if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(cmd->device->backend)) \
+						PulseLogError(cmd->device->backend, "command list is not recording"); \
+				return retval; \
+				case PULSE_COMMAND_LIST_STATE_SENT: \
+					if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(cmd->device->backend)) \
+						PulseLogWarning(cmd->device->backend, "command list has already been submitted"); \
+				return retval; \
+				default: break; \
+			} \
 		} \
-	} \
+	} while(0); \
 
 #define PULSE_CHECK_COMMAND_LIST_STATE(cmd) PULSE_CHECK_COMMAND_LIST_STATE_RETVAL(cmd, )
 
 #ifndef PULSE_STATIC_ASSERT
 	#ifdef __cplusplus
 		#if __cplusplus >= 201103L
-			#define PULSE_STATIC_ASSERT(name, x)  static_assert(x, #x)
+			#define PULSE_STATIC_ASSERT(name, x) static_assert(x, #x)
 		#endif
 	#elif PULSE_C_VERSION >= 2023
-		#define PULSE_STATIC_ASSERT(name, x)  static_assert(x, #x)
+		#define PULSE_STATIC_ASSERT(name, x) static_assert(x, #x)
 	#elif PULSE_C_VERSION >= 2011
 		#define PULSE_STATIC_ASSERT(name, x) _Static_assert(x, #x)
 	#else

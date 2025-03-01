@@ -35,7 +35,7 @@
 		device->adapter = adapter;
 	}
 #else
-	static uint64_t WebGPUScoreAdapter(WGPUInstance instance, WGPUAdapter adapter)
+	static uint64_t WebGPUScoreAdapter(WGPUAdapter adapter)
 	{
 		uint64_t score = 0;
 		WGPUAdapterInfo infos;
@@ -172,7 +172,7 @@ PulseDevice WebGPUCreateDevice(PulseBackend backend, PulseDevice* forbiden_devic
 		{
 			if(WebGPUIsDeviceForbidden(adapters[i], forbiden_devices, forbiden_devices_count))
 				continue;
-			uint64_t current_device_score = WebGPUScoreAdapter(instance, adapters[i]);
+			uint64_t current_device_score = WebGPUScoreAdapter(adapters[i]);
 			if(current_device_score > best_device_score)
 			{
 				best_device_score = current_device_score;
@@ -196,7 +196,7 @@ PulseDevice WebGPUCreateDevice(PulseBackend backend, PulseDevice* forbiden_devic
 
 	WGPUDeviceLostCallbackInfo lost_callback = { 0 };
 	lost_callback.callback = WebGPUDeviceLostCallback;
-	lost_callback.mode = WGPUCallbackMode_AllowProcessEvents;
+	lost_callback.mode = WGPUCallbackMode_AllowSpontaneous;
 	lost_callback.userdata1 = device;
 	lost_callback.userdata2 = backend;
 	WGPUUncapturedErrorCallbackInfo uncaptured_callback = { 0 };
@@ -209,7 +209,7 @@ PulseDevice WebGPUCreateDevice(PulseBackend backend, PulseDevice* forbiden_devic
 	descriptor.uncapturedErrorCallbackInfo = uncaptured_callback;
 	WGPURequestDeviceCallbackInfo device_callback = { 0 };
 	device_callback.callback = WebGPURequestDeviceCallback;
-	device_callback.mode = WGPUCallbackMode_AllowProcessEvents;
+	device_callback.mode = WGPUCallbackMode_AllowSpontaneous;
 	device_callback.userdata1 = device;
 	device_callback.userdata2 = backend;
 	wgpuAdapterRequestDevice(device->adapter, &descriptor, device_callback);

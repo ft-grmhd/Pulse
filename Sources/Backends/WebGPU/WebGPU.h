@@ -23,4 +23,3 @@ PulseBackendFlags WebGPUCheckSupport(PulseBackendFlags candidates, PulseShaderFo
 #endif // PULSE_WEBGPU_H_
 
 #endif // PULSE_ENABLE_WEBGPU_BACKEND
-

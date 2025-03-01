@@ -19,6 +19,7 @@ PULSE_API PulseBuffer PulseCreateBuffer(PulseDevice device, const PulseBufferCre
 			return PULSE_NULL_HANDLE;
 		}
 	}
+
 	PulseBuffer buffer = device->PFN_CreateBuffer(device, create_infos);
 	if(buffer == PULSE_NULL_HANDLE)
 		return PULSE_NULL_HANDLE;
@@ -28,11 +29,53 @@ PULSE_API PulseBuffer PulseCreateBuffer(PulseDevice device, const PulseBufferCre
 	return buffer;
 }
 
-PULSE_API bool PulseMapBuffer(PulseBuffer buffer, void** data)
+PULSE_API bool PulseMapBuffer(PulseBuffer buffer, PulseMapMode mode, void** data)
 {
 	PULSE_CHECK_HANDLE_RETVAL(buffer, false);
 	PULSE_CHECK_PTR_RETVAL(data, false);
-	bool res = buffer->device->PFN_MapBuffer(buffer, data);
+
+	if(buffer->is_mapped)
+	{
+		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(buffer->device->backend))
+			PulseLogError(buffer->device->backend, "buffer is already mapped");
+		PulseSetInternalError(PULSE_ERROR_MAP_FAILED);
+		return false;
+	}
+
+	PulseFlags storage_flags = PULSE_BUFFER_USAGE_STORAGE_READ | PULSE_BUFFER_USAGE_STORAGE_WRITE;
+	if((buffer->usage & storage_flags) != 0)
+	{
+		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(buffer->device->backend))
+			PulseLogError(buffer->device->backend, "cannot map a buffer that has been created with storage flags");
+		PulseSetInternalError(PULSE_ERROR_MAP_FAILED);
+		return false;
+	}
+
+	PulseFlags transfer_flags = PULSE_BUFFER_USAGE_TRANSFER_UPLOAD | PULSE_BUFFER_USAGE_TRANSFER_DOWNLOAD;
+	if((buffer->usage & transfer_flags) == 0)
+	{
+		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(buffer->device->backend))
+			PulseLogError(buffer->device->backend, "cannot map a buffer that has not been created with upload or download flags");
+		PulseSetInternalError(PULSE_ERROR_MAP_FAILED);
+		return false;
+	}
+
+	if((buffer->usage & PULSE_BUFFER_USAGE_TRANSFER_UPLOAD) == 0 && mode == PULSE_MAP_WRITE)
+	{
+		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(buffer->device->backend))
+			PulseLogError(buffer->device->backend, "cannot map a buffer that has not been created with upload flags for writting");
+		PulseSetInternalError(PULSE_ERROR_MAP_FAILED);
+		return false;
+	}
+	if((buffer->usage & PULSE_BUFFER_USAGE_TRANSFER_DOWNLOAD) == 0 && mode == PULSE_MAP_READ)
+	{
+		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(buffer->device->backend))
+			PulseLogError(buffer->device->backend, "cannot map a buffer that has not been created with download flags for reading");
+		PulseSetInternalError(PULSE_ERROR_MAP_FAILED);
+		return false;
+	}
+
+	bool res = buffer->device->PFN_MapBuffer(buffer, mode, data);
 	if(res)
 		buffer->is_mapped = true;
 	return res;
@@ -41,6 +84,14 @@ PULSE_API bool PulseMapBuffer(PulseBuffer buffer, void** data)
 PULSE_API void PulseUnmapBuffer(PulseBuffer buffer)
 {
 	PULSE_CHECK_HANDLE(buffer);
+
+	if(!buffer->is_mapped)
+	{
+		if(PULSE_IS_BACKEND_HIGH_LEVEL_DEBUG(buffer->device->backend))
+			PulseLogError(buffer->device->backend, "buffer is not mapped");
+		return;
+	}
+
 	buffer->device->PFN_UnmapBuffer(buffer);
 	buffer->is_mapped = false;
 }

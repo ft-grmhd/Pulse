@@ -109,7 +109,7 @@ bool VulkanSubmitCommandList(PulseDevice device, PulseCommandList cmd, PulseFenc
 		default: break;
 	}
 
-	VkFence vulkan_fence;
+	VkFence vulkan_fence = VK_NULL_HANDLE;
 	if(fence != PULSE_NULL_HANDLE)
 	{
 		vulkan_fence = VULKAN_RETRIEVE_DRIVER_DATA_AS(fence, VkFence);
@@ -132,7 +132,10 @@ bool VulkanSubmitCommandList(PulseDevice device, PulseCommandList cmd, PulseFenc
 	submit_info.commandBufferCount = 1;
 	submit_info.pCommandBuffers = &vulkan_cmd->cmd;
 	res = vulkan_device->vkQueueSubmit(vulkan_queue->queue, 1, &submit_info, vulkan_fence);
-	cmd->state = PULSE_COMMAND_LIST_STATE_SENT;
+	if(fence != PULSE_NULL_HANDLE)
+		cmd->state = PULSE_COMMAND_LIST_STATE_SENT;
+	else
+		cmd->state = PULSE_COMMAND_LIST_STATE_READY;
 	switch(res)
 	{
 		case VK_SUCCESS: return true;

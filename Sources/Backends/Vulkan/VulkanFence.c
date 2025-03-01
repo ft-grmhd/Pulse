@@ -93,10 +93,7 @@ bool VulkanWaitForFences(PulseDevice device, const PulseFence* fences, uint32_t 
 	free(vulkan_fences);
 	switch(result)
 	{
-		case VK_SUCCESS:
-			for(uint32_t i = 0; i < fences_count; i++)
-				fences[i]->cmd->state = PULSE_COMMAND_LIST_STATE_READY;
-		break;
+		case VK_SUCCESS: break;
 		case VK_TIMEOUT: break;
 
 		case VK_ERROR_DEVICE_LOST: PulseSetInternalError(PULSE_ERROR_DEVICE_LOST); return false;

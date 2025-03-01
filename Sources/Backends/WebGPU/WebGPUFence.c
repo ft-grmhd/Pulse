@@ -35,10 +35,8 @@ bool WebGPUIsFenceReady(PulseDevice device, PulseFence fence)
 {
 	PULSE_UNUSED(device);
 	WebGPUFence* webgpu_fence = WEBGPU_RETRIEVE_DRIVER_DATA_AS(fence, WebGPUFence*);
-	return atomic_load(&webgpu_fence->signal) == true;
+	return atomic_load(&webgpu_fence->signal);
 }
-
-#include <stdio.h>
 
 bool WebGPUWaitForFences(PulseDevice device, const PulseFence* fences, uint32_t fences_count, bool wait_for_all)
 {

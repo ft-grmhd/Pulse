@@ -41,15 +41,17 @@ PulseCommandList WebGPURequestCommandList(PulseDevice device, PulseCommandListUs
 	return cmd;
 }
 
-#include <stdio.h>
-
 static void WebGPUFenceCallback(WGPUQueueWorkDoneStatus status, void* userdata1, void* userdata2)
 {
 	PULSE_UNUSED(userdata2);
 	WebGPUFence* webgpu_fence = (WebGPUFence*)userdata1;
+	PulseCommandList cmd = (PulseCommandList)userdata2;
 	if(status == WGPUQueueWorkDoneStatus_Success)
-		atomic_store(&webgpu_fence->signal, true);
-	puts("test");
+	{
+		if(webgpu_fence != PULSE_NULLPTR)
+			atomic_store(&webgpu_fence->signal, true);
+		cmd->state = PULSE_COMMAND_LIST_STATE_READY;
+	}
 }
 
 bool WebGPUSubmitCommandList(PulseDevice device, PulseCommandList cmd, PulseFence fence)
@@ -60,16 +62,22 @@ bool WebGPUSubmitCommandList(PulseDevice device, PulseCommandList cmd, PulseFenc
 	WGPUCommandBufferDescriptor command_buffer_descriptor = { 0 };
 	WGPUCommandBuffer command_buffer = wgpuCommandEncoderFinish(webgpu_cmd->encoder, &command_buffer_descriptor);
 
-	wgpuQueueSubmit(webgpu_device->queue, 1, &command_buffer);
-
-	WebGPUFence* webgpu_fence = WEBGPU_RETRIEVE_DRIVER_DATA_AS(fence, WebGPUFence*);
-	atomic_store(&webgpu_fence->signal, false);
-
 	WGPUQueueWorkDoneCallbackInfo callback = { 0 };
 	callback.mode = WGPUCallbackMode_AllowSpontaneous;
 	callback.callback = WebGPUFenceCallback;
-	callback.userdata1 = webgpu_fence;
+	callback.userdata1 = PULSE_NULLPTR;
+	callback.userdata2 = cmd;
+	if(fence != PULSE_NULL_HANDLE)
+	{
+		WebGPUFence* webgpu_fence = WEBGPU_RETRIEVE_DRIVER_DATA_AS(fence, WebGPUFence*);
+		callback.userdata1 = webgpu_fence;
+		atomic_store(&webgpu_fence->signal, false);
+		fence->cmd = cmd;
+	}
 	wgpuQueueOnSubmittedWorkDone(webgpu_device->queue, callback);
+
+	cmd->state = PULSE_COMMAND_LIST_STATE_SENT;
+	wgpuQueueSubmit(webgpu_device->queue, 1, &command_buffer);
 
 	wgpuCommandBufferRelease(command_buffer);
 	return true;

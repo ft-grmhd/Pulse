@@ -3,13 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define CHECK_PULSE_HANDLE_RETVAL(handle, retval) \
-	if(handle == PULSE_NULL_HANDLE) \
-	{ \
-		fprintf(stderr, "Error: %s\n", PulseVerbaliseErrorType(PulseGetLastErrorType())); \
-		return retval; \
-	} \
-
 void DebugCallBack(PulseDebugMessageSeverity severity, const char* message)
 {
 	if(severity == PULSE_DEBUG_MESSAGE_SEVERITY_ERROR)
@@ -23,62 +16,85 @@ void DebugCallBack(PulseDebugMessageSeverity severity, const char* message)
 		printf("Pulse: %s\n", message);
 }
 
+#define BUFFER_SIZE (256 * sizeof(uint32_t))
+
 int main(void)
 {
 	PulseBackend backend = PulseLoadBackend(PULSE_BACKEND_VULKAN, PULSE_SHADER_FORMAT_SPIRV_BIT, PULSE_HIGH_DEBUG);
-	CHECK_PULSE_HANDLE_RETVAL(backend, 1);
 	PulseSetDebugCallback(backend, DebugCallBack);
 	PulseDevice device = PulseCreateDevice(backend, NULL, 0);
-	CHECK_PULSE_HANDLE_RETVAL(device, 1);
-
-	const uint8_t shader_bytecode[] = {
-		#include "shader.spv.h"
-	};
-
-	PulseComputePipelineCreateInfo info = { 0 };
-	info.code_size = sizeof(shader_bytecode);
-	info.code = shader_bytecode;
-	info.entrypoint = "main";
-	info.format = PULSE_SHADER_FORMAT_SPIRV_BIT;
-	info.num_readwrite_storage_buffers = 1;
-
-	PulseComputePipeline pipeline = PulseCreateComputePipeline(device, &info);
-	CHECK_PULSE_HANDLE_RETVAL(pipeline, 1);
 
 	PulseBufferCreateInfo buffer_create_info = { 0 };
-	buffer_create_info.size = 256 * sizeof(uint32_t);
+	buffer_create_info.size = BUFFER_SIZE;
 	buffer_create_info.usage = PULSE_BUFFER_USAGE_STORAGE_READ | PULSE_BUFFER_USAGE_STORAGE_WRITE | PULSE_BUFFER_USAGE_TRANSFER_DOWNLOAD;
-
 	PulseBuffer buffer = PulseCreateBuffer(device, &buffer_create_info);
-	CHECK_PULSE_HANDLE_RETVAL(buffer, 1);
 
-	PulseFence fence = PulseCreateFence(device);
-	CHECK_PULSE_HANDLE_RETVAL(fence, 1);
-	PulseCommandList cmd = PulseRequestCommandList(device, PULSE_COMMAND_LIST_GENERAL);
-	CHECK_PULSE_HANDLE_RETVAL(cmd, 1);
+	// GPU computations
+	{
+		const uint8_t shader_bytecode[] = {
+			#include "shader.spv.h"
+		};
 
-	PulseComputePass pass = PulseBeginComputePass(cmd);
-	CHECK_PULSE_HANDLE_RETVAL(pass, 1);
-		PulseBindStorageBuffers(pass, &buffer, 1);
-		PulseBindComputePipeline(pass, pipeline);
-		PulseDispatchComputations(pass, 32, 32, 1);
-	PulseEndComputePass(pass);
+		PulseComputePipelineCreateInfo info = { 0 };
+		info.code_size = sizeof(shader_bytecode);
+		info.code = shader_bytecode;
+		info.entrypoint = "main";
+		info.format = PULSE_SHADER_FORMAT_SPIRV_BIT;
+		info.num_readwrite_storage_buffers = 1;
+		PulseComputePipeline pipeline = PulseCreateComputePipeline(device, &info);
 
-	if(!PulseSubmitCommandList(device, cmd, fence))
-		fprintf(stderr, "Could not submit command list, %s\n", PulseVerbaliseErrorType(PulseGetLastErrorType()));
-	if(!PulseWaitForFences(device, &fence, 1, true))
-		fprintf(stderr, "Could not wait for fences, %s\n", PulseVerbaliseErrorType(PulseGetLastErrorType()));
+		PulseFence fence = PulseCreateFence(device);
+		PulseCommandList cmd = PulseRequestCommandList(device, PULSE_COMMAND_LIST_GENERAL);
 
-	void* ptr;
-	PulseMapBuffer(buffer, &ptr);
-	for(uint32_t i = 0; i < 256; i++)
-		printf("%d, ", ((int32_t*)ptr)[i]);
-	puts("");
-	PulseUnmapBuffer(buffer);
+		PulseComputePass pass = PulseBeginComputePass(cmd);
+			PulseBindStorageBuffers(pass, &buffer, 1);
+			PulseBindComputePipeline(pass, pipeline);
+			PulseDispatchComputations(pass, 32, 32, 1);
+		PulseEndComputePass(pass);
 
-	PulseReleaseCommandList(device, cmd);
-	PulseDestroyFence(device, fence);
-	PulseDestroyComputePipeline(device, pipeline);
+		PulseSubmitCommandList(device, cmd, fence);
+		PulseWaitForFences(device, &fence, 1, true);
+
+		PulseReleaseCommandList(device, cmd);
+		PulseDestroyFence(device, fence);
+		PulseDestroyComputePipeline(device, pipeline);
+	}
+
+	// Get result and read it on CPU
+	{
+		PulseBufferCreateInfo staging_buffer_create_info = { 0 };
+		staging_buffer_create_info.size = BUFFER_SIZE;
+		staging_buffer_create_info.usage = PULSE_BUFFER_USAGE_TRANSFER_UPLOAD | PULSE_BUFFER_USAGE_TRANSFER_DOWNLOAD;
+		PulseBuffer staging_buffer = PulseCreateBuffer(device, &staging_buffer_create_info);
+
+		PulseFence fence = PulseCreateFence(device);
+		PulseCommandList cmd = PulseRequestCommandList(device, PULSE_COMMAND_LIST_TRANSFER_ONLY);
+
+		PulseBufferRegion src_region = { 0 };
+		src_region.buffer = buffer;
+		src_region.size = BUFFER_SIZE;
+
+		PulseBufferRegion dst_region = { 0 };
+		dst_region.buffer = staging_buffer;
+		dst_region.size = BUFFER_SIZE;
+
+		PulseCopyBufferToBuffer(cmd, &src_region, &dst_region);
+
+		PulseSubmitCommandList(device, cmd, fence);
+		PulseWaitForFences(device, &fence, 1, true);
+
+		void* ptr;
+		PulseMapBuffer(staging_buffer, PULSE_MAP_READ, &ptr);
+		for(uint32_t i = 0; i < BUFFER_SIZE / sizeof(uint32_t); i++)
+			printf("%d, ", ((int32_t*)ptr)[i]);
+		puts("");
+		PulseUnmapBuffer(staging_buffer);
+
+		PulseDestroyBuffer(device, staging_buffer);
+
+		PulseReleaseCommandList(device, cmd);
+		PulseDestroyFence(device, fence);
+	}
 
 	PulseDestroyBuffer(device, buffer);
 
