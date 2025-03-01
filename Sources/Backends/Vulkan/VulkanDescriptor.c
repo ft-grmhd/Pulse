@@ -250,6 +250,8 @@ void VulkanReturnDescriptorSetToPool(VulkanDescriptorSetPool* pool, const Vulkan
 	}
 }
 
+#include <stdio.h>
+
 void VulkanBindDescriptorSets(PulseComputePass pass)
 {
 	VulkanComputePass* vulkan_pass = VULKAN_RETRIEVE_DRIVER_DATA_AS(pass, VulkanComputePass*);
@@ -424,6 +426,7 @@ void VulkanBindDescriptorSets(PulseComputePass pass)
 		vulkan_pass->should_recreate_uniform_descriptor_sets = false;
 	}
 
+	fprintf(stderr, "test %p, %p, %p, %d\n", vulkan_device, vulkan_device->vkUpdateDescriptorSets, vulkan_device->device, write_count);
 	vulkan_device->vkUpdateDescriptorSets(vulkan_device->device, write_count, writes, 0, PULSE_NULLPTR);
 
 	VkDescriptorSet sets[3];
