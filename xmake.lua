@@ -72,7 +72,10 @@ option("unitybuild", { description = "Build the library using unity build", defa
 if is_plat("wasm") then
 	backends.Vulkan = nil
 else
-	add_requires("tiny-c-thread", "wgpu-native")
+	add_requires("tiny-c-thread")
+	if has_config("webgpu") then
+		add_requires("wgpu-native") -- Adding it manually here because wgpu-native is not available in wasm
+	end
 end
 
 for name, module in pairs(backends) do
