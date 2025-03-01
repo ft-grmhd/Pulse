@@ -39,5 +39,6 @@ void LoadComputePipeline(PulseDevice device, PulseComputePipeline* pipeline, con
 		uint32_t num_readwrite_storage_buffers,
 		uint32_t num_uniform_buffers);
 void CleanupPipeline(PulseDevice device, PulseComputePipeline pipeline);
+void CopySameSizeBufferToBuffer(PulseDevice device, PulseBuffer src, PulseBuffer dst, PulseDeviceSize size);
 
 #endif

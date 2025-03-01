@@ -307,13 +307,21 @@ void TestBufferComputeWrite()
 	TEST_ASSERT_TRUE_MESSAGE(PulseWaitForFences(device, &fence, 1, true), PulseVerbaliseErrorType(PulseGetLastErrorType()));
 
 	{
+		buffer_create_info.usage = PULSE_BUFFER_USAGE_TRANSFER_UPLOAD | PULSE_BUFFER_USAGE_TRANSFER_DOWNLOAD;
+		PulseBuffer mappable_buffer = PulseCreateBuffer(device, &buffer_create_info);
+		TEST_ASSERT_NOT_EQUAL_MESSAGE(mappable_buffer, PULSE_NULL_HANDLE, PulseVerbaliseErrorType(PulseGetLastErrorType()));
+
+		CopySameSizeBufferToBuffer(device, buffer, mappable_buffer, buffer_create_info.size);
+
 		void* ptr;
 		uint32_t data[256];
 		memset(data, 0xFF, 256 * sizeof(uint32_t));
-		TEST_ASSERT_NOT_EQUAL_MESSAGE(PulseMapBuffer(buffer, PULSE_MAP_READ, &ptr), false, PulseVerbaliseErrorType(PulseGetLastErrorType()));
+		TEST_ASSERT_NOT_EQUAL_MESSAGE(PulseMapBuffer(mappable_buffer, PULSE_MAP_READ, &ptr), false, PulseVerbaliseErrorType(PulseGetLastErrorType()));
 		TEST_ASSERT_NOT_NULL(ptr);
 		TEST_ASSERT_EQUAL(memcmp(ptr, data, 256 * sizeof(uint32_t)), 0);
-		PulseUnmapBuffer(buffer);
+		PulseUnmapBuffer(mappable_buffer);
+
+		PulseDestroyBuffer(device, mappable_buffer);
 	}
 
 	PulseReleaseCommandList(device, cmd);
@@ -346,11 +354,19 @@ void TestBufferComputeCopy()
 	TEST_ASSERT_NOT_EQUAL_MESSAGE(read_buffer, PULSE_NULL_HANDLE, PulseVerbaliseErrorType(PulseGetLastErrorType()));
 
 	{
+		buffer_create_info.usage = PULSE_BUFFER_USAGE_TRANSFER_UPLOAD | PULSE_BUFFER_USAGE_TRANSFER_DOWNLOAD;
+		PulseBuffer mappable_buffer = PulseCreateBuffer(device, &buffer_create_info);
+		TEST_ASSERT_NOT_EQUAL_MESSAGE(mappable_buffer, PULSE_NULL_HANDLE, PulseVerbaliseErrorType(PulseGetLastErrorType()));
+
 		void* ptr;
-		TEST_ASSERT_NOT_EQUAL_MESSAGE(PulseMapBuffer(read_buffer, PULSE_MAP_WRITE, &ptr), false, PulseVerbaliseErrorType(PulseGetLastErrorType()));
+		TEST_ASSERT_NOT_EQUAL_MESSAGE(PulseMapBuffer(mappable_buffer, PULSE_MAP_WRITE, &ptr), false, PulseVerbaliseErrorType(PulseGetLastErrorType()));
 		TEST_ASSERT_NOT_NULL(ptr);
 		memcpy(ptr, data, 256 * sizeof(uint32_t));
-		PulseUnmapBuffer(read_buffer);
+		PulseUnmapBuffer(mappable_buffer);
+
+		CopySameSizeBufferToBuffer(device, mappable_buffer, read_buffer, buffer_create_info.size);
+
+		PulseDestroyBuffer(device, mappable_buffer);
 	}
 
 	buffer_create_info.usage = PULSE_BUFFER_USAGE_STORAGE_WRITE | PULSE_BUFFER_USAGE_TRANSFER_DOWNLOAD;
@@ -377,11 +393,19 @@ void TestBufferComputeCopy()
 	TEST_ASSERT_TRUE_MESSAGE(PulseWaitForFences(device, &fence, 1, true), PulseVerbaliseErrorType(PulseGetLastErrorType()));
 
 	{
+		buffer_create_info.usage = PULSE_BUFFER_USAGE_TRANSFER_UPLOAD | PULSE_BUFFER_USAGE_TRANSFER_DOWNLOAD;
+		PulseBuffer mappable_buffer = PulseCreateBuffer(device, &buffer_create_info);
+		TEST_ASSERT_NOT_EQUAL_MESSAGE(mappable_buffer, PULSE_NULL_HANDLE, PulseVerbaliseErrorType(PulseGetLastErrorType()));
+
+		CopySameSizeBufferToBuffer(device, write_buffer, mappable_buffer, buffer_create_info.size);
+
 		void* ptr;
-		TEST_ASSERT_NOT_EQUAL_MESSAGE(PulseMapBuffer(write_buffer, PULSE_MAP_READ, &ptr), false, PulseVerbaliseErrorType(PulseGetLastErrorType()));
+		TEST_ASSERT_NOT_EQUAL_MESSAGE(PulseMapBuffer(mappable_buffer, PULSE_MAP_READ, &ptr), false, PulseVerbaliseErrorType(PulseGetLastErrorType()));
 		TEST_ASSERT_NOT_NULL(ptr);
 		TEST_ASSERT_EQUAL(memcmp(ptr, data, 256 * sizeof(uint32_t)), 0);
-		PulseUnmapBuffer(write_buffer);
+		PulseUnmapBuffer(mappable_buffer);
+
+		PulseDestroyBuffer(device, mappable_buffer);
 	}
 
 	PulseReleaseCommandList(device, cmd);

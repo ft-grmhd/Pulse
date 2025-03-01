@@ -68,3 +68,25 @@ void CleanupPipeline(PulseDevice device, PulseComputePipeline pipeline)
 {
 	PulseDestroyComputePipeline(device, pipeline);
 }
+
+void CopySameSizeBufferToBuffer(PulseDevice device, PulseBuffer src, PulseBuffer dst, PulseDeviceSize size)
+{
+	PulseFence fence = PulseCreateFence(device);
+	PulseCommandList cmd = PulseRequestCommandList(device, PULSE_COMMAND_LIST_TRANSFER_ONLY);
+
+	PulseBufferRegion src_region = { 0 };
+	src_region.buffer = src;
+	src_region.size = size;
+
+	PulseBufferRegion dst_region = { 0 };
+	dst_region.buffer = dst;
+	dst_region.size = size;
+
+	PulseCopyBufferToBuffer(cmd, &src_region, &dst_region);
+
+	PulseSubmitCommandList(device, cmd, fence);
+	PulseWaitForFences(device, &fence, 1, true);
+
+	PulseReleaseCommandList(device, cmd);
+	PulseDestroyFence(device, fence);
+}
