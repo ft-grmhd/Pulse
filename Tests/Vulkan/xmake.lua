@@ -94,6 +94,10 @@ if has_config("vulkan-tests") then
 	set_group("VulkanTests")
 	add_requires("unity_test")
 
+	if is_plat("linux") then
+		add_requires("libbacktrace")
+	end
+
 	target("VulkanUnitTests")
 		set_kind("binary")
 		add_deps("pulse_gpu")
@@ -102,6 +106,7 @@ if has_config("vulkan-tests") then
 		add_files("**.nzsl")
 		add_packages("unity_test")
 		if is_plat("linux") then
+			add_packages("libbacktrace")
 			set_extension(".x86_64")
 		end
 	target_end()
