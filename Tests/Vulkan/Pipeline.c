@@ -39,8 +39,6 @@ void TestPipelineSetup()
 	CleanupPulse(backend);
 }
 
-#include <signal.h>
-
 void TestPipelineReadOnlyBindings()
 {
 	PulseBackend backend;
@@ -51,8 +49,6 @@ void TestPipelineReadOnlyBindings()
 	const uint8_t shader_bytecode[] = {
 		#include "Shaders/ReadOnlyBindings.spv.h"
 	};
-
-	raise(SIGSEGV);
 
 	PulseBufferCreateInfo buffer_create_info = { 0 };
 	buffer_create_info.size = 256 * sizeof(int32_t);
