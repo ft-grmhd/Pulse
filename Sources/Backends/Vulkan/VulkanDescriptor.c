@@ -426,8 +426,9 @@ void VulkanBindDescriptorSets(PulseComputePass pass)
 		vulkan_pass->should_recreate_uniform_descriptor_sets = false;
 	}
 
-	fprintf(stderr, "test %p, %p, %p, %d\n", vulkan_device, vulkan_device->vkUpdateDescriptorSets, vulkan_device->device, write_count);
+	fprintf(stderr, "test device %p, fn %p, vkdevice %p, count %d\n", vulkan_device, vulkan_device->vkUpdateDescriptorSets, vulkan_device->device, write_count);
 	vulkan_device->vkUpdateDescriptorSets(vulkan_device->device, write_count, writes, 0, PULSE_NULLPTR);
+	fprintf(stderr, "end test\n");
 
 	VkDescriptorSet sets[3];
 	sets[0] = vulkan_pass->read_only_descriptor_set->set;
