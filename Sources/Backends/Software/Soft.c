@@ -23,7 +23,7 @@ bool SoftLoadBackend(PulseBackend backend, PulseDebugLevel debug_level)
 	PULSE_UNUSED(debug_level);
 	SoftDriverData* driver_data = (SoftDriverData*)calloc(1, sizeof(SoftDriverData));
 	PULSE_CHECK_ALLOCATION_RETVAL(driver_data, false);
-	WebGPUDriver.driver_data = driver_data;
+	SoftwareDriver.driver_data = driver_data;
 	return true;
 }
 
