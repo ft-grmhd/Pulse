@@ -46,6 +46,7 @@ bool WebGPUWaitForFences(PulseDevice device, const PulseFence* fences, uint32_t 
 	uint32_t fences_to_wait = fences_count;
 	while(fences_to_wait != 0)
 	{
+		WebGPUDeviceTick(device);
 		for(uint32_t i = 0; i < fences_count; i++)
 		{
 			if(WebGPUIsFenceReady(device, fences[i]))

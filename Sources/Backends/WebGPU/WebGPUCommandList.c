@@ -43,7 +43,6 @@ PulseCommandList WebGPURequestCommandList(PulseDevice device, PulseCommandListUs
 
 static void WebGPUFenceCallback(WGPUQueueWorkDoneStatus status, void* userdata1, void* userdata2)
 {
-	PULSE_UNUSED(userdata2);
 	WebGPUFence* webgpu_fence = (WebGPUFence*)userdata1;
 	PulseCommandList cmd = (PulseCommandList)userdata2;
 	if(status == WGPUQueueWorkDoneStatus_Success)

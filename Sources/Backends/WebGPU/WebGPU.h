@@ -19,6 +19,7 @@ typedef struct WebGPUDriverData
 } WebGPUDriverData;
 
 PulseBackendFlags WebGPUCheckSupport(PulseBackendFlags candidates, PulseShaderFormatsFlags shader_formats_used); // Return PULSE_BACKEND_WEBGPU in case of success and PULSE_BACKEND_INVALID otherwise
+void WebGPUDeviceTick(PulseDevice device);
 
 #endif // PULSE_WEBGPU_H_
 

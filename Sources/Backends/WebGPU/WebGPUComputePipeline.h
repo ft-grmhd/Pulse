@@ -13,8 +13,12 @@
 
 typedef struct WebGPUComputePipeline
 {
-	WGPUComputePipeline pipeline;
 	WGPUShaderModule shader;
+	WGPUPipelineLayout layout;
+	WGPUComputePipeline pipeline;
+	WGPUBindGroupLayout readonly_group;
+	WGPUBindGroupLayout readwrite_group;
+	WGPUBindGroupLayout uniform_group;
 } WebGPUComputePipeline;
 
 PulseComputePipeline WebGPUCreateComputePipeline(PulseDevice device, const PulseComputePipelineCreateInfo* info);

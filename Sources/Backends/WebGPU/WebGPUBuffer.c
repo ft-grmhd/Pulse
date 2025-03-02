@@ -9,8 +9,8 @@
 #include "../../PulseInternal.h"
 #include "WebGPU.h"
 #include "WebGPUDevice.h"
-#include "webgpu.h"
 #include "WebGPUBuffer.h"
+#include "WebGPUCommandList.h"
 
 PulseBuffer WebGPUCreateBuffer(PulseDevice device, const PulseBufferCreateInfo* create_infos)
 {
@@ -58,13 +58,10 @@ PulseBuffer WebGPUCreateBuffer(PulseDevice device, const PulseBufferCreateInfo* 
 	return buffer;
 }
 
-#include <stdio.h>
-
 static void WebGPUMapBufferCallback(WGPUMapAsyncStatus status, WGPUStringView message, void* userdata1, void* userdata2)
 {
 	atomic_int* mapping_finished = (atomic_int*)userdata1;
 	PulseBuffer buffer = (PulseBuffer)userdata2;
-	puts("test");
 	if(status == WGPUMapAsyncStatus_Success)
 		atomic_store(mapping_finished, 1);
 	else
@@ -90,10 +87,7 @@ bool WebGPUMapBuffer(PulseBuffer buffer, PulseMapMode mode, void** data)
 	// https://toji.dev/webgpu-best-practices/buffer-uploads.html
 	if(mode == PULSE_MAP_WRITE)
 	{
-		if(webgpu_buffer->map == PULSE_NULLPTR)
-			webgpu_buffer->map = malloc(buffer->size);
-		else
-			webgpu_buffer->map = realloc(webgpu_buffer->map, buffer->size);
+		webgpu_buffer->map = malloc(buffer->size);
 		PULSE_CHECK_ALLOCATION_RETVAL(webgpu_buffer->map, false);
 	}
 	else
@@ -115,6 +109,7 @@ bool WebGPUMapBuffer(PulseBuffer buffer, PulseMapMode mode, void** data)
 
 		while(atomic_load(&mapping_finished) == 0)
 		{
+			WebGPUDeviceTick(buffer->device);
 			clock_t elapsed = clock() - start;
 			if(elapsed > timeout)
 			{
@@ -141,7 +136,10 @@ void WebGPUUnmapBuffer(PulseBuffer buffer)
 	WebGPUDevice* webgpu_device = WEBGPU_RETRIEVE_DRIVER_DATA_AS(buffer->device, WebGPUDevice*);
 	WebGPUBuffer* webgpu_buffer = WEBGPU_RETRIEVE_DRIVER_DATA_AS(buffer, WebGPUBuffer*);
 	if(webgpu_buffer->current_map_mode == PULSE_MAP_WRITE)
+	{
 		wgpuQueueWriteBuffer(webgpu_device->queue, webgpu_buffer->buffer, 0, webgpu_buffer->map, buffer->size);
+		free(webgpu_buffer->map);
+	}
 	else
 		wgpuBufferUnmap(webgpu_buffer->buffer);
 	webgpu_buffer->map = PULSE_NULLPTR;
@@ -149,6 +147,11 @@ void WebGPUUnmapBuffer(PulseBuffer buffer)
 
 bool WebGPUCopyBufferToBuffer(PulseCommandList cmd, const PulseBufferRegion* src, const PulseBufferRegion* dst)
 {
+	WebGPUBuffer* webgpu_src_buffer = WEBGPU_RETRIEVE_DRIVER_DATA_AS(src->buffer, WebGPUBuffer*);
+	WebGPUBuffer* webgpu_dst_buffer = WEBGPU_RETRIEVE_DRIVER_DATA_AS(dst->buffer, WebGPUBuffer*);
+	WebGPUCommandList* webgpu_cmd = WEBGPU_RETRIEVE_DRIVER_DATA_AS(cmd, WebGPUCommandList*);
+	wgpuCommandEncoderCopyBufferToBuffer(webgpu_cmd->encoder, webgpu_src_buffer->buffer, src->offset, webgpu_dst_buffer->buffer, dst->offset, (src->size < dst->size ? src->size : dst->size));
+	return true;
 }
 
 bool WebGPUCopyBufferToImage(PulseCommandList cmd, const PulseBufferRegion* src, const PulseImageRegion* dst)

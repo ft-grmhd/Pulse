@@ -16,6 +16,13 @@
 typedef struct WebGPUComputePass
 {
 	WGPUComputePassEncoder encoder;
+	WGPUBindGroup read_only_bind_group;
+	WGPUBindGroup read_write_bind_group;
+	WGPUBindGroup uniform_bind_group;
+
+	bool should_recreate_read_only_bind_group;
+	bool should_recreate_write_bind_group;
+	bool should_recreate_uniform_bind_group;
 } WebGPUComputePass;
 
 PulseComputePass WebGPUCreateComputePass(PulseDevice device, PulseCommandList cmd);

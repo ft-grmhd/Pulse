@@ -8,6 +8,12 @@
 #include "WebGPU.h"
 #include "WebGPUDevice.h"
 
+void WebGPUDeviceTick(PulseDevice device)
+{
+	WebGPUDevice* webgpu_device = WEBGPU_RETRIEVE_DRIVER_DATA_AS(device, WebGPUDevice*);
+	wgpuQueueSubmit(webgpu_device->queue, 0, PULSE_NULLPTR); // Submitting nothing just to check for ongoing asynchronous operations and call their callbacks if needed
+}
+
 PulseBackendFlags WebGPUCheckSupport(PulseBackendFlags candidates, PulseShaderFormatsFlags shader_formats_used)
 {
 	if(candidates != PULSE_BACKEND_ANY && (candidates & PULSE_BACKEND_WEBGPU) == 0)
