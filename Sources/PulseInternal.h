@@ -178,5 +178,8 @@ void PulseLogBackend(PulseBackend backend, PulseDebugMessageSeverity type, const
 #ifdef PULSE_ENABLE_WEBGPU_BACKEND
 	extern PulseBackendHandler WebGPUDriver;
 #endif // PULSE_ENABLE_WEBGPU_BACKEND
+#ifdef PULSE_ENABLE_SOFTWARE_BACKEND
+	extern PulseBackendHandler SoftwareDriver;
+#endif // PULSE_ENABLE_SOFTWARE_BACKEND
 
 #endif // PULSE_INTERNAL_H_

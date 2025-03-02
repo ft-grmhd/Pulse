@@ -17,6 +17,9 @@
 #ifdef PULSE_ENABLE_WEBGPU_BACKEND
 	#include "Backends/WebGPU/WebGPU.h"
 #endif
+#ifdef PULSE_ENABLE_SOFTWARE_BACKEND
+	#include "Backends/Software/Soft.h"
+#endif
 
 // Ordered by default preference
 static const PulseCheckBackendSupportPFN backends_supports[] = {
@@ -28,6 +31,9 @@ static const PulseCheckBackendSupportPFN backends_supports[] = {
 	#endif
 	#ifdef PULSE_ENABLE_WEBGPU_BACKEND
 		WebGPUCheckSupport,
+	#endif
+	#ifdef PULSE_ENABLE_SOFTWARE_BACKEND
+		SoftCheckSupport,
 	#endif
 	PULSE_NULLPTR
 };
@@ -98,6 +104,9 @@ static PulseBackend PulseGetBackendFromFlag(PulseBackendBits flag)
 		#endif
 		#ifdef PULSE_ENABLE_WEBGPU_BACKEND
 			case PULSE_BACKEND_WEBGPU: return &WebGPUDriver;
+		#endif
+		#ifdef PULSE_ENABLE_SOFTWARE_BACKEND
+			case PULSE_BACKEND_SOFTWARE: return &SoftwareDriver;
 		#endif
 
 		default: break;

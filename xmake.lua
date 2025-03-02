@@ -29,6 +29,11 @@ local backends = {
 				add_packages("wgpu-native")
 			end
 		end
+	},
+	Software = {
+		option = "software",
+		default = true,
+		packages = { "spirv-vm" }
 	}
 }
 
