@@ -13,6 +13,9 @@
 
 typedef struct SoftDevice
 {
+	PulseCommandList* available_command_lists;
+	uint32_t available_command_lists_capacity;
+	uint32_t available_command_lists_size;
 } SoftDevice;
 
 PulseDevice SoftCreateDevice(PulseBackend backend, PulseDevice* forbiden_devices, uint32_t forbiden_devices_count);

@@ -11,10 +11,6 @@
 
 #define SOFTWARE_RETRIEVE_DRIVER_DATA_AS(handle, cast) ((cast)handle->driver_data)
 
-typedef struct SoftDriverData
-{
-} SoftDriverData;
-
 PulseBackendFlags SoftCheckSupport(PulseBackendFlags candidates, PulseShaderFormatsFlags shader_formats_used); // Return PULSE_BACKEND_SOFTWARE in case of success and PULSE_BACKEND_INVALID otherwise
 
 #endif // PULSE_SOFTWARE_H_
