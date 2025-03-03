@@ -9,7 +9,7 @@
 #ifndef PULSE_SOFTWARE_H_
 #define PULSE_SOFTWARE_H_
 
-#define SOFTWARE_RETRIEVE_DRIVER_DATA_AS(handle, cast) ((cast)handle->driver_data)
+#define SOFT_RETRIEVE_DRIVER_DATA_AS(handle, cast) ((cast)handle->driver_data)
 
 PulseBackendFlags SoftCheckSupport(PulseBackendFlags candidates, PulseShaderFormatsFlags shader_formats_used); // Return PULSE_BACKEND_SOFTWARE in case of success and PULSE_BACKEND_INVALID otherwise
 

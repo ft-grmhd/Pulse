@@ -84,15 +84,11 @@ bool WebGPUSubmitCommandList(PulseDevice device, PulseCommandList cmd, PulseFenc
 
 void WebGPUReleaseCommandList(PulseDevice device, PulseCommandList cmd)
 {
-	PULSE_CHECK_HANDLE(device);
-
 	WebGPUCommandList* webgpu_cmd = WEBGPU_RETRIEVE_DRIVER_DATA_AS(cmd, WebGPUCommandList*);
-	WebGPUComputePass* webgpu_pass = WEBGPU_RETRIEVE_DRIVER_DATA_AS(cmd->pass, WebGPUComputePass*);
 
 	wgpuCommandEncoderRelease(webgpu_cmd->encoder);
 
-	free(webgpu_pass);
-	free(cmd->pass);
+	WebGPUDestroyComputePass(device, cmd->pass);
 	free(webgpu_cmd);
 	free(cmd);
 }

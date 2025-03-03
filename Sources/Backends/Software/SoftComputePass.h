@@ -13,6 +13,7 @@
 
 typedef struct SoftComputePass
 {
+	int dummy;
 } SoftComputePass;
 
 PulseComputePass SoftCreateComputePass(PulseDevice device, PulseCommandList cmd);

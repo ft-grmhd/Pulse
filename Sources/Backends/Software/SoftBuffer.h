@@ -13,7 +13,9 @@
 
 typedef struct SoftBuffer
 {
+	void* buffer;
 	void* map;
+	PulseMapMode current_map_mode;
 } SoftBuffer;
 
 PulseBuffer SoftCreateBuffer(PulseDevice device, const PulseBufferCreateInfo* create_infos);

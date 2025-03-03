@@ -2,6 +2,8 @@
 // This file is part of "Pulse"
 // For conditions of distribution and use, see copyright notice in LICENSE
 
+#include <cpuinfo.h>
+
 #include <Pulse.h>
 #include "../../PulseInternal.h"
 
@@ -21,11 +23,13 @@ bool SoftLoadBackend(PulseBackend backend, PulseDebugLevel debug_level)
 {
 	PULSE_UNUSED(backend);
 	PULSE_UNUSED(debug_level);
+	cpuinfo_initialize();
 	return true;
 }
 
 void SoftUnloadBackend(PulseBackend backend)
 {
+	cpuinfo_deinitialize();
 	free(backend->driver_data);
 }
 

@@ -33,7 +33,7 @@ local backends = {
 	Software = {
 		option = "software",
 		default = true,
-		packages = { "spirv-vm", "openmp", "cpuinfo" }
+		packages = { "spirv-vm", "cpuinfo" }
 	}
 }
 

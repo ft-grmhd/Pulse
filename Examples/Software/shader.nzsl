@@ -1,0 +1,25 @@
+[nzsl_version("1.0")]
+module;
+
+struct Input
+{
+    [builtin(global_invocation_indices)] indices: vec3[u32]
+}
+
+[layout(std430)]
+struct SSBO
+{
+    data: dyn_array[i32]
+}
+
+external
+{
+    [set(1), binding(0)] ssbo: storage[SSBO],
+}
+
+[entry(compute)]
+[workgroup(32, 32, 1)]
+fn main(input: Input)
+{
+    ssbo.data[input.indices.x * input.indices.y] = i32(input.indices.x * input.indices.y);
+}
