@@ -27,7 +27,7 @@ typedef struct VulkanDevice
 	VulkanDescriptorSetPoolManager descriptor_set_pool_manager;
 	VulkanDescriptorSetLayoutManager descriptor_set_layout_manager;
 
-	VulkanCommandPool* cmd_pools;
+	VulkanCommandPool** cmd_pools;
 	uint32_t cmd_pools_size;
 
 	struct VulkanQueue* queues[VULKAN_QUEUE_END_ENUM];

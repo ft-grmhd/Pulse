@@ -250,7 +250,10 @@ void VulkanDestroyDevice(PulseDevice device)
 	VulkanDestroyDescriptorSetPoolManager(&vulkan_device->descriptor_set_pool_manager);
 	VulkanDestroyDescriptorSetLayoutManager(&vulkan_device->descriptor_set_layout_manager);
 	for(uint32_t i = 0; i < vulkan_device->cmd_pools_size; i++)
-		vulkan_device->vkDestroyCommandPool(vulkan_device->device, vulkan_device->cmd_pools[i].pool, PULSE_NULLPTR);
+	{
+		vulkan_device->vkDestroyCommandPool(vulkan_device->device, vulkan_device->cmd_pools[i]->pool, PULSE_NULLPTR);
+		free(vulkan_device->cmd_pools[i]);
+	}
 	vmaDestroyAllocator(vulkan_device->allocator);
 	vulkan_device->vkDestroyDevice(vulkan_device->device, PULSE_NULLPTR);
 	if(PULSE_IS_BACKEND_HIGH_LEVEL_DEBUG(device->backend))
@@ -271,13 +274,14 @@ VulkanCommandPool* VulkanRequestCmdPoolFromDevice(PulseDevice device, VulkanQueu
 
 	for(uint32_t i = 0; i < vulkan_device->cmd_pools_size; i++)
 	{
-		if(thread_id == vulkan_device->cmd_pools[i].thread_id && queue_type == vulkan_device->cmd_pools[i].queue_type)
-			return &vulkan_device->cmd_pools[i];
+		if(thread_id == vulkan_device->cmd_pools[i]->thread_id && queue_type == vulkan_device->cmd_pools[i]->queue_type)
+			return vulkan_device->cmd_pools[i];
 	}
 
 	vulkan_device->cmd_pools_size++;
-	vulkan_device->cmd_pools = (VulkanCommandPool*)realloc(vulkan_device->cmd_pools, vulkan_device->cmd_pools_size * sizeof(VulkanCommandPool));
-	if(!VulkanInitCommandPool(device, &vulkan_device->cmd_pools[vulkan_device->cmd_pools_size - 1], queue_type))
+	vulkan_device->cmd_pools = (VulkanCommandPool**)realloc(vulkan_device->cmd_pools, vulkan_device->cmd_pools_size * sizeof(VulkanCommandPool*));
+	vulkan_device->cmd_pools[vulkan_device->cmd_pools_size - 1] = (VulkanCommandPool*)calloc(1, sizeof(VulkanCommandPool));
+	if(!VulkanInitCommandPool(device, vulkan_device->cmd_pools[vulkan_device->cmd_pools_size - 1], queue_type))
 		return PULSE_NULLPTR;
-	return &vulkan_device->cmd_pools[vulkan_device->cmd_pools_size - 1];
+	return vulkan_device->cmd_pools[vulkan_device->cmd_pools_size - 1];
 }
