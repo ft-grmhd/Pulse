@@ -22,23 +22,6 @@ typedef struct SoftCommand
 	{
 		struct
 		{
-			PulseComputePipeline pipeline;
-		} BindComputePipeline;
-
-		struct
-		{
-		} BindStorageBuffers;
-
-		struct
-		{
-		} BindStorageImages;
-
-		struct
-		{
-		} BindUniformBuffers;
-
-		struct
-		{
 			const PulseImageRegion* src;
 			const PulseImageRegion* dst;
 		} BlitImages;
@@ -63,6 +46,7 @@ typedef struct SoftCommand
 
 		struct
 		{
+			PulseComputePipeline pipeline;
 			uint32_t groupcount_x;
 			uint32_t groupcount_y;
 			uint32_t groupcount_z;
@@ -70,6 +54,7 @@ typedef struct SoftCommand
 
 		struct
 		{
+			PulseComputePipeline pipeline;
 			PulseBuffer buffer;
 			uint32_t offset;
 		} DispatchIndirect;

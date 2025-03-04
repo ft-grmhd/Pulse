@@ -6,6 +6,7 @@
 #include "../../PulseInternal.h"
 #include "Soft.h"
 #include "SoftComputePass.h"
+#include "SoftCommandList.h"
 
 PulseComputePass SoftCreateComputePass(PulseDevice device, PulseCommandList cmd)
 {
@@ -31,10 +32,12 @@ void SoftDestroyComputePass(PulseDevice device, PulseComputePass pass)
 
 PulseComputePass SoftBeginComputePass(PulseCommandList cmd)
 {
+	return cmd->pass;
 }
 
 void SoftEndComputePass(PulseComputePass pass)
 {
+	PULSE_UNUSED(pass);
 }
 
 void SoftBindStorageBuffers(PulseComputePass pass, const PulseBuffer* buffers, uint32_t num_buffers)
@@ -51,8 +54,17 @@ void SoftBindStorageImages(PulseComputePass pass, const PulseImage* images, uint
 
 void SoftBindComputePipeline(PulseComputePass pass, PulseComputePipeline pipeline)
 {
+	PULSE_UNUSED(pass);
+	PULSE_UNUSED(pipeline);
 }
 
 void SoftDispatchComputations(PulseComputePass pass, uint32_t groupcount_x, uint32_t groupcount_y, uint32_t groupcount_z)
 {
+	SoftCommand command = { 0 };
+	command.type = SOFT_COMMAND_DISPATCH;
+	command.Dispatch.groupcount_x = groupcount_x;
+	command.Dispatch.groupcount_y = groupcount_y;
+	command.Dispatch.groupcount_z = groupcount_z;
+	command.Dispatch.pipeline = pass->current_pipeline;
+	SoftQueueCommand(pass->cmd, command);
 }

@@ -10,9 +10,13 @@
 #define PULSE_SOFTWARE_COMPUTE_PIPELINE_H_
 
 #include "Soft.h"
+#include <spvm/state.h>
+#include <spvm/program.h>
 
 typedef struct SoftComputePipeline
 {
+	spvm_program_t program;
+	const char* entry_point;
 } SoftComputePipeline;
 
 PulseComputePipeline SoftCreateComputePipeline(PulseDevice device, const PulseComputePipelineCreateInfo* info);

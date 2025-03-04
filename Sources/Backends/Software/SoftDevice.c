@@ -29,6 +29,7 @@ PulseDevice SoftCreateDevice(PulseBackend backend, PulseDevice* forbiden_devices
 	PULSE_CHECK_ALLOCATION_RETVAL(device, PULSE_NULL_HANDLE);
 
 	device->device = cpuinfo_get_current_processor();
+	device->spv_context = spvm_context_initialize();
 
 	pulse_device->driver_data = device;
 	pulse_device->backend = backend;
@@ -44,6 +45,7 @@ void SoftDestroyDevice(PulseDevice device)
 	SoftDevice* soft_device = SOFT_RETRIEVE_DRIVER_DATA_AS(device, SoftDevice*);
 	if(soft_device == PULSE_NULLPTR)
 		return;
+	spvm_context_deinitialize(soft_device->spv_context);
 	if(PULSE_IS_BACKEND_HIGH_LEVEL_DEBUG(device->backend))
 		PulseLogInfoFmt(device->backend, "(Soft) destroyed device created from %s", soft_device->device->package->name);
 	free(soft_device);

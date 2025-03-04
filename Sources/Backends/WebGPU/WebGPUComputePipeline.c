@@ -218,7 +218,6 @@ PulseComputePipeline WebGPUCreateComputePipeline(PulseDevice device, const Pulse
 
 	if(PULSE_IS_BACKEND_HIGH_LEVEL_DEBUG(device->backend))
 		PulseLogInfoFmt(device->backend, "(WebGPU) created new compute pipeline %p", pipeline);
-
 	return pipeline;
 }
 

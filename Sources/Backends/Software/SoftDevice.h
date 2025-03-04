@@ -10,15 +10,14 @@
 #define PULSE_SOFTWARE_DEVICE_H_
 
 #include <cpuinfo.h>
+#include <spvm/context.h>
 
 #include "Soft.h"
 
 typedef struct SoftDevice
 {
 	const struct cpuinfo_processor* device;
-	PulseCommandList* available_command_lists;
-	uint32_t available_command_lists_capacity;
-	uint32_t available_command_lists_size;
+	spvm_context_t spv_context;
 } SoftDevice;
 
 PulseDevice SoftCreateDevice(PulseBackend backend, PulseDevice* forbiden_devices, uint32_t forbiden_devices_count);

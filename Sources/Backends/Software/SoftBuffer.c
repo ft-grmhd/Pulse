@@ -15,7 +15,7 @@ PulseBuffer SoftCreateBuffer(PulseDevice device, const PulseBufferCreateInfo* cr
 	PulseBuffer buffer = (PulseBuffer)calloc(1, sizeof(PulseBufferHandler));
 	PULSE_CHECK_ALLOCATION_RETVAL(buffer, PULSE_NULL_HANDLE);
 
-	SoftBuffer* soft_buffer = (SoftBuffer*)calloc(1, sizeof(SoftBuffer) + _Alignof(SoftBuffer) + create_infos->size);
+	SoftBuffer* soft_buffer = (SoftBuffer*)calloc(1, sizeof(SoftBuffer));
 	PULSE_CHECK_ALLOCATION_RETVAL(soft_buffer, PULSE_NULL_HANDLE);
 
 	buffer->device = device;
@@ -23,7 +23,7 @@ PulseBuffer SoftCreateBuffer(PulseDevice device, const PulseBufferCreateInfo* cr
 	buffer->size = create_infos->size;
 	buffer->usage = create_infos->usage;
 
-	soft_buffer->buffer = soft_buffer + sizeof(SoftBuffer) + _Alignof(SoftBuffer);
+	soft_buffer->buffer = (uint8_t*)malloc(create_infos->size);
 
 	return buffer;
 }
@@ -85,6 +85,7 @@ void SoftDestroyBuffer(PulseDevice device, PulseBuffer buffer)
 {
 	PULSE_UNUSED(device);
 	SoftBuffer* soft_buffer = SOFT_RETRIEVE_DRIVER_DATA_AS(buffer, SoftBuffer*);
+	free(soft_buffer->buffer);
 	free(soft_buffer);
 	free(buffer);
 }

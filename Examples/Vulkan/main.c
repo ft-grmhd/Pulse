@@ -49,7 +49,7 @@ int main(void)
 		PulseComputePass pass = PulseBeginComputePass(cmd);
 			PulseBindStorageBuffers(pass, &buffer, 1);
 			PulseBindComputePipeline(pass, pipeline);
-			PulseDispatchComputations(pass, 32, 32, 1);
+			PulseDispatchComputations(pass, 16, 1, 1);
 		PulseEndComputePass(pass);
 
 		PulseSubmitCommandList(device, cmd, fence);

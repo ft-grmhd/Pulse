@@ -13,7 +13,7 @@
 
 typedef struct SoftBuffer
 {
-	void* buffer;
+	uint8_t* buffer;
 	void* map;
 	PulseMapMode current_map_mode;
 } SoftBuffer;

@@ -29,6 +29,38 @@ int main(void)
 	buffer_create_info.usage = PULSE_BUFFER_USAGE_STORAGE_READ | PULSE_BUFFER_USAGE_STORAGE_WRITE | PULSE_BUFFER_USAGE_TRANSFER_DOWNLOAD;
 	PulseBuffer buffer = PulseCreateBuffer(device, &buffer_create_info);
 
+	// GPU computations
+	{
+		const uint8_t shader_bytecode[] = {
+			#include "shader.spv.h"
+		};
+
+		PulseComputePipelineCreateInfo info = { 0 };
+		info.code_size = sizeof(shader_bytecode);
+		info.code = shader_bytecode;
+		info.entrypoint = "main";
+		info.format = PULSE_SHADER_FORMAT_SPIRV_BIT;
+		info.num_readwrite_storage_buffers = 1;
+		PulseComputePipeline pipeline = PulseCreateComputePipeline(device, &info);
+
+		PulseFence fence = PulseCreateFence(device);
+		PulseCommandList cmd = PulseRequestCommandList(device, PULSE_COMMAND_LIST_GENERAL);
+
+		PulseComputePass pass = PulseBeginComputePass(cmd);
+			//PulseBindStorageBuffers(pass, &buffer, 1);
+			PulseBindComputePipeline(pass, pipeline);
+			PulseDispatchComputations(pass, 16, 1, 1);
+		PulseEndComputePass(pass);
+
+		PulseSubmitCommandList(device, cmd, fence);
+		PulseWaitForFences(device, &fence, 1, true);
+
+		PulseReleaseCommandList(device, cmd);
+		PulseDestroyFence(device, fence);
+		PulseDestroyComputePipeline(device, pipeline);
+	}
+
+
 	// Get result and read it on CPU
 	{
 		PulseBufferCreateInfo staging_buffer_create_info = { 0 };

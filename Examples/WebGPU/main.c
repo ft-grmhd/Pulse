@@ -24,7 +24,7 @@ void DebugCallBack(PulseDebugMessageSeverity severity, const char* message)
 const char* wgsl_source = WGSL_SOURCE(
 	@group(1) @binding(0) var<storage, read_write> ssbo: array<i32>;
 
-	@compute @workgroup_size(32, 32, 1)
+	@compute @workgroup_size(16, 16, 1)
 	fn main(@builtin(global_invocation_id) grid: vec3<u32>)
 	{
     	ssbo[grid.x * grid.y] = i32(grid.x * grid.y);
@@ -58,7 +58,7 @@ int main(void)
 		PulseComputePass pass = PulseBeginComputePass(cmd);
 			PulseBindStorageBuffers(pass, &buffer, 1);
 			PulseBindComputePipeline(pass, pipeline);
-			PulseDispatchComputations(pass, 32, 32, 1);
+			PulseDispatchComputations(pass, 16, 1, 1);
 		PulseEndComputePass(pass);
 
 		PulseSubmitCommandList(device, cmd, fence);
