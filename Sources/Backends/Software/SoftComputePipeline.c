@@ -34,6 +34,10 @@ PulseComputePipeline SoftCreateComputePipeline(PulseDevice device, const PulseCo
 	soft_pipeline->entry_point = calloc(1, strlen(info->entrypoint));
 	strcpy((char*)soft_pipeline->entry_point, info->entrypoint);
 
+	// Create dummy state to retrieve informations from the spirv
+	spvm_state_t state = spvm_state_create(soft_pipeline->program);
+	spvm_state_delete(state);
+
 	pipeline->driver_data = soft_pipeline;
 
 	if(PULSE_IS_BACKEND_HIGH_LEVEL_DEBUG(device->backend))
@@ -52,6 +56,7 @@ void SoftDestroyComputePipeline(PulseDevice device, PulseComputePipeline pipelin
 	PULSE_UNUSED(device);
 	SoftComputePipeline* soft_pipeline = SOFT_RETRIEVE_DRIVER_DATA_AS(pipeline, SoftComputePipeline*);
 	spvm_program_delete(soft_pipeline->program);
+	free(soft_pipeline->entry_point);
 	free(soft_pipeline);
 	if(PULSE_IS_BACKEND_HIGH_LEVEL_DEBUG(device->backend))
 		PulseLogInfoFmt(device->backend, "(Soft) destroyed compute pipeline %p", pipeline);

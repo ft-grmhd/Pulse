@@ -53,7 +53,6 @@ static void SoftCommandDispatch(SoftCommand* cmd)
 	thrd_t* invocations = (thrd_t*)malloc(invocations_count * sizeof(thrd_t));
 	PULSE_CHECK_PTR(invocations);
 
-	printf("test2 %d %d\n", invocations_count, local_size);
 	uint32_t invocation_index = 0;
 	for(uint32_t z = 0; z < cmd->Dispatch.groupcount_z; z++)
 	{
@@ -63,21 +62,15 @@ static void SoftCommandDispatch(SoftCommand* cmd)
 			{
 				for(uint32_t i = 0; i < local_size; i++)
 				{
-					printf("\r%d", invocation_index);
 					thrd_create(&invocations[invocation_index], SoftCommandDispatchCore, soft_pipeline);
+					thrd_join(invocations[invocation_index], NULL);
 					invocation_index++;
 				}
 			}
 		}
 	}
-	printf("\ntest %d %d %d\n", invocation_index, invocations_count, local_size);
 	for(uint32_t i = 0; i < invocations_count; i++)
-	{
-		printf("test %d\n", i);
-		int res;
-		thrd_join(invocations[i], &res);
-		PULSE_UNUSED(res);
-	}
+		thrd_join(invocations[i], PULSE_NULLPTR);
 	free(invocations);
 }
 
