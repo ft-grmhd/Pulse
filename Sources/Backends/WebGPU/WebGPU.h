@@ -9,6 +9,10 @@
 #ifndef PULSE_WEBGPU_H_
 #define PULSE_WEBGPU_H_
 
+#ifdef __STDC_NO_ATOMICS__
+	#error "Atomic support is not present"
+#endif
+
 #include <webgpu/webgpu.h>
 
 #define WEBGPU_RETRIEVE_DRIVER_DATA_AS(handle, cast) ((cast)handle->driver_data)
@@ -20,6 +24,11 @@ typedef struct WebGPUDriverData
 
 PulseBackendFlags WebGPUCheckSupport(PulseBackendFlags candidates, PulseShaderFormatsFlags shader_formats_used); // Return PULSE_BACKEND_WEBGPU in case of success and PULSE_BACKEND_INVALID otherwise
 void WebGPUDeviceTick(PulseDevice device);
+
+uint32_t WebGPUBytesPerRow(int32_t width, PulseImageFormat format);
+uint32_t WebGPUImageFormatTexelBlockSize(PulseImageFormat format);
+int32_t WebGPUGetImageBlockHeight(PulseImageFormat format);
+int32_t WebGPUGetImageBlockWidth(PulseImageFormat format);
 
 #endif // PULSE_WEBGPU_H_
 

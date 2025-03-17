@@ -38,9 +38,9 @@
 	static uint64_t WebGPUScoreAdapter(WGPUAdapter adapter)
 	{
 		uint64_t score = 0;
-		WGPUAdapterInfo infos;
+		WGPUAdapterInfo infos = { 0 };
 		wgpuAdapterGetInfo(adapter, &infos);
-		WGPULimits limits;
+		WGPULimits limits = { 0 };
 		wgpuAdapterGetLimits(adapter, &limits);
 
 		if(infos.adapterType == WGPUAdapterType_DiscreteGPU)
@@ -106,7 +106,7 @@ static void WebGPUDeviceLostCallback(const WGPUDevice* _, WGPUDeviceLostReason r
 		"creation failed",
 	};
 	if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(backend))
-		PulseLogErrorFmt(backend, "(WebGPU) device %.*s lost because %s. %.*s", device->infos.device.length, device->infos.device.data, reasons[reason], message.length, message.data);
+		PulseLogErrorFmt(backend, "(WebGPU) device %.*s lost because %s. %.*s", device->infos.device.length, device->infos.device.data, reasons[reason - 1], message.length, message.data);
 }
 
 static void WebGPUDeviceUncapturedErrorCallback(const WGPUDevice* _, WGPUErrorType type, WGPUStringView message, void* userdata1, void* userdata2)
@@ -121,7 +121,7 @@ static void WebGPUDeviceUncapturedErrorCallback(const WGPUDevice* _, WGPUErrorTy
 		"has recieved an unknown error",
 	};
 	if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(backend))
-		PulseLogErrorFmt(backend, "(WebGPU) device %.*s %s. %.*s", device->infos.device.length, device->infos.device.data, types[type], message.length, message.data);
+		PulseLogErrorFmt(backend, "(WebGPU) device %.*s %s. %.*s", device->infos.device.length, device->infos.device.data, types[type - 1], message.length, message.data);
 }
 
 PulseDevice WebGPUCreateDevice(PulseBackend backend, PulseDevice* forbiden_devices, uint32_t forbiden_devices_count)

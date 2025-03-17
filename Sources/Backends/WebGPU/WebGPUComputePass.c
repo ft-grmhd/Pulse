@@ -8,6 +8,7 @@
 #include "../../PulseInternal.h"
 #include "WebGPU.h"
 #include "WebGPUDevice.h"
+#include "WebGPUImage.h"
 #include "WebGPUComputePass.h"
 #include "WebGPUComputePipeline.h"
 
@@ -151,9 +152,12 @@ static void WebGPUBindBindGroups(PulseComputePass pass)
 		uint32_t entry_index = 0;
 		for(uint32_t i = 0; i < pass->current_pipeline->num_readonly_storage_images; i++, entry_index++)
 		{
+			WebGPUImage* webgpu_image = WEBGPU_RETRIEVE_DRIVER_DATA_AS(pass->readonly_images[i], WebGPUImage*);
+
 			WGPUBindGroupEntry* entry = &read_only_entries[entry_index];
 			memset(entry, 0, sizeof(WGPUBindGroupEntry));
 			entry->binding = i;
+			entry->textureView = webgpu_image->view;
 		}
 
 		for(uint32_t i = 0; i < pass->current_pipeline->num_readonly_storage_buffers; i++, entry_index++)
@@ -180,9 +184,12 @@ static void WebGPUBindBindGroups(PulseComputePass pass)
 		uint32_t entry_index = 0;
 		for(uint32_t i = 0; i < pass->current_pipeline->num_readwrite_storage_images; i++, entry_index++)
 		{
+			WebGPUImage* webgpu_image = WEBGPU_RETRIEVE_DRIVER_DATA_AS(pass->readwrite_images[i], WebGPUImage*);
+
 			WGPUBindGroupEntry* entry = &read_write_entries[entry_index];
 			memset(entry, 0, sizeof(WGPUBindGroupEntry));
 			entry->binding = i;
+			entry->textureView = webgpu_image->view;
 		}
 
 		for(uint32_t i = 0; i < pass->current_pipeline->num_readwrite_storage_buffers; i++, entry_index++)

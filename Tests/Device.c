@@ -46,7 +46,11 @@ void TestBackendInUse()
 
 	PulseDevice device = PulseCreateDevice(backend, NULL, 0);
 	TEST_ASSERT_NOT_EQUAL_MESSAGE(device, PULSE_NULL_HANDLE, PulseVerbaliseErrorType(PulseGetLastErrorType()));
-	TEST_ASSERT_EQUAL(PulseGetBackendInUseByDevice(device), PULSE_BACKEND_VULKAN);
+	#if defined(VULKAN_ENABLED)
+		TEST_ASSERT_EQUAL(PulseGetBackendInUseByDevice(device), PULSE_BACKEND_VULKAN);
+	#elif defined(WEBGPU_ENABLED)
+		TEST_ASSERT_EQUAL(PulseGetBackendInUseByDevice(device), PULSE_BACKEND_WEBGPU);
+	#endif
 	PulseDestroyDevice(device);
 
 	CleanupPulse(backend);
@@ -59,7 +63,11 @@ void TestShaderFormatSupport()
 
 	PulseDevice device = PulseCreateDevice(backend, NULL, 0);
 	TEST_ASSERT_NOT_EQUAL_MESSAGE(device, PULSE_NULL_HANDLE, PulseVerbaliseErrorType(PulseGetLastErrorType()));
-	TEST_ASSERT_TRUE(PulseDeviceSupportsShaderFormats(device, PULSE_SHADER_FORMAT_SPIRV_BIT));
+	#if defined(VULKAN_ENABLED)
+		TEST_ASSERT_TRUE(PulseDeviceSupportsShaderFormats(device, PULSE_SHADER_FORMAT_SPIRV_BIT));
+	#elif defined(WEBGPU_ENABLED)
+		TEST_ASSERT_TRUE(PulseDeviceSupportsShaderFormats(device, PULSE_SHADER_FORMAT_WGSL_BIT));
+	#endif
 	PulseDestroyDevice(device);
 
 	CleanupPulse(backend);

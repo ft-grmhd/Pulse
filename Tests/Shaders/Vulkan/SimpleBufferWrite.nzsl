@@ -18,7 +18,7 @@ external
 }
 
 [entry(compute)]
-[workgroup(32, 32, 1)]
+[workgroup(16, 16, 1)]
 fn main(input: Input)
 {
     ssbo.data[input.indices.x * input.indices.y] = u32(0xFFFFFFFF);

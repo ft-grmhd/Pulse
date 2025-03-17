@@ -1,5 +1,7 @@
 #include "Common.h"
 #include <unity/unity.h>
+#include <stdio.h>
+#include <string.h>
 
 bool errors_enabled = true;
 bool has_recieved_error = false;
@@ -7,7 +9,10 @@ bool has_recieved_error = false;
 void DebugCallBack(PulseDebugMessageSeverity severity, const char* message)
 {
 	if(errors_enabled && severity == PULSE_DEBUG_MESSAGE_SEVERITY_ERROR)
-		TEST_FAIL_MESSAGE(message);
+	{
+		fprintf(stderr, "%s", message);
+		TEST_FAIL();
+	}
 	has_recieved_error = true;
 }
 
@@ -15,11 +20,15 @@ void DebugCallBack(PulseDebugMessageSeverity severity, const char* message)
 
 void SetupPulse(PulseBackend* backend)
 {
-	*backend = PulseLoadBackend(PULSE_BACKEND_VULKAN, PULSE_SHADER_FORMAT_SPIRV_BIT, PULSE_PARANOID_DEBUG);
+	#if defined(VULKAN_ENABLED)
+		*backend = PulseLoadBackend(PULSE_BACKEND_VULKAN, PULSE_SHADER_FORMAT_SPIRV_BIT, PULSE_PARANOID_DEBUG);
+	#elif defined(WEBGPU_ENABLED)
+		*backend = PulseLoadBackend(PULSE_BACKEND_WEBGPU, PULSE_SHADER_FORMAT_WGSL_BIT, PULSE_PARANOID_DEBUG);
+	#endif
 	if(*backend == PULSE_NULL_HANDLE)
 	{
 		char complete_message[LOG_MESSAGE_MAX_LENGTH] = { 0 };
-		snprintf(complete_message, LOG_MESSAGE_MAX_LENGTH, "Fatal Error: could not load Pulse using Vulkan due to %s", PulseVerbaliseErrorType(PulseGetLastErrorType()));
+		snprintf(complete_message, LOG_MESSAGE_MAX_LENGTH, "Fatal Error: could not load Pulse backend due to %s", PulseVerbaliseErrorType(PulseGetLastErrorType()));
 		TEST_FAIL_MESSAGE(complete_message);
 		TEST_ABORT();
 	}
@@ -50,10 +59,18 @@ void LoadComputePipeline(PulseDevice device, PulseComputePipeline* pipeline, con
 		uint32_t num_uniform_buffers)
 {
 	PulseComputePipelineCreateInfo info = { 0 };
-	info.code_size = code_size;
+	#if defined(WEBGPU_ENABLED)
+		info.code_size = strlen(code);
+	#else
+		info.code_size = code_size;
+	#endif
 	info.code = code;
 	info.entrypoint = "main";
-	info.format = PULSE_SHADER_FORMAT_SPIRV_BIT;
+	#if defined(VULKAN_ENABLED)
+		info.format = PULSE_SHADER_FORMAT_SPIRV_BIT;
+	#elif defined(WEBGPU_ENABLED)
+		info.format = PULSE_SHADER_FORMAT_WGSL_BIT;
+	#endif
 	info.num_readonly_storage_images = num_readonly_storage_images;
 	info.num_readonly_storage_buffers = num_readonly_storage_buffers;
 	info.num_readwrite_storage_buffers = num_readwrite_storage_buffers;

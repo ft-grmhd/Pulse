@@ -28,12 +28,7 @@
 	#endif
 #endif
 
-#ifdef PULSE_PLAT_WINDOWS
-	__declspec(dllimport) HMODULE __stdcall LoadLibraryA(LPCSTR);
-	__declspec(dllimport) FARPROC __stdcall GetProcAddress(HMODULE, LPCSTR);
-	__declspec(dllimport) int __stdcall FreeLibrary(HMODULE);
-	typedef HMODULE LibModule;
-#else
+#ifndef PULSE_PLAT_WINDOWS
 	#include <dlfcn.h>
 	typedef void* LibModule;
 #endif

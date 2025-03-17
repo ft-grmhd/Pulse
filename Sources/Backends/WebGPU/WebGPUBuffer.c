@@ -10,6 +10,7 @@
 #include "WebGPU.h"
 #include "WebGPUDevice.h"
 #include "WebGPUBuffer.h"
+#include "WebGPUImage.h"
 #include "WebGPUCommandList.h"
 
 PulseBuffer WebGPUCreateBuffer(PulseDevice device, const PulseBufferCreateInfo* create_infos)
@@ -156,6 +157,52 @@ bool WebGPUCopyBufferToBuffer(PulseCommandList cmd, const PulseBufferRegion* src
 
 bool WebGPUCopyBufferToImage(PulseCommandList cmd, const PulseBufferRegion* src, const PulseImageRegion* dst)
 {
+	WebGPUDevice* webgpu_device = WEBGPU_RETRIEVE_DRIVER_DATA_AS(cmd->device, WebGPUDevice*);
+	WebGPUBuffer* webgpu_src_buffer = WEBGPU_RETRIEVE_DRIVER_DATA_AS(src->buffer, WebGPUBuffer*);
+	WebGPUImage* webgpu_dst_image = WEBGPU_RETRIEVE_DRIVER_DATA_AS(dst->image, WebGPUImage*);
+	WebGPUCommandList* webgpu_cmd = WEBGPU_RETRIEVE_DRIVER_DATA_AS(cmd, WebGPUCommandList*);
+
+	PulseImageFormat format = dst->image->format;
+	uint32_t block_height = WebGPUGetImageBlockHeight(format) > 1 ? WebGPUGetImageBlockHeight(format) : 1;
+	uint32_t blocks_per_column = (dst->image->height + block_height - 1) / block_height;
+	uint32_t bytes_per_row = WebGPUBytesPerRow(dst->image->width, dst->image->format);
+
+	if(bytes_per_row == 0)
+	{
+		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(cmd->device->backend))
+			PulseLogError(cmd->device->backend, "(WebGPU) unsupported image format");
+		PulseSetInternalError(PULSE_ERROR_INVALID_IMAGE_FORMAT);
+		return false;
+	}
+
+	WGPUTexelCopyBufferLayout layout = { 0 };
+	layout.bytesPerRow = bytes_per_row;
+	layout.rowsPerImage = blocks_per_column;
+
+	WGPUTexelCopyTextureInfo texture_copy_info = { 0 };
+	texture_copy_info.texture = webgpu_dst_image->texture;
+	texture_copy_info.mipLevel = 1;
+	texture_copy_info.aspect = WGPUTextureAspect_All;
+	texture_copy_info.origin.x = dst->x;
+	texture_copy_info.origin.y = dst->y;
+	texture_copy_info.origin.z = dst->z;
+
+	WGPUExtent3D extent = { 0 };
+	extent.width = dst->width;
+	extent.height = dst->height;
+	extent.depthOrArrayLayers = dst->depth;
+
+	if(bytes_per_row >= 256 && bytes_per_row % 256 == 0)
+	{
+		WGPUTexelCopyBufferInfo buffer_copy_info = { 0 };
+		buffer_copy_info.buffer = webgpu_src_buffer->buffer;
+		buffer_copy_info.layout = layout;
+		wgpuCommandEncoderCopyBufferToTexture(webgpu_cmd->encoder, &buffer_copy_info, &texture_copy_info, &extent);
+	}
+	else
+		wgpuQueueWriteTexture(webgpu_device->queue, &texture_copy_info, webgpu_src_buffer->buffer, src->size, &layout, &extent);
+
+	return true;
 }
 
 void WebGPUDestroyBuffer(PulseDevice device, PulseBuffer buffer)

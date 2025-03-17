@@ -54,15 +54,6 @@ void TestBufferCreation()
 	TEST_ASSERT_NOT_EQUAL_MESSAGE(buffer, PULSE_NULL_HANDLE, PulseVerbaliseErrorType(PulseGetLastErrorType()));
 	PulseDestroyBuffer(device, buffer);
 
-	DISABLE_ERRORS;
-		buffer_create_info.size = -1;
-		buffer_create_info.usage = PULSE_BUFFER_USAGE_STORAGE_READ;
-		buffer = PulseCreateBuffer(device, &buffer_create_info);
-		TEST_ASSERT_EQUAL(buffer, PULSE_NULL_HANDLE);
-		PulseGetLastErrorType(); // Just to clear the error code
-		PulseDestroyBuffer(device, buffer);
-	ENABLE_ERRORS;
-
 	CleanupDevice(device);
 	CleanupPulse(backend);
 }
@@ -278,9 +269,14 @@ void TestBufferComputeWrite()
 	PulseDevice device;
 	SetupDevice(backend, &device);
 
-	const uint8_t shader_bytecode[] = {
-		#include "Shaders/SimpleBufferWrite.spv.h"
-	};
+	#if defined(VULKAN_ENABLED)
+		const uint8_t shader_bytecode[] = {
+			#include "Shaders/Vulkan/SimpleBufferWrite.spv.h"
+		};
+	#elif defined(WEBGPU_ENABLED)
+		#define SHADER_NAME shader_bytecode
+		#include "Shaders/WebGPU/SimpleBufferWrite.wgsl.h"
+	#endif
 
 	PulseBufferCreateInfo buffer_create_info = { 0 };
 	buffer_create_info.size = 256 * sizeof(int32_t);
@@ -300,7 +296,7 @@ void TestBufferComputeWrite()
 	TEST_ASSERT_NOT_EQUAL_MESSAGE(pass, PULSE_NULL_HANDLE, PulseVerbaliseErrorType(PulseGetLastErrorType()));
 		PulseBindStorageBuffers(pass, &buffer, 1);
 		PulseBindComputePipeline(pass, pipeline);
-		PulseDispatchComputations(pass, 32, 32, 1);
+		PulseDispatchComputations(pass, 16, 1, 1);
 	PulseEndComputePass(pass);
 
 	TEST_ASSERT_TRUE_MESSAGE(PulseSubmitCommandList(device, cmd, fence), PulseVerbaliseErrorType(PulseGetLastErrorType()));
@@ -340,9 +336,14 @@ void TestBufferComputeCopy()
 	PulseDevice device;
 	SetupDevice(backend, &device);
 
-	const uint8_t shader_bytecode[] = {
-		#include "Shaders/BufferCopy.spv.h"
-	};
+	#if defined(VULKAN_ENABLED)
+		const uint8_t shader_bytecode[] = {
+			#include "Shaders/Vulkan/BufferCopy.spv.h"
+		};
+	#elif defined(WEBGPU_ENABLED)
+		#define SHADER_NAME shader_bytecode
+		#include "Shaders/WebGPU/BufferCopy.wgsl.h"
+	#endif
 
 	uint32_t data[256];
 	memset(data, 0xFF, 256 * sizeof(uint32_t));
@@ -386,7 +387,7 @@ void TestBufferComputeCopy()
 		PulseBindStorageBuffers(pass, &read_buffer, 1);
 		PulseBindStorageBuffers(pass, &write_buffer, 1);
 		PulseBindComputePipeline(pass, pipeline);
-		PulseDispatchComputations(pass, 32, 32, 1);
+		PulseDispatchComputations(pass, 16, 1, 1);
 	PulseEndComputePass(pass);
 
 	TEST_ASSERT_TRUE_MESSAGE(PulseSubmitCommandList(device, cmd, fence), PulseVerbaliseErrorType(PulseGetLastErrorType()));

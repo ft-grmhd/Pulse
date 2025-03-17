@@ -137,8 +137,5 @@ target("pulse_gpu")
 	end)
 target_end()
 
+includes("Tests/xmake.lua")
 includes("Examples/*.lua")
-
-if not is_plat("wasm") then
-	includes("Tests/Vulkan/*.lua")
-end

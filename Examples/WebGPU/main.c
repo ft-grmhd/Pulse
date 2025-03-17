@@ -27,7 +27,7 @@ const char* wgsl_source = WGSL_SOURCE(
 	@compute @workgroup_size(16, 16, 1)
 	fn main(@builtin(global_invocation_id) grid: vec3<u32>)
 	{
-    	ssbo[grid.x * grid.y] = i32(grid.x * grid.y);
+		ssbo[grid.x * grid.y] = i32(grid.x * grid.y);
 	}
 );
 

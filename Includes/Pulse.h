@@ -49,7 +49,7 @@ typedef enum PulseBufferUsageBits
 	PULSE_BUFFER_USAGE_TRANSFER_DOWNLOAD = PULSE_BIT(2),
 	PULSE_BUFFER_USAGE_STORAGE_READ      = PULSE_BIT(3),
 	PULSE_BUFFER_USAGE_STORAGE_WRITE     = PULSE_BIT(4),
-} PulseShaderFormatBits;
+} PulseBufferUsageBits;
 typedef PulseFlags PulseBufferUsageFlags;
 
 /**

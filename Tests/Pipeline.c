@@ -10,9 +10,14 @@ void TestPipelineSetup()
 	PulseDevice device;
 	SetupDevice(backend, &device);
 
-	const uint8_t shader_bytecode[] = {
-		#include "Shaders/Simple.spv.h"
-	};
+	#if defined(VULKAN_ENABLED)
+		const uint8_t shader_bytecode[] = {
+			#include "Shaders/Vulkan/Simple.spv.h"
+		};
+	#elif defined(WEBGPU_ENABLED)
+		#define SHADER_NAME shader_bytecode
+		#include "Shaders/WebGPU/Simple.wgsl.h"
+	#endif
 
 	PulseComputePipeline pipeline;
 	LoadComputePipeline(device, &pipeline, shader_bytecode, sizeof(shader_bytecode), 0, 0, 0, 0, 0);
@@ -25,7 +30,7 @@ void TestPipelineSetup()
 	PulseComputePass pass = PulseBeginComputePass(cmd);
 	TEST_ASSERT_NOT_EQUAL_MESSAGE(pass, PULSE_NULL_HANDLE, PulseVerbaliseErrorType(PulseGetLastErrorType()));
 		PulseBindComputePipeline(pass, pipeline);
-		PulseDispatchComputations(pass, 32, 32, 1);
+		PulseDispatchComputations(pass, 16, 1, 1);
 	PulseEndComputePass(pass);
 
 	TEST_ASSERT_TRUE_MESSAGE(PulseSubmitCommandList(device, cmd, fence), PulseVerbaliseErrorType(PulseGetLastErrorType()));
@@ -46,9 +51,14 @@ void TestPipelineReadOnlyBindings()
 	PulseDevice device;
 	SetupDevice(backend, &device);
 
-	const uint8_t shader_bytecode[] = {
-		#include "Shaders/ReadOnlyBindings.spv.h"
-	};
+	#if defined(VULKAN_ENABLED)
+		const uint8_t shader_bytecode[] = {
+			#include "Shaders/Vulkan/ReadOnlyBindings.spv.h"
+		};
+	#elif defined(WEBGPU_ENABLED)
+		#define SHADER_NAME shader_bytecode
+		#include "Shaders/WebGPU/ReadOnlyBindings.wgsl.h"
+	#endif
 
 	PulseBufferCreateInfo buffer_create_info = { 0 };
 	buffer_create_info.size = 256 * sizeof(int32_t);
@@ -79,7 +89,7 @@ void TestPipelineReadOnlyBindings()
 		PulseBindStorageImages(pass, &image, 1);
 		PulseBindStorageBuffers(pass, &buffer, 1);
 		PulseBindComputePipeline(pass, pipeline);
-		PulseDispatchComputations(pass, 32, 32, 1);
+		PulseDispatchComputations(pass, 16, 1, 1);
 	PulseEndComputePass(pass);
 
 	TEST_ASSERT_TRUE_MESSAGE(PulseSubmitCommandList(device, cmd, fence), PulseVerbaliseErrorType(PulseGetLastErrorType()));
@@ -102,9 +112,14 @@ void TestPipelineWriteOnlyBindings()
 	PulseDevice device;
 	SetupDevice(backend, &device);
 
-	const uint8_t shader_bytecode[] = {
-		#include "Shaders/ReadOnlyBindings.spv.h"
-	};
+	#if defined(VULKAN_ENABLED)
+		const uint8_t shader_bytecode[] = {
+			#include "Shaders/Vulkan/WriteOnlyBindings.spv.h"
+		};
+	#elif defined(WEBGPU_ENABLED)
+		#define SHADER_NAME shader_bytecode
+		#include "Shaders/WebGPU/WriteOnlyBindings.wgsl.h"
+	#endif
 
 	PulseBufferCreateInfo buffer_create_info = { 0 };
 	buffer_create_info.size = 256 * sizeof(int32_t);
@@ -135,7 +150,7 @@ void TestPipelineWriteOnlyBindings()
 		PulseBindStorageImages(pass, &image, 1);
 		PulseBindStorageBuffers(pass, &buffer, 1);
 		PulseBindComputePipeline(pass, pipeline);
-		PulseDispatchComputations(pass, 32, 32, 1);
+		PulseDispatchComputations(pass, 16, 1, 1);
 	PulseEndComputePass(pass);
 
 	TEST_ASSERT_TRUE_MESSAGE(PulseSubmitCommandList(device, cmd, fence), PulseVerbaliseErrorType(PulseGetLastErrorType()));
@@ -158,9 +173,14 @@ void TestPipelineReadWriteBindings()
 	PulseDevice device;
 	SetupDevice(backend, &device);
 
-	const uint8_t shader_bytecode[] = {
-		#include "Shaders/ReadOnlyBindings.spv.h"
-	};
+	#if defined(VULKAN_ENABLED)
+		const uint8_t shader_bytecode[] = {
+			#include "Shaders/Vulkan/ReadWriteBindings.spv.h"
+		};
+	#elif defined(WEBGPU_ENABLED)
+		#define SHADER_NAME shader_bytecode
+		#include "Shaders/WebGPU/ReadWriteBindings.wgsl.h"
+	#endif
 
 	PulseBufferCreateInfo buffer_create_info = { 0 };
 	buffer_create_info.size = 256 * sizeof(int32_t);
@@ -201,7 +221,7 @@ void TestPipelineReadWriteBindings()
 		PulseBindStorageBuffers(pass, &read_buffer, 1);
 		PulseBindStorageBuffers(pass, &write_buffer, 1);
 		PulseBindComputePipeline(pass, pipeline);
-		PulseDispatchComputations(pass, 32, 32, 1);
+		PulseDispatchComputations(pass, 16, 1, 1);
 	PulseEndComputePass(pass);
 
 	TEST_ASSERT_TRUE_MESSAGE(PulseSubmitCommandList(device, cmd, fence), PulseVerbaliseErrorType(PulseGetLastErrorType()));
