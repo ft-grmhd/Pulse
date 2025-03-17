@@ -169,7 +169,7 @@ PulseImage VulkanCreateImage(PulseDevice device, const PulseImageCreateInfo* cre
 
 bool VulkanIsImageFormatValid(PulseDevice device, PulseImageFormat format, PulseImageType type, PulseImageUsageFlags usage)
 {
-	(void)usage;
+	PULSE_UNUSED(usage);
 	VulkanDriverData* vulkan_driver_data = VULKAN_RETRIEVE_DRIVER_DATA_AS(device->backend, VulkanDriverData*);
 	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(device, VulkanDevice*);
 	VkImageCreateFlags vulkan_flags = 0;

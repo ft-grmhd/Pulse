@@ -186,6 +186,7 @@ PULSE_API const char* PulseVerbaliseErrorType(PulseErrorType error)
 		case PULSE_ERROR_INVALID_REGION:                             return "invalid region";
 		case PULSE_ERROR_INVALID_BUFFER_USAGE:                       return "invalid buffer usage";
 		case PULSE_ERROR_INVALID_IMAGE_USAGE:                        return "invalid image usage";
+		case PULSE_ERROR_INVALID_IMAGE_FORMAT:                       return "invalid image format";
 
 		default: return "invalid error type";
 	};

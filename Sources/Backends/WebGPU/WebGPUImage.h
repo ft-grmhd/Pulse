@@ -14,6 +14,7 @@
 
 typedef struct WebGPUImage
 {
+	WGPUTexture texture;
 } WebGPUImage;
 
 PulseImage WebGPUCreateImage(PulseDevice device, const PulseImageCreateInfo* create_infos);
