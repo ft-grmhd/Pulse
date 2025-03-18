@@ -13,6 +13,9 @@
 
 #ifdef PULSE_PLAT_MACOS
 	#include <stdlib.h> // getenv
+#endif
+
+#ifdef PULSE_PLAT_WINDOWS
 	typedef HMODULE LibModule;
 #else
 	#include <dlfcn.h>
