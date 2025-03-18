@@ -13,22 +13,8 @@
 
 #ifdef PULSE_PLAT_MACOS
 	#include <stdlib.h> // getenv
-#endif
-
-#ifdef PULSE_PLAT_WINDOWS
-	typedef const char* LPCSTR;
-	typedef struct HINSTANCE__* HINSTANCE;
-	typedef HINSTANCE HMODULE;
-	#if defined(_MINWINDEF_)
-		/* minwindef.h defines FARPROC, and attempting to redefine it may conflict with -Wstrict-prototypes */
-	#elif defined(_WIN64)
-		typedef __int64 (__stdcall* FARPROC)(void);
-	#else
-		typedef int (__stdcall* FARPROC)(void);
-	#endif
-#endif
-
-#ifndef PULSE_PLAT_WINDOWS
+	typedef HMODULE LibModule;
+#else
 	#include <dlfcn.h>
 	typedef void* LibModule;
 #endif

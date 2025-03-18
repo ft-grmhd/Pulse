@@ -1,7 +1,6 @@
 local tests = {
 	Vulkan = {
 		option = "vulkan",
-		packages = { "nzsl" },
 		global_custom = function()
 			add_repositories("nazara-engine-repo https://github.com/NazaraEngine/xmake-repo")
 			add_requires("nzsl >=2023.12.31", { configs = { shared = false, nzslc = true } })
@@ -80,6 +79,7 @@ local tests = {
 		end,
 		custom = function()
 			add_rules("nzsl_compile_shaders")
+			add_packages("nzs")
 			add_files("**.nzsl")
 		end
 	},
