@@ -113,6 +113,7 @@ if is_plat("linux") then
 	add_requires("libbacktrace")
 end
 add_requires("unity_test")
+-- add_requireconfs("unity_test", { configs = { cflags = "-D UNITY_OUTPUT_COLOR" }})
 
 for name, module in table.orderpairs(tests) do
 	if module.option then

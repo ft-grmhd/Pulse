@@ -108,7 +108,6 @@ PulseImage VulkanCreateImage(PulseDevice device, const PulseImageCreateInfo* cre
 	uint32_t layer_count = (create_infos->type == PULSE_IMAGE_TYPE_3D) ? 1 : create_infos->layer_count_or_depth;
 	uint32_t depth = (create_infos->type == PULSE_IMAGE_TYPE_3D) ? create_infos->layer_count_or_depth : 1;
 
-	image->device = device;
 	image->driver_data = vulkan_image;
 
 	VmaAllocationCreateInfo allocation_create_info = { 0 };

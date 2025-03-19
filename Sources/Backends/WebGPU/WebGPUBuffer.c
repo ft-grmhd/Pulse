@@ -45,7 +45,7 @@ PulseBuffer WebGPUCreateBuffer(PulseDevice device, const PulseBufferCreateInfo* 
 			descriptor.usage |= WGPUBufferUsage_MapRead;
 	}
 	if(buffer->usage & PULSE_BUFFER_USAGE_TRANSFER_UPLOAD)
-		descriptor.usage |= WGPUBufferUsage_CopyDst | WGPUBufferUsage_CopySrc;
+		descriptor.usage |= WGPUBufferUsage_CopySrc;
 	if(buffer->usage & PULSE_INTERNAL_BUFFER_USAGE_UNIFORM_ACCESS)
 		descriptor.usage |= WGPUBufferUsage_Uniform | WGPUBufferUsage_CopyDst | WGPUBufferUsage_CopySrc;
 
@@ -74,7 +74,7 @@ static void WebGPUMapBufferCallback(WGPUMapAsyncStatus status, WGPUStringView me
 			"mapping was aborted",
 		};
 		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(buffer->device->backend))
-			PulseLogErrorFmt(buffer->device->backend, "(WebGPU) buffer mapping failed because %s. %.*s", reasons[status], message.length, message.data);
+			PulseLogErrorFmt(buffer->device->backend, "(WebGPU) buffer mapping failed because %s. %.*s", reasons[status - 1], message.length, message.data);
 		PulseSetInternalError(PULSE_ERROR_MAP_FAILED);
 		atomic_store(mapping_finished, 2);
 	}

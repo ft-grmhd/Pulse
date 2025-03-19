@@ -10,7 +10,7 @@ void DebugCallBack(PulseDebugMessageSeverity severity, const char* message)
 {
 	if(errors_enabled && severity == PULSE_DEBUG_MESSAGE_SEVERITY_ERROR)
 	{
-		fprintf(stderr, "%s", message);
+		fprintf(stderr, "%s\n", message);
 		TEST_FAIL();
 	}
 	has_recieved_error = true;

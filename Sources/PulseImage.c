@@ -103,6 +103,7 @@ PULSE_API PulseImage PulseCreateImage(PulseDevice device, const PulseImageCreate
 	if(image == PULSE_NULL_HANDLE)
 		return PULSE_NULL_HANDLE;
 
+	image->device = device;
 	image->type = create_infos->type;
 	image->format = create_infos->format;
 	image->usage = create_infos->usage;
