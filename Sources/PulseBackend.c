@@ -20,6 +20,9 @@
 #ifdef PULSE_ENABLE_SOFTWARE_BACKEND
 	#include "Backends/Software/Soft.h"
 #endif
+#ifdef PULSE_ENABLE_OPENGL_BACKEND
+	#include "Backends/OpenGL/OpenGL.h"
+#endif
 
 // Ordered by default preference
 static const PulseCheckBackendSupportPFN backends_supports[] = {
@@ -31,6 +34,10 @@ static const PulseCheckBackendSupportPFN backends_supports[] = {
 	#endif
 	#ifdef PULSE_ENABLE_WEBGPU_BACKEND
 		WebGPUCheckSupport,
+	#endif
+	#ifdef PULSE_ENABLE_OPENGL_BACKEND
+		OpenGLCheckSupport,
+		OpenGLESCheckSupport,
 	#endif
 	#ifdef PULSE_ENABLE_SOFTWARE_BACKEND
 		SoftCheckSupport,
@@ -49,7 +56,7 @@ void PulseSetInternalError(PulseErrorType error)
 
 void PulseLogBackend(PulseBackend backend, PulseDebugMessageSeverity type, const char* message, const char* file, const char* function, int line, ...)
 {
-	(void)file; // May be used later
+	PULSE_UNUSED(file); // May be used later
 	if(backend == PULSE_NULL_HANDLE)
 		return;
 	if(!backend->PFN_UserDebugCallback)
@@ -107,6 +114,10 @@ static PulseBackend PulseGetBackendFromFlag(PulseBackendBits flag)
 		#endif
 		#ifdef PULSE_ENABLE_SOFTWARE_BACKEND
 			case PULSE_BACKEND_SOFTWARE: return &SoftwareDriver;
+		#endif
+		#ifdef PULSE_ENABLE_OPENGL_BACKEND
+			case PULSE_BACKEND_OPENGL: return &OpenGLDriver;
+			case PULSE_BACKEND_OPENGL_ES: return &OpenGLESDriver;
 		#endif
 
 		default: break;

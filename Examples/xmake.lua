@@ -8,6 +8,9 @@ if has_config("examples") then
 	if has_config("webgpu") then
 		includes("WebGPU/xmake.lua")
 	end
+	if has_config("opengl") then
+		includes("OpenGL/xmake.lua")
+	end
 	if has_config("software") then
 		includes("Software/xmake.lua")
 	end

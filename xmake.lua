@@ -34,7 +34,20 @@ local backends = {
 		option = "software",
 		default = true,
 		packages = { "spirv-vm", "cpuinfo" }
-	}
+	},
+	OpenGL = {
+		option = "opengl",
+		default = not is_plat("macosx", "iphoneos", "wasm", "appletvos"),
+		packages = { "opengl-headers", "egl-headers" },
+		custom = function()
+			add_defines("EGL_NO_X11")
+			if is_plat("windows", "mingw") then
+				add_syslinks("User32")
+			else
+				remove_files("Sources/Backends/OpenGL/WGL/**.c")
+			end
+		end
+	},
 }
 
 local sanitizers = {

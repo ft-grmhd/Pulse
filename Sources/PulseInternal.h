@@ -181,5 +181,9 @@ void PulseLogBackend(PulseBackend backend, PulseDebugMessageSeverity type, const
 #ifdef PULSE_ENABLE_SOFTWARE_BACKEND
 	extern PulseBackendHandler SoftwareDriver;
 #endif // PULSE_ENABLE_SOFTWARE_BACKEND
+#ifdef PULSE_ENABLE_OPENGL_BACKEND
+	extern PulseBackendHandler OpenGLDriver;
+	extern PulseBackendHandler OpenGLESDriver;
+#endif // PULSE_ENABLE_OPENGL_BACKEND
 
 #endif // PULSE_INTERNAL_H_

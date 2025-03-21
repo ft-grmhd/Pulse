@@ -16,7 +16,7 @@ extern "C" {
 
 #include "PulseProfile.h"
 
-#define PULSE_VERSION PULSE_MAKE_VERSION(0, 0, 1)
+#define PULSE_VERSION PULSE_MAKE_VERSION(0, 1, 0)
 
 // Types
 typedef uint64_t PulseDeviceSize;
@@ -34,12 +34,14 @@ PULSE_DEFINE_NULLABLE_HANDLE(PulseComputePass);
 // Flags
 typedef enum PulseBackendBits
 {
-	PULSE_BACKEND_INVALID  = PULSE_BIT(1),
-	PULSE_BACKEND_ANY      = PULSE_BIT(2),
-	PULSE_BACKEND_VULKAN   = PULSE_BIT(3),
-	PULSE_BACKEND_METAL    = PULSE_BIT(4),
-	PULSE_BACKEND_WEBGPU   = PULSE_BIT(5),
-	PULSE_BACKEND_SOFTWARE = PULSE_BIT(6),
+	PULSE_BACKEND_INVALID   = PULSE_BIT(1),
+	PULSE_BACKEND_ANY       = PULSE_BIT(2),
+	PULSE_BACKEND_VULKAN    = PULSE_BIT(3),
+	PULSE_BACKEND_METAL     = PULSE_BIT(4),
+	PULSE_BACKEND_WEBGPU    = PULSE_BIT(5),
+	PULSE_BACKEND_SOFTWARE  = PULSE_BIT(6),
+	PULSE_BACKEND_OPENGL    = PULSE_BIT(7),
+	PULSE_BACKEND_OPENGL_ES = PULSE_BIT(8),
 } PulseBackendBits;
 typedef PulseFlags PulseBackendFlags;
 
@@ -72,6 +74,7 @@ typedef enum PulseShaderFormatsBits
 	PULSE_SHADER_FORMAT_MSL_BIT      = PULSE_BIT(2), // Can be used by Metal backend
 	PULSE_SHADER_FORMAT_METALLIB_BIT = PULSE_BIT(3), // Can be used by Metal backend
 	PULSE_SHADER_FORMAT_WGSL_BIT     = PULSE_BIT(4), // Can be used by WebGPU backend
+	PULSE_SHADER_FORMAT_GLSL_BIT     = PULSE_BIT(5), // Can be used by OpenGL / OpenGL_ES backend
 	// More to come
 } PulseShaderFormatsBits;
 typedef PulseFlags PulseShaderFormatsFlags;
