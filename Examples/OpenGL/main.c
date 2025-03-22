@@ -26,7 +26,9 @@ int main(int ac, char** av)
 		backend_type = PULSE_BACKEND_OPENGL_ES;
 	PulseBackend backend = PulseLoadBackend(backend_type, PULSE_SHADER_FORMAT_GLSL_BIT, PULSE_HIGH_DEBUG);
 	PulseSetDebugCallback(backend, DebugCallBack);
+	PulseDevice device = PulseCreateDevice(backend, NULL, 0);
 
+	PulseDestroyDevice(device);
 	PulseUnloadBackend(backend);
 	printf("Successfully executed Pulse example using %s !\n", backend_type == PULSE_BACKEND_OPENGL ? "OpenGL" : "OpenGL ES");
 	return 0;

@@ -71,7 +71,10 @@ void PulseLogBackend(PulseBackend backend, PulseDebugMessageSeverity type, const
 
 	if(type != PULSE_DEBUG_MESSAGE_SEVERITY_INFO)
 	{
-		shift = snprintf(complete_message, LOG_MESSAGE_MAX_LENGTH, "[%s:%d] ", function, line);
+		if(line != 0)
+			shift = snprintf(complete_message, LOG_MESSAGE_MAX_LENGTH, "[%s:%d] ", function, line);
+		else
+			shift = snprintf(complete_message, LOG_MESSAGE_MAX_LENGTH, "[%s] ", function);
 		if(backend->debug_level == PULSE_PARANOID_DEBUG && type == PULSE_DEBUG_MESSAGE_SEVERITY_WARNING)
 			type = PULSE_DEBUG_MESSAGE_SEVERITY_ERROR;
 		if(shift == -1)
@@ -112,12 +115,12 @@ static PulseBackend PulseGetBackendFromFlag(PulseBackendBits flag)
 		#ifdef PULSE_ENABLE_WEBGPU_BACKEND
 			case PULSE_BACKEND_WEBGPU: return &WebGPUDriver;
 		#endif
+		#ifdef PULSE_ENABLE_OPENGL_BACKEND
+			case PULSE_BACKEND_OPENGL: return &OpenGLDriver;
+			case PULSE_BACKEND_OPENGL_ES: return &OpenGLESDriver;
+		#endif
 		#ifdef PULSE_ENABLE_SOFTWARE_BACKEND
 			case PULSE_BACKEND_SOFTWARE: return &SoftwareDriver;
-		#endif
-		#ifdef PULSE_ENABLE_OPENGL_BACKEND
-			case PULSE_BACKEND_OPENGL:
-			case PULSE_BACKEND_OPENGL_ES: return &OpenGLESDriver;
 		#endif
 
 		default: break;

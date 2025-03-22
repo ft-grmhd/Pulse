@@ -46,6 +46,10 @@ local backends = {
 			else
 				remove_files("Sources/Backends/OpenGL/WGL/**.c")
 			end
+		end,
+		before_build = function(target, os)
+			local gles_dir = target:pkg("opengl-headers"):installdir()
+			os.runv("python", {"Scripts/GenerateOpenGLDefs.py", "Sources/Backends/OpenGL/OpenGLFunctions.h", gles_dir .. "/include/GLES3/gl31.h", "Sources/Backends/OpenGL/OpenGLWraps.h"})
 		end
 	},
 }
@@ -123,6 +127,14 @@ target("pulse_gpu")
 	if is_plat("wasm") then
 		add_defines("PULSE_PLAT_WASM")
 	end
+
+	before_build(function(target)
+		for name, module in pairs(backends) do
+			if module ~= nil and has_config(module.option) and module.before_build then
+				module.before_build(target, os)
+			end
+		end
+	end)
 
 	for name, module in pairs(backends) do
 		if module ~= nil and has_config(module.option) then
