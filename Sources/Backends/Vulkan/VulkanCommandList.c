@@ -12,7 +12,7 @@
 static void VulkanInitCommandList(VulkanCommandPool* pool, PulseCommandList cmd)
 {
 	PULSE_CHECK_PTR(pool);
-	PULSE_CHECK_PTR(cmd);
+	PULSE_CHECK_HANDLE(cmd);
 
 	VulkanDevice* vulkan_device = VULKAN_RETRIEVE_DRIVER_DATA_AS(pool->device, VulkanDevice*);
 	VulkanCommandList* vulkan_cmd = VULKAN_RETRIEVE_DRIVER_DATA_AS(cmd, VulkanCommandList*);

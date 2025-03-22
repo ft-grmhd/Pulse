@@ -116,7 +116,7 @@ static PulseBackend PulseGetBackendFromFlag(PulseBackendBits flag)
 			case PULSE_BACKEND_SOFTWARE: return &SoftwareDriver;
 		#endif
 		#ifdef PULSE_ENABLE_OPENGL_BACKEND
-			case PULSE_BACKEND_OPENGL: return &OpenGLDriver;
+			case PULSE_BACKEND_OPENGL:
 			case PULSE_BACKEND_OPENGL_ES: return &OpenGLESDriver;
 		#endif
 

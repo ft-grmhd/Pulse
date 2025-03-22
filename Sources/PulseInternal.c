@@ -33,3 +33,51 @@
 		emscripten_thread_sleep(ms);
 	}
 #endif
+
+#ifdef PULSE_PLAT_WINDOWS
+	PULSE_IMPORT_API HMODULE __stdcall LoadLibraryA(LPCSTR);
+	PULSE_IMPORT_API FARPROC __stdcall GetProcAddress(HMODULE, LPCSTR);
+	PULSE_IMPORT_API int __stdcall FreeLibrary(HMODULE);
+#else
+	#ifdef PULSE_PLAT_MACOS
+		#include <stdlib.h>
+	#endif
+	#include <dlfcn.h>
+#endif
+
+PulseLibModule PulseLoadLibrary(const char* libpath)
+{
+	PulseLibModule module;
+	#ifdef PULSE_PLAT_WINDOWS
+		module = LoadLibraryA(libpath);
+	#else
+		dlerror();
+		module = dlopen(libpath, RTLD_NOW | RTLD_LOCAL);
+	#endif
+	return (module ? module : PULSE_NULL_LIB_MODULE);
+}
+
+PFN_PulseLibFunction PulseLoadSymbolFromLibModule(PulseLibModule module, const char* symbol)
+{
+	if(module == PULSE_NULL_LIB_MODULE)
+		return PULSE_NULLPTR;
+	PFN_PulseLibFunction function;
+	#ifdef PULSE_PLAT_WINDOWS
+		function = (PFN_PulseLibFunction)GetProcAddress(module, symbol);
+	#else
+		void* symbol_ptr = (PFN_PulseLibFunction)dlsym(module, symbol);
+		*(void**)(&function) = symbol_ptr;
+	#endif
+	return function;
+}
+
+void PulseUnloadLibrary(PulseLibModule module)
+{
+	if(module == PULSE_NULL_LIB_MODULE)
+		return;
+	#ifdef PULSE_PLAT_WINDOWS
+		FreeLibrary(module);
+	#else
+		dlclose(module);
+	#endif
+}

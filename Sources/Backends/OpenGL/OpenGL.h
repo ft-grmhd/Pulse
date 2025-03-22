@@ -11,8 +11,14 @@
 
 #define OPENGL_RETRIEVE_DRIVER_DATA_AS(handle, cast) ((cast)handle->driver_data)
 
+#include "EGL/EGLInstance.h"
+
 typedef struct OpenGLDriverData
 {
+	union
+	{
+		EGLInstance egl_instance;
+	};
 } OpenGLDriverData;
 
 PulseBackendFlags OpenGLCheckSupport(PulseBackendFlags candidates, PulseShaderFormatsFlags shader_formats_used); // Return PULSE_BACKEND_OPENGL in case of success and PULSE_BACKEND_INVALID otherwise

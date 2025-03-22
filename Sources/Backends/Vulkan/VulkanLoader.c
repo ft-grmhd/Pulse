@@ -11,35 +11,7 @@
 #include "VulkanDevice.h"
 #include "VulkanInstance.h"
 
-#ifdef PULSE_PLAT_MACOS
-	#include <stdlib.h> // getenv
-#endif
-
-#ifdef PULSE_PLAT_WINDOWS
-	typedef const char* LPCSTR;
-	typedef struct HINSTANCE__* HINSTANCE;
-	typedef HINSTANCE HMODULE;
-	#if defined(_MINWINDEF_)
-		/* minwindef.h defines FARPROC, and attempting to redefine it may conflict with -Wstrict-prototypes */
-	#elif defined(_WIN64)
-		typedef __int64 (__stdcall* FARPROC)(void);
-	#else
-		typedef int (__stdcall* FARPROC)(void);
-	#endif
-#endif
-
-#ifdef PULSE_PLAT_WINDOWS
-	__declspec(dllimport) HMODULE __stdcall LoadLibraryA(LPCSTR);
-	__declspec(dllimport) FARPROC __stdcall GetProcAddress(HMODULE, LPCSTR);
-	__declspec(dllimport) int __stdcall FreeLibrary(HMODULE);
-	typedef HMODULE LibModule;
-#else
-	#include <dlfcn.h>
-	typedef void* LibModule;
-#endif
-
-static LibModule vulkan_lib_module = PULSE_NULLPTR;
-
+static PulseLibModule vulkan_lib_module = PULSE_NULL_LIB_MODULE;
 static uint32_t loader_references_count = 0;
 
 static bool VulkanLoadGlobalFunctions(void* context, PFN_vkVoidFunction (*load)(void*, const char*));
@@ -60,33 +32,6 @@ static inline PFN_vkVoidFunction vkGetDeviceProcAddrStub(VulkanInstance* instanc
 	if(!fn)
 		PulseSetInternalError(PULSE_ERROR_INITIALIZATION_FAILED);
 	return fn;
-}
-
-static inline LibModule LoadLibrary(const char* libname)
-{
-	#ifdef PULSE_PLAT_WINDOWS
-		return LoadLibraryA(libname);
-	#else
-		return dlopen(libname, RTLD_NOW | RTLD_LOCAL);
-	#endif
-}
-
-static inline void* GetSymbol(LibModule module, const char* name)
-{
-	#ifdef PULSE_PLAT_WINDOWS
-		return (void*)(void(*)(void))GetProcAddress(module, name);
-	#else
-		return dlsym(module, name);
-	#endif
-}
-
-static inline void UnloadLibrary(LibModule lib)
-{
-	#ifdef PULSE_PLAT_WINDOWS
-		FreeLibrary(lib);
-	#else
-		dlclose(lib);
-	#endif
 }
 
 bool VulkanInitLoader()
@@ -116,15 +61,17 @@ bool VulkanInitLoader()
 
 	for(size_t i = 0; i < sizeof(libnames) / sizeof(const char*); i++)
 	{
-		vulkan_lib_module = LoadLibrary(libnames[i]);
+		vulkan_lib_module = PulseLoadLibrary(libnames[i]);
 		if(vulkan_lib_module)
 		{
-			VulkanGetGlobal()->vkGetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)GetSymbol(vulkan_lib_module, "vkGetInstanceProcAddr");
+			VulkanGetGlobal()->vkGetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)PulseLoadSymbolFromLibModule(vulkan_lib_module, "vkGetInstanceProcAddr");
 			if(VulkanGetGlobal()->vkGetInstanceProcAddr == PULSE_NULLPTR)
 			{
-				UnloadLibrary(vulkan_lib_module);
+				PulseUnloadLibrary(vulkan_lib_module);
 				vulkan_lib_module = PULSE_NULLPTR;
 			}
+			else
+				break;
 		}
 	}
 	if(!vulkan_lib_module)
@@ -151,8 +98,8 @@ void VulkanLoaderShutdown()
 	loader_references_count--;
 	if(loader_references_count != 0)
 		return;
-	UnloadLibrary(vulkan_lib_module);
-	vulkan_lib_module = PULSE_NULLPTR;
+	PulseUnloadLibrary(vulkan_lib_module);
+	vulkan_lib_module = PULSE_NULL_LIB_MODULE;
 }
 
 static bool VulkanLoadGlobalFunctions(void* context, PFN_vkVoidFunction (*load)(void*, const char*))

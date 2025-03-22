@@ -28,6 +28,6 @@ int main(int ac, char** av)
 	PulseSetDebugCallback(backend, DebugCallBack);
 
 	PulseUnloadBackend(backend);
-	puts("Successfully executed Pulse example using OpenGL !");
+	printf("Successfully executed Pulse example using %s !\n", backend_type == PULSE_BACKEND_OPENGL ? "OpenGL" : "OpenGL ES");
 	return 0;
 }
