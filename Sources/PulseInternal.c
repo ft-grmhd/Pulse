@@ -2,6 +2,8 @@
 // This file is part of "Pulse"
 // For conditions of distribution and use, see copyright notice in LICENSE
 
+#include <string.h>
+
 #include "PulseInternal.h"
 
 #ifndef PULSE_PLAT_WASM
@@ -80,4 +82,12 @@ void PulseUnloadLibrary(PulseLibModule module)
 	#else
 		dlclose(module);
 	#endif
+}
+
+uint32_t PulseHashString(const char* str)
+{
+	uint32_t hash = 5381;
+	for(size_t i = 0; i < strlen(str); i++)
+		hash = ((hash << 5) + hash) + str[i];
+	return hash;
 }

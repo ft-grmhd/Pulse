@@ -187,6 +187,7 @@ PFN_PulseLibFunction PulseLoadSymbolFromLibModule(PulseLibModule module, const c
 void PulseUnloadLibrary(PulseLibModule module);
 
 void PulseSetInternalError(PulseErrorType error);
+uint32_t PulseHashString(const char* str);
 
 void PulseLogBackend(PulseBackend backend, PulseDebugMessageSeverity type, const char* message, const char* file, const char* function, int line, ...);
 

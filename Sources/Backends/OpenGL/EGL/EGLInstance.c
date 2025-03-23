@@ -2,6 +2,7 @@
 // This file is part of "Pulse"
 // For conditions of distribution and use, see copyright notice in LICENSE
 
+#include <stdio.h>
 #include <string.h>
 
 #include "EGLInstance.h"
@@ -61,28 +62,6 @@ static bool EGLLoadFunctions(EGLInstance* instance)
 	return true;
 }
 
-static bool EGLIsDeviceForbidden(EGLInstance* instance, EGLDeviceEXT device, PulseDevice* forbiden_devices, uint32_t forbiden_devices_count)
-{
-	if(device == EGL_NO_DEVICE_EXT)
-		return true;
-
-	const char* test_device_vendor = instance->eglQueryDeviceStringEXT(device, EGL_VENDOR);
-
-	for(uint32_t i = 0; i < forbiden_devices_count; i++)
-	{
-		OpenGLDevice* opengl_device = OPENGL_RETRIEVE_DRIVER_DATA_AS(forbiden_devices[i], OpenGLDevice*);
-		if(opengl_device->context_type != OPENGL_CONTEXT_EGL)
-			continue;
-
-		const char* device_vendor = instance->eglQueryDeviceStringEXT(opengl_device->egl_instance.device, EGL_VENDOR);
-		if(device_vendor && test_device_vendor && strcmp(test_device_vendor, device_vendor) == 0)
-			return true;
-	}
-	return false;
-}
-
-#include <stdio.h>
-
 bool EGLLoadInstance(EGLInstance* instance, PulseDevice* forbiden_devices, uint32_t forbiden_devices_count, bool es_context)
 {
 	PULSE_CHECK_PTR_RETVAL(instance, false);
@@ -106,12 +85,116 @@ bool EGLLoadInstance(EGLInstance* instance, PulseDevice* forbiden_devices, uint3
 
 		for(int32_t i = 0; i < device_count; i++)
 		{
-			if(EGLIsDeviceForbidden(instance, devices[i], forbiden_devices, forbiden_devices_count))
+			EGLDisplay display = instance->eglGetPlatformDisplayEXT(EGL_PLATFORM_DEVICE_EXT, devices[i], PULSE_NULLPTR);
+			if(display == EGL_NO_DISPLAY || !instance->eglInitialize(display, PULSE_NULLPTR, PULSE_NULLPTR))
 				continue;
-			const char* exts = instance->eglQueryDeviceStringEXT(devices[i], EGL_EXTENSIONS);
+
+			EGLint attribs[] = {
+				EGL_RENDERABLE_TYPE, es_context ? EGL_OPENGL_ES3_BIT : EGL_OPENGL_BIT,
+				EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
+				EGL_NONE
+			};
+			EGLint num_configs;
+			EGLConfig config;
+			instance->eglChooseConfig(display, attribs, &config, 1, &num_configs);
+			instance->eglBindAPI(es_context ? EGL_OPENGL_ES_API : EGL_OPENGL_API);
+			EGLint pbufferAttribs[] = {
+				EGL_WIDTH, 1,
+				EGL_HEIGHT, 1,
+				EGL_NONE
+			};
+			EGLSurface surface = instance->eglCreatePbufferSurface(display, config, pbufferAttribs);
+			EGLContext context;
+			if(es_context)
+			{
+				EGLint ctx_attribs[] = {
+					EGL_CONTEXT_CLIENT_VERSION, 3,
+					EGL_NONE
+				};
+				context = instance->eglCreateContext(display, config, EGL_NO_CONTEXT, ctx_attribs);
+			}
+			else
+			{
+				EGLint ctx_attribs[] = {
+					EGL_CONTEXT_MAJOR_VERSION, 4,
+					EGL_CONTEXT_MINOR_VERSION_KHR, 3,
+					EGL_CONTEXT_OPENGL_PROFILE_MASK, EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT,
+					EGL_NONE
+				};
+				context = instance->eglCreateContext(display, config, EGL_NO_CONTEXT, ctx_attribs);
+			}
+			if(context != EGL_NO_CONTEXT && !instance->eglMakeCurrent(display, surface, surface, context))
+			{
+				instance->eglDestroySurface(display, surface);
+				instance->eglTerminate(display);
+				continue;
+			}
+
+			PFNGLGETINTEGERI_VPROC glGetIntegeri_v = (PFNGLGETINTEGERI_VPROC)instance->eglGetProcAddress("glGetIntegeri_v");
+			PFNGLGETINTEGERVPROC glGetIntegerv = (PFNGLGETINTEGERVPROC)instance->eglGetProcAddress("glGetIntegerv");
+			PFNGLGETSTRINGPROC glGetString = (PFNGLGETSTRINGPROC)instance->eglGetProcAddress("glGetString");
+			PFNGLGETSTRINGIPROC glGetStringi = (PFNGLGETSTRINGIPROC)instance->eglGetProcAddress("glGetStringi");
+
+			if(!glGetIntegeri_v || !glGetIntegerv || !glGetString || !glGetStringi)
+			{
+				instance->eglDestroySurface(display, surface);
+				instance->eglDestroyContext(display, context);
+				instance->eglTerminate(display);
+				continue;
+			}
+
+			// Check for forbiden devices
+			{
+				char* hash_string = (char*)calloc(1024, 1024);
+				snprintf(hash_string, 1024 * 1024, "%s|%s|", glGetString(GL_VENDOR), glGetString(GL_RENDERER));
+				GLint gl_extension_count = 0;
+				glGetIntegerv(GL_NUM_EXTENSIONS, &gl_extension_count);
+				for(int i = 0; i < gl_extension_count; i++)
+					snprintf(hash_string, 1024 * 1024 - strlen(hash_string), "%s|", glGetStringi(GL_EXTENSIONS, i));
+				uint32_t device_id = PulseHashString(hash_string);
+				free(hash_string);
+
+				for(uint32_t j = 0; j < forbiden_devices_count; j++)
+				{
+					OpenGLDevice* opengl_device = OPENGL_RETRIEVE_DRIVER_DATA_AS(forbiden_devices[j], OpenGLDevice*);
+					if(opengl_device->context_type != OPENGL_CONTEXT_EGL)
+						continue;
+					if(device_id == opengl_device->device_id)
+						return true;
+				}
+			}
+
 			uint64_t current_device_score = 0;
-			if(strstr(exts, "EGL_EXT_device_drm")) // tricky way to check if it is a discrete GPU
+
+			const char* vendor = (const char*)glGetString(GL_VENDOR);
+			if(vendor && (strstr(vendor, "NVIDIA") || strstr(vendor, "AMD") || strstr(vendor, "ATI"))) // High chances of being a discrete GPU
 				current_device_score += 10000;
+			else if(vendor && strstr(vendor, "Intel")) // High chances of being an integrated GPU
+				current_device_score += 1000;
+
+			GLint max_compute_work_group_invocations;
+			glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, &max_compute_work_group_invocations);
+
+			GLint max_compute_work_group_size_x;
+			GLint max_compute_work_group_size_y;
+			GLint max_compute_work_group_size_z;
+			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &max_compute_work_group_size_x);
+			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &max_compute_work_group_size_y);
+			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &max_compute_work_group_size_z);
+
+			GLint max_texture_size;
+			glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_texture_size);
+
+			current_device_score += max_compute_work_group_invocations;
+			current_device_score += max_compute_work_group_size_x;
+			current_device_score += max_compute_work_group_size_y;
+			current_device_score += max_compute_work_group_size_z;
+			current_device_score += max_texture_size;
+
+			instance->eglDestroySurface(display, surface);
+			instance->eglDestroyContext(display, context);
+			instance->eglTerminate(display);
+
 			if(current_device_score > best_device_score)
 			{
 				best_device_score = current_device_score;
@@ -133,12 +216,25 @@ bool EGLLoadInstance(EGLInstance* instance, PulseDevice* forbiden_devices, uint3
 	};
 	EGLint num_configs;
 	instance->eglChooseConfig(instance->display, attribs, &instance->config, 1, &num_configs);
-	EGLint ctxAttribs[] = {
-		es_context ? EGL_CONTEXT_CLIENT_VERSION : EGL_CONTEXT_MAJOR_VERSION, 3,
-		EGL_NONE
-	};
 	instance->eglBindAPI(es_context ? EGL_OPENGL_ES_API : EGL_OPENGL_API);
-	instance->context = instance->eglCreateContext(instance->display, instance->config, EGL_NO_CONTEXT, ctxAttribs);
+	if(es_context)
+	{
+		EGLint ctx_attribs[] = {
+			EGL_CONTEXT_CLIENT_VERSION, 3,
+			EGL_NONE
+		};
+		instance->context = instance->eglCreateContext(instance->display, instance->config, EGL_NO_CONTEXT, ctx_attribs);
+	}
+	else
+	{
+		EGLint ctx_attribs[] = {
+			EGL_CONTEXT_MAJOR_VERSION, 4,
+			EGL_CONTEXT_MINOR_VERSION_KHR, 3,
+			EGL_CONTEXT_OPENGL_PROFILE_MASK, EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT,
+			EGL_NONE
+		};
+		instance->context = instance->eglCreateContext(instance->display, instance->config, EGL_NO_CONTEXT, ctx_attribs);
+	}
 	PULSE_CHECK_PTR_RETVAL(instance->context, false);
 
 	EGLint pbufferAttribs[] = {

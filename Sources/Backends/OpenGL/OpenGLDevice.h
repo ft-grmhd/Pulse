@@ -32,6 +32,8 @@ typedef struct OpenGLDevice
 		#include "OpenGLWraps.h"
 	#undef PULSE_OPENGL_WRAPPER
 	#undef PULSE_OPENGL_WRAPPER_RET
+
+	uint32_t device_id;
 } OpenGLDevice;
 
 PulseDevice OpenGLCreateDevice(PulseBackend backend, PulseDevice* forbiden_devices, uint32_t forbiden_devices_count);
