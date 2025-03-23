@@ -62,6 +62,63 @@ static bool EGLLoadFunctions(EGLInstance* instance)
 	return true;
 }
 
+bool EGLLoadOpenGLContext(EGLInstance* instance, EGLDisplay* display, EGLDeviceEXT device, EGLConfig* config, EGLSurface* surface, EGLContext* context, bool es_context)
+{
+	if(device != EGL_NO_DEVICE_EXT)
+		*display = instance->eglGetPlatformDisplayEXT(EGL_PLATFORM_DEVICE_EXT, device, PULSE_NULLPTR);
+	else
+		*display = instance->eglGetDisplay(EGL_DEFAULT_DISPLAY);
+	if(display == EGL_NO_DISPLAY || !instance->eglInitialize(*display, PULSE_NULLPTR, PULSE_NULLPTR))
+		return false;
+
+	EGLint attribs[] = {
+		EGL_RENDERABLE_TYPE, es_context ? EGL_OPENGL_ES3_BIT : EGL_OPENGL_BIT,
+		EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
+		EGL_NONE
+	};
+	EGLint num_configs;
+	instance->eglChooseConfig(*display, attribs, config, 1, &num_configs);
+	instance->eglBindAPI(es_context ? EGL_OPENGL_ES_API : EGL_OPENGL_API);
+	EGLint pbufferAttribs[] = {
+		EGL_WIDTH, 1,
+		EGL_HEIGHT, 1,
+		EGL_NONE
+	};
+	*surface = instance->eglCreatePbufferSurface(*display, *config, pbufferAttribs);
+	if(es_context)
+	{
+		EGLint ctx_attribs[] = {
+			EGL_CONTEXT_CLIENT_VERSION, 3,
+			EGL_NONE
+		};
+		*context = instance->eglCreateContext(*display, *config, EGL_NO_CONTEXT, ctx_attribs);
+	}
+	else
+	{
+		EGLint ctx_attribs[] = {
+			EGL_CONTEXT_MAJOR_VERSION, 4,
+			EGL_CONTEXT_MINOR_VERSION_KHR, 3,
+			EGL_CONTEXT_OPENGL_PROFILE_MASK, EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT,
+			EGL_NONE
+		};
+		*context = instance->eglCreateContext(*display, *config, EGL_NO_CONTEXT, ctx_attribs);
+	}
+	if(*context == EGL_NO_CONTEXT)
+	{
+		instance->eglDestroySurface(*display, *surface);
+		instance->eglTerminate(*display);
+		return false;
+	}
+	if(!instance->eglMakeCurrent(*display, *surface, *surface, *context))
+	{
+		instance->eglDestroySurface(*display, *surface);
+		instance->eglDestroyContext(display, *context);
+		instance->eglTerminate(*display);
+		return false;
+	}
+	return true;
+}
+
 bool EGLLoadInstance(EGLInstance* instance, PulseDevice* forbiden_devices, uint32_t forbiden_devices_count, bool es_context)
 {
 	PULSE_CHECK_PTR_RETVAL(instance, false);
@@ -71,10 +128,9 @@ bool EGLLoadInstance(EGLInstance* instance, PulseDevice* forbiden_devices, uint3
 
 	instance->device = EGL_NO_DEVICE_EXT;
 
-	if(instance->eglGetPlatformDisplayEXT && instance->eglQueryDevicesEXT && instance->eglQueryDeviceStringEXT)
+	if(instance->eglGetPlatformDisplayEXT && instance->eglQueryDevicesEXT)
 	{
 		EGLDeviceEXT* devices = PULSE_NULLPTR;
-		EGLDeviceEXT chosen_one = EGL_NO_DEVICE_EXT;
 		int32_t device_count;
 		uint64_t best_device_score = 0;
 
@@ -85,50 +141,12 @@ bool EGLLoadInstance(EGLInstance* instance, PulseDevice* forbiden_devices, uint3
 
 		for(int32_t i = 0; i < device_count; i++)
 		{
-			EGLDisplay display = instance->eglGetPlatformDisplayEXT(EGL_PLATFORM_DEVICE_EXT, devices[i], PULSE_NULLPTR);
-			if(display == EGL_NO_DISPLAY || !instance->eglInitialize(display, PULSE_NULLPTR, PULSE_NULLPTR))
-				continue;
-
-			EGLint attribs[] = {
-				EGL_RENDERABLE_TYPE, es_context ? EGL_OPENGL_ES3_BIT : EGL_OPENGL_BIT,
-				EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
-				EGL_NONE
-			};
-			EGLint num_configs;
+			EGLDisplay display;
 			EGLConfig config;
-			instance->eglChooseConfig(display, attribs, &config, 1, &num_configs);
-			instance->eglBindAPI(es_context ? EGL_OPENGL_ES_API : EGL_OPENGL_API);
-			EGLint pbufferAttribs[] = {
-				EGL_WIDTH, 1,
-				EGL_HEIGHT, 1,
-				EGL_NONE
-			};
-			EGLSurface surface = instance->eglCreatePbufferSurface(display, config, pbufferAttribs);
+			EGLSurface surface;
 			EGLContext context;
-			if(es_context)
-			{
-				EGLint ctx_attribs[] = {
-					EGL_CONTEXT_CLIENT_VERSION, 3,
-					EGL_NONE
-				};
-				context = instance->eglCreateContext(display, config, EGL_NO_CONTEXT, ctx_attribs);
-			}
-			else
-			{
-				EGLint ctx_attribs[] = {
-					EGL_CONTEXT_MAJOR_VERSION, 4,
-					EGL_CONTEXT_MINOR_VERSION_KHR, 3,
-					EGL_CONTEXT_OPENGL_PROFILE_MASK, EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT,
-					EGL_NONE
-				};
-				context = instance->eglCreateContext(display, config, EGL_NO_CONTEXT, ctx_attribs);
-			}
-			if(context != EGL_NO_CONTEXT && !instance->eglMakeCurrent(display, surface, surface, context))
-			{
-				instance->eglDestroySurface(display, surface);
-				instance->eglTerminate(display);
+			if(!EGLLoadOpenGLContext(instance, &display, devices[i], &config, &surface, &context, es_context))
 				continue;
-			}
 
 			PFNGLGETINTEGERI_VPROC glGetIntegeri_v = (PFNGLGETINTEGERI_VPROC)instance->eglGetProcAddress("glGetIntegeri_v");
 			PFNGLGETINTEGERVPROC glGetIntegerv = (PFNGLGETINTEGERVPROC)instance->eglGetProcAddress("glGetIntegerv");
@@ -145,14 +163,11 @@ bool EGLLoadInstance(EGLInstance* instance, PulseDevice* forbiden_devices, uint3
 
 			// Check for forbiden devices
 			{
-				char* hash_string = (char*)calloc(1024, 1024);
-				snprintf(hash_string, 1024 * 1024, "%s|%s|", glGetString(GL_VENDOR), glGetString(GL_RENDERER));
+				uint32_t device_id = PulseHashString((const char*)glGetString(GL_VENDOR));
+				device_id = PulseHashCombine(device_id, PulseHashString((const char*)glGetString(GL_RENDERER)));
 				GLint gl_extension_count = 0;
-				glGetIntegerv(GL_NUM_EXTENSIONS, &gl_extension_count);
 				for(int i = 0; i < gl_extension_count; i++)
-					snprintf(hash_string, 1024 * 1024 - strlen(hash_string), "%s|", glGetStringi(GL_EXTENSIONS, i));
-				uint32_t device_id = PulseHashString(hash_string);
-				free(hash_string);
+					device_id = PulseHashCombine(device_id, PulseHashString((const char*)glGetStringi(GL_EXTENSIONS, i)));
 
 				for(uint32_t j = 0; j < forbiden_devices_count; j++)
 				{
@@ -198,54 +213,12 @@ bool EGLLoadInstance(EGLInstance* instance, PulseDevice* forbiden_devices, uint3
 			if(current_device_score > best_device_score)
 			{
 				best_device_score = current_device_score;
-				chosen_one = devices[i];
+				instance->device = devices[i];
 			}
 		}
-
-		instance->display = instance->eglGetPlatformDisplayEXT(EGL_PLATFORM_DEVICE_EXT, chosen_one, PULSE_NULLPTR);
 	}
-	else
-		instance->display = instance->eglGetDisplay(EGL_DEFAULT_DISPLAY);
-	PULSE_CHECK_PTR_RETVAL(instance->display, false);
 
-	instance->eglInitialize(instance->display, PULSE_NULLPTR, PULSE_NULLPTR);
-	EGLint attribs[] = {
-		EGL_RENDERABLE_TYPE, es_context ? EGL_OPENGL_ES3_BIT : EGL_OPENGL_BIT,
-		EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
-		EGL_NONE
-	};
-	EGLint num_configs;
-	instance->eglChooseConfig(instance->display, attribs, &instance->config, 1, &num_configs);
-	instance->eglBindAPI(es_context ? EGL_OPENGL_ES_API : EGL_OPENGL_API);
-	if(es_context)
-	{
-		EGLint ctx_attribs[] = {
-			EGL_CONTEXT_CLIENT_VERSION, 3,
-			EGL_NONE
-		};
-		instance->context = instance->eglCreateContext(instance->display, instance->config, EGL_NO_CONTEXT, ctx_attribs);
-	}
-	else
-	{
-		EGLint ctx_attribs[] = {
-			EGL_CONTEXT_MAJOR_VERSION, 4,
-			EGL_CONTEXT_MINOR_VERSION_KHR, 3,
-			EGL_CONTEXT_OPENGL_PROFILE_MASK, EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT,
-			EGL_NONE
-		};
-		instance->context = instance->eglCreateContext(instance->display, instance->config, EGL_NO_CONTEXT, ctx_attribs);
-	}
-	PULSE_CHECK_PTR_RETVAL(instance->context, false);
-
-	EGLint pbufferAttribs[] = {
-		EGL_WIDTH, 1,
-		EGL_HEIGHT, 1,
-		EGL_NONE
-	};
-	instance->surface = instance->eglCreatePbufferSurface(instance->display, instance->config, pbufferAttribs);
-	PULSE_CHECK_PTR_RETVAL(instance->surface, false);
-
-	return instance->eglMakeCurrent(instance->display, instance->surface, instance->surface, instance->context);
+	return EGLLoadOpenGLContext(instance, &instance->display, instance->device, &instance->config, &instance->surface, &instance->context, es_context);
 }
 
 void EGLUnloadInstance(EGLInstance* instance)

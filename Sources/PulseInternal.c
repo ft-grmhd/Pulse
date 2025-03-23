@@ -91,3 +91,9 @@ uint32_t PulseHashString(const char* str)
 		hash = ((hash << 5) + hash) + str[i];
 	return hash;
 }
+
+uint32_t PulseHashCombine(uint32_t lhs, uint32_t rhs)
+{
+	lhs ^= rhs + 0x9e3779b9 + (lhs << 6) + (lhs >> 2);
+	return lhs;
+}

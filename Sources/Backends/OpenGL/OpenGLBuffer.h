@@ -12,6 +12,7 @@
 
 typedef struct OpenGLBuffer
 {
+	GLuint buffer;
 } OpenGLBuffer;
 
 PulseBuffer OpenGLCreateBuffer(PulseDevice device, const PulseBufferCreateInfo* create_infos);

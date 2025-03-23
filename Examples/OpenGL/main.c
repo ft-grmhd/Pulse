@@ -4,7 +4,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define WGSL_SOURCE(...) #__VA_ARGS__
+#define GLSL_SOURCE(...) #__VA_ARGS__
+
+#define BUFFER_SIZE (256 * sizeof(uint32_t))
 
 void DebugCallBack(PulseDebugMessageSeverity severity, const char* message)
 {
@@ -27,6 +29,13 @@ int main(int ac, char** av)
 	PulseBackend backend = PulseLoadBackend(backend_type, PULSE_SHADER_FORMAT_GLSL_BIT, PULSE_HIGH_DEBUG);
 	PulseSetDebugCallback(backend, DebugCallBack);
 	PulseDevice device = PulseCreateDevice(backend, NULL, 0);
+
+	PulseBufferCreateInfo buffer_create_info = { 0 };
+	buffer_create_info.size = BUFFER_SIZE;
+	buffer_create_info.usage = PULSE_BUFFER_USAGE_STORAGE_READ | PULSE_BUFFER_USAGE_STORAGE_WRITE | PULSE_BUFFER_USAGE_TRANSFER_DOWNLOAD;
+	PulseBuffer buffer = PulseCreateBuffer(device, &buffer_create_info);
+
+	PulseDestroyBuffer(device, buffer);
 
 	PulseDestroyDevice(device);
 	PulseUnloadBackend(backend);

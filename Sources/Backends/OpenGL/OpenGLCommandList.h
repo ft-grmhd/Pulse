@@ -11,11 +11,61 @@
 #include "OpenGL.h"
 #include "OpenGLBuffer.h"
 
+typedef struct OpenGLCommand
+{
+	OpenGLCommandType type;
+	union
+	{
+		struct
+		{
+			const PulseImageRegion* src;
+			const PulseImageRegion* dst;
+		} BlitImages;
+
+		struct
+		{
+			const PulseBufferRegion* src;
+			const PulseBufferRegion* dst;
+		} CopyBufferToBuffer;
+
+		struct
+		{
+			const PulseBufferRegion* src;
+			const PulseImageRegion* dst;
+		} CopyBufferToImage;
+
+		struct
+		{
+			const PulseImageRegion* src;
+			const PulseBufferRegion* dst;
+		} CopyImageToBuffer;
+
+		struct
+		{
+			PulseComputePipeline pipeline;
+			uint32_t groupcount_x;
+			uint32_t groupcount_y;
+			uint32_t groupcount_z;
+		} Dispatch;
+
+		struct
+		{
+			PulseComputePipeline pipeline;
+			PulseBuffer buffer;
+			uint32_t offset;
+		} DispatchIndirect;
+	};
+} OpenGLCommand;
+
 typedef struct OpenGLCommandList
 {
+	OpenGLCommand* commands;
+	uint32_t commands_count;
+	uint32_t commands_capacity;
 } OpenGLCommandList;
 
 PulseCommandList OpenGLRequestCommandList(PulseDevice device, PulseCommandListUsage usage);
+void OpenGLQueueCommand(PulseCommandList cmd, OpenGLCommand command);
 bool OpenGLSubmitCommandList(PulseDevice device, PulseCommandList cmd, PulseFence fence);
 void OpenGLReleaseCommandList(PulseDevice device, PulseCommandList cmd);
 

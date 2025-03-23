@@ -188,14 +188,11 @@ PulseDevice OpenGLCreateDevice(PulseBackend backend, PulseDevice* forbiden_devic
 
 	PULSE_LOAD_DRIVER_DEVICE(OpenGL);
 
-	char* hash_string = (char*)calloc(1024, 1024);
-	snprintf(hash_string, 1024 * 1024, "%s|%s|", device->glGetString(pulse_device, GL_VENDOR), device->glGetString(pulse_device, GL_RENDERER));
+	device->device_id = PulseHashString((const char*)device->glGetString(pulse_device, GL_VENDOR));
+	device->device_id = PulseHashCombine(device->device_id, PulseHashString((const char*)device->glGetString(pulse_device, GL_RENDERER)));
 	GLint gl_extension_count = 0;
-	device->glGetIntegerv(pulse_device, GL_NUM_EXTENSIONS, &gl_extension_count);
 	for(int i = 0; i < gl_extension_count; i++)
-		snprintf(hash_string, 1024 * 1024 - strlen(hash_string), "%s|", device->glGetStringi(pulse_device, GL_EXTENSIONS, i));
-	device->device_id = PulseHashString(hash_string);
-	free(hash_string);
+		device->device_id = PulseHashCombine(device->device_id, PulseHashString((const char*)device->glGetStringi(pulse_device, GL_EXTENSIONS, i)));
 
 	if(PULSE_IS_BACKEND_HIGH_LEVEL_DEBUG(backend))
 		PulseLogInfoFmt(backend, "%s created device from %s", backend->backend == PULSE_BACKEND_OPENGL ? "(OpenGL)" : "(OpenGL ES)", device->glGetString(pulse_device, GL_RENDERER));
