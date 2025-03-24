@@ -124,6 +124,7 @@ PULSE_OPENGL_WRAPPER(glProgramParameteri, (PulseDevice device, GLuint program, G
 PULSE_OPENGL_WRAPPER(glTexStorage2D, (PulseDevice device, GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height), (target, levels, internalformat, width, height), PFNGLTEXSTORAGE2DPROC)
 PULSE_OPENGL_WRAPPER(glTexStorage3D, (PulseDevice device, GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth), (target, levels, internalformat, width, height, depth), PFNGLTEXSTORAGE3DPROC)
 PULSE_OPENGL_WRAPPER(glDispatchCompute, (PulseDevice device, GLuint num_groups_x, GLuint num_groups_y, GLuint num_groups_z), (num_groups_x, num_groups_y, num_groups_z), PFNGLDISPATCHCOMPUTEPROC)
+PULSE_OPENGL_WRAPPER(glDispatchComputeIndirect, (PulseDevice device, GLintptr indirect), (indirect), PFNGLDISPATCHCOMPUTEINDIRECTPROC)
 PULSE_OPENGL_WRAPPER(glGetProgramInterfaceiv, (PulseDevice device, GLuint program, GLenum programInterface, GLenum pname, GLint *params), (program, programInterface, pname, params), PFNGLGETPROGRAMINTERFACEIVPROC)
 PULSE_OPENGL_WRAPPER_RET(GLuint, glGetProgramResourceIndex, (PulseDevice device, GLuint program, GLenum programInterface, const GLchar *name), (program, programInterface, name), PFNGLGETPROGRAMRESOURCEINDEXPROC)
 PULSE_OPENGL_WRAPPER(glGetProgramResourceName, (PulseDevice device, GLuint program, GLenum programInterface, GLuint index, GLsizei bufSize, GLsizei *length, GLchar *name), (program, programInterface, index, bufSize, length, name), PFNGLGETPROGRAMRESOURCENAMEPROC)
@@ -133,3 +134,5 @@ PULSE_OPENGL_WRAPPER(glBindImageTexture, (PulseDevice device, GLuint unit, GLuin
 PULSE_OPENGL_WRAPPER(glGetBooleani_v, (PulseDevice device, GLenum target, GLuint index, GLboolean *data), (target, index, data), PFNGLGETBOOLEANI_VPROC)
 PULSE_OPENGL_WRAPPER(glMemoryBarrier, (PulseDevice device, GLbitfield barriers), (barriers), PFNGLMEMORYBARRIERPROC)
 PULSE_OPENGL_WRAPPER(glMemoryBarrierByRegion, (PulseDevice device, GLbitfield barriers), (barriers), PFNGLMEMORYBARRIERBYREGIONPROC)
+PULSE_OPENGL_WRAPPER(glDebugMessageControl, (PulseDevice device, GLenum source, GLenum type, GLenum severity, GLsizei count, const GLuint *ids, GLboolean enabled), (source, type, severity, count, ids, enabled), PFNGLDEBUGMESSAGECONTROLPROC)
+PULSE_OPENGL_WRAPPER(glDebugMessageCallback, (PulseDevice device, GLDEBUGPROC callback, const void *userParam), (callback, userParam), PFNGLDEBUGMESSAGECALLBACKPROC)

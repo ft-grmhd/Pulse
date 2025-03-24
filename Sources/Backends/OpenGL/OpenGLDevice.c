@@ -46,6 +46,12 @@ const char* OpenGLVerbaliseError(GLenum code)
 	return "unknown OpenGL error";
 }
 
+static void OpenGLDebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* user_param)
+{
+	PulseDevice device = (PulseDevice)user_param;
+	PulseLogInfoFmt(device->backend, "%s debug message catched: %.*s", device->backend->backend == PULSE_BACKEND_OPENGL ? "(OpenGL)" : "(OpenGL ES)", length, message);
+}
+
 static void PulseCheckGLError(PulseDevice device, const char* function)
 {
 	OpenGLDevice* opengl_device = OPENGL_RETRIEVE_DRIVER_DATA_AS(device, OpenGLDevice*);
@@ -108,6 +114,26 @@ static void OpenGLDeviceMakeCurrent(PulseDevice device)
 #undef PULSE_OPENGL_WRAPPER
 #undef PULSE_OPENGL_WRAPPER_RET
 
+static bool OpenGLLoadFallbackFunction(PulseDevice device, OpenGLFunctionIndex index, GLFunctionLoad load)
+{
+	OpenGLDevice* opengl_device = OPENGL_RETRIEVE_DRIVER_DATA_AS(device, OpenGLDevice*);
+
+	if(index == glDebugMessageCallback)
+	{
+		GLFunction fn = PULSE_NULLPTR;
+
+		if(OpenGLDeviceSupportsExtension(device, "GL_KHR_debug"))
+			fn = load("glDebugMessageCallbackKHR");
+		if(!fn && device->backend->backend == PULSE_BACKEND_OPENGL && OpenGLDeviceSupportsExtension(device, "GL_ARB_debug_output"))
+			fn = load("glDebugMessageCallbackARB");
+
+		if(fn)
+			opengl_device->original_function_ptrs[index] = fn;
+	}
+
+	return opengl_device->original_function_ptrs[index] != PULSE_NULLPTR;
+}
+
 static bool OpenGLLoadFunction(PulseDevice device, OpenGLFunctionIndex index)
 {
 	OpenGLDevice* opengl_device = OPENGL_RETRIEVE_DRIVER_DATA_AS(device, OpenGLDevice*);
@@ -123,7 +149,7 @@ static bool OpenGLLoadFunction(PulseDevice device, OpenGLFunctionIndex index)
 	#endif
 
 	GLFunction fn = load(OpenGLFunctionIndexToFunctionName[index]);
-	if(!fn)
+	if(!fn && index > OPENGL_FUNCTION_INDEX_START_ENUM && !OpenGLLoadFallbackFunction(device, index, load))
 	{
 		PulseSetInternalError(PULSE_ERROR_INITIALIZATION_FAILED);
 		return false;
@@ -132,11 +158,11 @@ static bool OpenGLLoadFunction(PulseDevice device, OpenGLFunctionIndex index)
 	return true;
 }
 
-static bool OpenGLLoadFunctions(PulseDevice device)
+static bool OpenGLLoadCoreFunctions(PulseDevice device)
 {
 	OpenGLDevice* opengl_device = OPENGL_RETRIEVE_DRIVER_DATA_AS(device, OpenGLDevice*);
 
-	for(int i = 0; i < OPENGL_FUNCTION_INDEX_END_ENUM; i++)
+	for(int i = 0; i < OPENGL_CORE_FUNCTION_INDEX_END_ENUM; i++)
 	{
 		if(!OpenGLLoadFunction(device, i))
 			return false;
@@ -145,6 +171,27 @@ static bool OpenGLLoadFunctions(PulseDevice device)
 	#define PULSE_OPENGL_FUNCTION(fn, T) opengl_device->fn = PulseOpenGLWrapper_##fn;
 		#include "OpenGLFunctions.h"
 	#undef PULSE_OPENGL_FUNCTION
+
+	return true;
+}
+
+static bool OpenGLLoadFunctions(PulseDevice device)
+{
+	OpenGLDevice* opengl_device = OPENGL_RETRIEVE_DRIVER_DATA_AS(device, OpenGLDevice*);
+
+	for(int i = OPENGL_CORE_FUNCTION_INDEX_END_ENUM; i < OPENGL_FUNCTION_INDEX_END_ENUM; i++)
+	{
+		if(!OpenGLLoadFunction(device, i))
+			return false;
+	}
+
+	#undef PULSE_OPENGL_GL_GLES_FUNCTION
+
+	#define PULSE_OPENGL_FUNCTION(fn, T)
+	#define PULSE_OPENGL_GL_GLES_FUNCTION(glver, glesver,fn, T) opengl_device->fn = PulseOpenGLWrapper_##fn;
+		#include "OpenGLFunctions.h"
+	#undef PULSE_OPENGL_FUNCTION
+	#undef PULSE_OPENGL_GL_GLES_FUNCTION
 
 	return true;
 }
@@ -179,6 +226,20 @@ PulseDevice OpenGLCreateDevice(PulseBackend backend, PulseDevice* forbiden_devic
 		device->context_type = OPENGL_CONTEXT_EGL;
 	#endif
 
+	if(!OpenGLLoadCoreFunctions(pulse_device))
+	{
+		EGLUnloadInstance(&device->egl_instance);
+		PulseSetInternalError(PULSE_ERROR_INITIALIZATION_FAILED);
+		return PULSE_NULL_HANDLE;
+	}
+
+	GLint gl_extension_count = 0;
+	device->glGetIntegerv(pulse_device, GL_NUM_EXTENSIONS, &gl_extension_count);
+	device->supported_extensions_count = gl_extension_count;
+	device->supported_extensions = (const char**)calloc(device->supported_extensions_count, sizeof(const char*));
+	for(uint32_t i = 0; i < device->supported_extensions_count; i++)
+		device->supported_extensions[i] = (const char*)device->glGetStringi(pulse_device, GL_EXTENSIONS, i);
+
 	if(!OpenGLLoadFunctions(pulse_device))
 	{
 		EGLUnloadInstance(&device->egl_instance);
@@ -186,25 +247,48 @@ PulseDevice OpenGLCreateDevice(PulseBackend backend, PulseDevice* forbiden_devic
 		return PULSE_NULL_HANDLE;
 	}
 
+	if(backend->debug_level != PULSE_NO_DEBUG && device->original_function_ptrs[glDebugMessageCallback] != PULSE_NULLPTR)
+	{
+		device->glDebugMessageCallback(pulse_device, OpenGLDebugMessageCallback, pulse_device);
+		if(backend->debug_level >= PULSE_LOW_DEBUG)
+			device->glDebugMessageControl(pulse_device, GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW, 0, PULSE_NULLPTR, GL_FALSE);
+		if(backend->debug_level >= PULSE_HIGH_DEBUG)
+		{
+			device->glDebugMessageControl(pulse_device, GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, PULSE_NULLPTR, GL_FALSE);
+			device->glDebugMessageControl(pulse_device, GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM, 0, PULSE_NULLPTR, GL_FALSE);
+			device->glDebugMessageControl(pulse_device, GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, PULSE_NULLPTR, GL_FALSE);
+			//device->glDebugMessageControl(pulse_device, GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, PULSE_NULLPTR, GL_FALSE);
+		}
+	}
+
 	PULSE_LOAD_DRIVER_DEVICE(OpenGL);
 
 	device->device_id = PulseHashString((const char*)device->glGetString(pulse_device, GL_VENDOR));
 	device->device_id = PulseHashCombine(device->device_id, PulseHashString((const char*)device->glGetString(pulse_device, GL_RENDERER)));
-	GLint gl_extension_count = 0;
-	for(int i = 0; i < gl_extension_count; i++)
-		device->device_id = PulseHashCombine(device->device_id, PulseHashString((const char*)device->glGetStringi(pulse_device, GL_EXTENSIONS, i)));
+	for(uint32_t i = 0; i < device->supported_extensions_count; i++)
+		device->device_id = PulseHashCombine(device->device_id, PulseHashString(device->supported_extensions[i]));
 
 	if(PULSE_IS_BACKEND_HIGH_LEVEL_DEBUG(backend))
 		PulseLogInfoFmt(backend, "%s created device from %s", backend->backend == PULSE_BACKEND_OPENGL ? "(OpenGL)" : "(OpenGL ES)", device->glGetString(pulse_device, GL_RENDERER));
 	return pulse_device;
 }
 
-void OpenGLDestroyDevice(PulseDevice device)
+bool OpenGLDeviceSupportsExtension(PulseDevice device, const char* name)
 {
 	OpenGLDevice* opengl_device = OPENGL_RETRIEVE_DRIVER_DATA_AS(device, OpenGLDevice*);
-	if(opengl_device == PULSE_NULLPTR)
-		return;
+	for(uint32_t i = 0; i < opengl_device->supported_extensions_count; i++)
+	{
+		if(strcmp(opengl_device->supported_extensions[i], name) == 0)
+			return true;
+	}
+	return false;
+}
 
+void OpenGLDestroyDevice(PulseDevice device)
+{
+	if(device == PULSE_NULL_HANDLE || device->driver_data == PULSE_NULLPTR)
+		return;
+	OpenGLDevice* opengl_device = OPENGL_RETRIEVE_DRIVER_DATA_AS(device, OpenGLDevice*);
 	#ifdef PULSE_PLAT_WINDOWS
 		if(opengl_device->context_type == OPENGL_CONTEXT_WGL)
 		{} // TODO: WGL

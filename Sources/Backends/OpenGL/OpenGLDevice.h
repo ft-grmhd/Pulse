@@ -33,10 +33,14 @@ typedef struct OpenGLDevice
 	#undef PULSE_OPENGL_WRAPPER
 	#undef PULSE_OPENGL_WRAPPER_RET
 
+	const char** supported_extensions;
+	uint32_t supported_extensions_count;
+
 	uint32_t device_id;
 } OpenGLDevice;
 
 PulseDevice OpenGLCreateDevice(PulseBackend backend, PulseDevice* forbiden_devices, uint32_t forbiden_devices_count);
+bool OpenGLDeviceSupportsExtension(PulseDevice device, const char* name);
 void OpenGLDestroyDevice(PulseDevice device);
 
 #endif // PULSE_OPENGL_DEVICE_H_

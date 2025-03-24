@@ -49,7 +49,7 @@ local backends = {
 		end,
 		before_build = function(target, os)
 			local gles_dir = target:pkg("opengl-headers"):installdir()
-			os.runv("python", {"Scripts/GenerateOpenGLDefs.py", "Sources/Backends/OpenGL/OpenGLFunctions.h", gles_dir .. "/include/GLES3/gl31.h", "Sources/Backends/OpenGL/OpenGLWraps.h"})
+			os.runv("python", {"Scripts/GenerateOpenGLDefs.py", "Sources/Backends/OpenGL/OpenGLFunctions.h", gles_dir .. "/include/GLES3/gl32.h", "Sources/Backends/OpenGL/OpenGLWraps.h"})
 		end
 	},
 }

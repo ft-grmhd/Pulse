@@ -12,6 +12,7 @@
 
 typedef struct OpenGLComputePipeline
 {
+	int dummy;
 } OpenGLComputePipeline;
 
 PulseComputePipeline OpenGLCreateComputePipeline(PulseDevice device, const PulseComputePipelineCreateInfo* info);

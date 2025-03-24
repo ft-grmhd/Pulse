@@ -63,7 +63,7 @@ static void SoftCommandDispatch(SoftCommand* cmd)
 				for(uint32_t i = 0; i < local_size; i++)
 				{
 					thrd_create(&invocations[invocation_index], SoftCommandDispatchCore, soft_pipeline);
-					thrd_join(invocations[invocation_index], NULL);
+					//thrd_join(invocations[invocation_index], NULL);
 					invocation_index++;
 				}
 			}

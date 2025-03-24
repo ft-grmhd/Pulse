@@ -14,6 +14,7 @@
 
 typedef struct OpenGLComputePass
 {
+	int dummy;
 } OpenGLComputePass;
 
 PulseComputePass OpenGLCreateComputePass(PulseDevice device, PulseCommandList cmd);

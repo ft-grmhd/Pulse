@@ -166,6 +166,7 @@ bool EGLLoadInstance(EGLInstance* instance, PulseDevice* forbiden_devices, uint3
 				uint32_t device_id = PulseHashString((const char*)glGetString(GL_VENDOR));
 				device_id = PulseHashCombine(device_id, PulseHashString((const char*)glGetString(GL_RENDERER)));
 				GLint gl_extension_count = 0;
+				glGetIntegerv(GL_NUM_EXTENSIONS, &gl_extension_count);
 				for(int i = 0; i < gl_extension_count; i++)
 					device_id = PulseHashCombine(device_id, PulseHashString((const char*)glGetStringi(GL_EXTENSIONS, i)));
 

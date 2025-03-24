@@ -10,10 +10,6 @@
 #include <Pulse.h>
 #include "OpenGL.h"
 
-typedef struct OpenGLFence
-{
-} OpenGLFence;
-
 PulseFence OpenGLCreateFence(PulseDevice device);
 void OpenGLDestroyFence(PulseDevice device, PulseFence fence);
 bool OpenGLIsFenceReady(PulseDevice device, PulseFence fence);

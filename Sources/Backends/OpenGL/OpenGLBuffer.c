@@ -26,7 +26,14 @@ PulseBuffer OpenGLCreateBuffer(PulseDevice device, const PulseBufferCreateInfo* 
 	buffer->size = create_infos->size;
 	buffer->usage = create_infos->usage;
 
+	void* data = calloc(1, create_infos->size);
+	PULSE_CHECK_ALLOCATION_RETVAL(data, PULSE_NULL_HANDLE);
+
 	opengl_device->glGenBuffers(device, 1, &opengl_buffer->buffer);
+	opengl_device->glBindBuffer(device, GL_SHADER_STORAGE_BUFFER, opengl_buffer->buffer);
+	opengl_device->glBufferData(device, GL_SHADER_STORAGE_BUFFER, create_infos->size, data, GL_DYNAMIC_COPY);
+
+	free(data);
 
 	return buffer;
 }

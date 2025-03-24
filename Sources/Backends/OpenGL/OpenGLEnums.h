@@ -15,11 +15,28 @@ typedef enum OpenGLContextType
 	OPENGL_CONTEXT_END_ENUM
 } OpenGLContextType;
 
-typedef enum OpenGLFunctionIndex
+typedef enum OpenGLCoreFunctionIndex
 {
+	#undef PULSE_OPENGL_GL_GLES_FUNCTION
+	#define PULSE_OPENGL_GL_GLES_FUNCTION(glver, glesver, fn, T)
 	#define PULSE_OPENGL_FUNCTION(fn, T) fn,
 		#include "OpenGLFunctions.h"
 	#undef PULSE_OPENGL_FUNCTION
+	#undef PULSE_OPENGL_GL_GLES_FUNCTION
+
+	OPENGL_CORE_FUNCTION_INDEX_END_ENUM
+} OpenGLCoreFunctionIndex;
+
+typedef enum OpenGLFunctionIndex
+{
+	OPENGL_FUNCTION_INDEX_START_ENUM = OPENGL_CORE_FUNCTION_INDEX_END_ENUM - 1,
+
+	#undef PULSE_OPENGL_GL_GLES_FUNCTION
+	#define PULSE_OPENGL_GL_GLES_FUNCTION(glver, glesver, fn, T) fn,
+	#define PULSE_OPENGL_FUNCTION(fn, T)
+		#include "OpenGLFunctions.h"
+	#undef PULSE_OPENGL_FUNCTION
+	#undef PULSE_OPENGL_GL_GLES_FUNCTION
 
 	OPENGL_FUNCTION_INDEX_END_ENUM
 } OpenGLFunctionIndex;

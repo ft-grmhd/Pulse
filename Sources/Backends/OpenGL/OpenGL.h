@@ -14,10 +14,7 @@
 #include "OpenGLEnums.h"
 
 #define GL_GLES_PROTOTYPES 0
-#include <GLES3/gl31.h>
-
-#define GL_STACK_UNDERFLOW 0x0504
-#define GL_STACK_OVERFLOW  0x0503
+#include <GLES3/gl32.h>
 
 typedef void(*GLFunction)(void);
 
