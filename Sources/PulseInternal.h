@@ -157,7 +157,7 @@ typedef struct PulseComputePassHandler
 PulseThreadID PulseGetThreadID();
 void PulseSleep(int32_t ms);
 
-#ifdef KANEL_CLI_PLAT_WINDOWS
+#ifdef PULSE_PLAT_WINDOWS
 	typedef const char* LPCSTR;
 	typedef struct HINSTANCE__* HINSTANCE;
 	typedef HINSTANCE HMODULE;
