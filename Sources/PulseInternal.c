@@ -4,6 +4,7 @@
 
 #include <string.h>
 
+#include <PulseProfile.h>
 #include "PulseInternal.h"
 
 #ifndef PULSE_PLAT_WASM
