@@ -30,8 +30,8 @@ def extract_prototypes(function_names, header_file):
                             arg_name = parts[-1]
                             arg_type = ' '.join(parts[:-1])
                             if arg_name != 'void':
-                                argument_list.append(f'{arg_type} {arg_name}')
-                                parameter_list.append(f'{arg_name.split('*')[-1]}')
+                                argument_list.append(f"{arg_type} {arg_name}")
+                                parameter_list.append(f"{arg_name.split('*')[-1]}")
                         if return_type == 'void':
                             prototype = f'PULSE_OPENGL_WRAPPER({function_name}, ({", ".join(argument_list)}), ({", ".join(parameter_list)}), {"PFN" + function_name.upper() + "PROC"})'
                         else:
