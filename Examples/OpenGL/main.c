@@ -21,10 +21,17 @@ void DebugCallBack(PulseDebugMessageSeverity severity, const char* message)
 		printf("Pulse: %s\n", message);
 }
 
-const char* glsl_source = GLSL_SOURCE("430 core",
+const char* glsl_source = GLSL_SOURCE("310 es",
+	layout(std430, binding = 0) buffer SSBO
+	{
+		int data[];
+	} ssbo;
+
 	layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 	void main()
 	{
+		uvec3 indices = gl_GlobalInvocationID;
+		ssbo.data[indices.x * indices.y] = int(indices.x * indices.y);
 	}
 );
 
@@ -42,7 +49,6 @@ int main(int ac, char** av)
 	buffer_create_info.usage = PULSE_BUFFER_USAGE_STORAGE_READ | PULSE_BUFFER_USAGE_STORAGE_WRITE | PULSE_BUFFER_USAGE_TRANSFER_DOWNLOAD;
 	PulseBuffer buffer = PulseCreateBuffer(device, &buffer_create_info);
 
-/*
 	// GPU computations
 	{
 		PulseComputePipelineCreateInfo info = { 0 };
@@ -69,7 +75,6 @@ int main(int ac, char** av)
 		PulseDestroyFence(device, fence);
 		PulseDestroyComputePipeline(device, pipeline);
 	}
-*/
 
 	// Get result and read it on CPU
 	{

@@ -37,9 +37,8 @@ PULSE_API bool PulseMapBuffer(PulseBuffer buffer, PulseMapMode mode, void** data
 	if(buffer->is_mapped)
 	{
 		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(buffer->device->backend))
-			PulseLogError(buffer->device->backend, "buffer is already mapped");
-		PulseSetInternalError(PULSE_ERROR_MAP_FAILED);
-		return false;
+			PulseLogWarning(buffer->device->backend, "buffer is already mapped");
+		return true;
 	}
 
 	PulseFlags storage_flags = PULSE_BUFFER_USAGE_STORAGE_READ | PULSE_BUFFER_USAGE_STORAGE_WRITE;

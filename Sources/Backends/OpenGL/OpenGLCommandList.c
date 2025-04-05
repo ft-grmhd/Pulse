@@ -10,6 +10,7 @@
 #include "OpenGLDevice.h"
 #include "OpenGLBuffer.h"
 #include "OpenGLFence.h"
+#include "OpenGLComputePipeline.h"
 #include "OpenGLComputePass.h"
 
 static void OpenGLCommandCopyBufferToBuffer(PulseDevice device, OpenGLCommand* cmd)
@@ -32,7 +33,8 @@ static void OpenGLCommandCopyBufferToBuffer(PulseDevice device, OpenGLCommand* c
 static void OpenGLCommandDispatch(PulseDevice device, OpenGLCommand* cmd)
 {
 	OpenGLDevice* opengl_device = OPENGL_RETRIEVE_DRIVER_DATA_AS(device, OpenGLDevice*);
-
+	OpenGLComputePipeline* opengl_pipeline = OPENGL_RETRIEVE_DRIVER_DATA_AS(cmd->Dispatch.pipeline, OpenGLComputePipeline*);
+	opengl_device->glUseProgram(device, opengl_pipeline->program);
 	opengl_device->glDispatchCompute(device, cmd->Dispatch.groupcount_x, cmd->Dispatch.groupcount_y, cmd->Dispatch.groupcount_z);
 }
 

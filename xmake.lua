@@ -78,7 +78,6 @@ add_rules("mode.debug", "mode.release")
 add_includedirs("Includes")
 set_languages("c17", "cxx20")
 set_encodings("utf-8")
-set_warnings("allextra")
 
 set_objectdir("build/Objs/$(os)_$(arch)")
 set_targetdir("build/Bin/$(os)_$(arch)")

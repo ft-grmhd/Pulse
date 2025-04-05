@@ -30,15 +30,14 @@ const char* OpenGLVerbaliseError(GLenum code)
 	switch (code)
 	{
 		// OpenGL / OpenGL ES error codes
-		case GL_INVALID_ENUM:                  return "an unacceptable value is specified for an enumerated argument";
-		case GL_INVALID_VALUE:                 return "a numeric argument is out of range";
-		case GL_INVALID_OPERATION:             return "the specified operation is not allowed in the current state";
-		case GL_INVALID_FRAMEBUFFER_OPERATION: return "the framebuffer object is not complete";
-		case GL_OUT_OF_MEMORY:                 return "there is not enough memory left to execute the command";
+		case GL_INVALID_ENUM:      return "(GL_INVALID_ENUM)      an unacceptable value is specified for an enumerated argument";
+		case GL_INVALID_VALUE:     return "(GL_INVALID_VALUE)     a numeric argument is out of range";
+		case GL_INVALID_OPERATION: return "(GL_INVALID_OPERATION) the specified operation is not allowed in the current state";
+		case GL_OUT_OF_MEMORY:     return "(GL_OUT_OF_MEMORY)     there is not enough memory left to execute the command";
 
 		// OpenGL error codes
-		case GL_STACK_UNDERFLOW: return "an attempt has been made to perform an operation that would cause an internal stack to underflow";
-		case GL_STACK_OVERFLOW:  return "an attempt has been made to perform an operation that would cause an internal stack to overflow";
+		case GL_STACK_UNDERFLOW:   return "(GL_STACK_UNDERFLOW)   an attempt has been made to perform an operation that would cause an internal stack to underflow";
+		case GL_STACK_OVERFLOW:    return "(GL_STACK_OVERFLOW)    an attempt has been made to perform an operation that would cause an internal stack to overflow";
 
 		default: break;
 	}
@@ -249,16 +248,10 @@ PulseDevice OpenGLCreateDevice(PulseBackend backend, PulseDevice* forbiden_devic
 
 	if(backend->debug_level != PULSE_NO_DEBUG && device->original_function_ptrs[glDebugMessageCallback] != PULSE_NULLPTR)
 	{
+		device->glEnable(pulse_device, GL_DEBUG_OUTPUT);
+		//device->glEnable(pulse_device, GL_DEBUG_OUTPUT_SYNCHRONOUS);
 		device->glDebugMessageCallback(pulse_device, OpenGLDebugMessageCallback, pulse_device);
-		if(backend->debug_level >= PULSE_LOW_DEBUG)
-			device->glDebugMessageControl(pulse_device, GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW, 0, PULSE_NULLPTR, GL_FALSE);
-		if(backend->debug_level >= PULSE_HIGH_DEBUG)
-		{
-			device->glDebugMessageControl(pulse_device, GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, PULSE_NULLPTR, GL_FALSE);
-			device->glDebugMessageControl(pulse_device, GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM, 0, PULSE_NULLPTR, GL_FALSE);
-			device->glDebugMessageControl(pulse_device, GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, PULSE_NULLPTR, GL_FALSE);
-			//device->glDebugMessageControl(pulse_device, GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, PULSE_NULLPTR, GL_FALSE);
-		}
+		device->glDebugMessageControl(pulse_device, GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, PULSE_NULLPTR, GL_FALSE);
 	}
 
 	PULSE_LOAD_DRIVER_DEVICE(OpenGL);

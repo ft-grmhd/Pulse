@@ -43,7 +43,7 @@ bool OpenGLMapBuffer(PulseBuffer buffer, PulseMapMode mode, void** data)
 	OpenGLBuffer* opengl_buffer = OPENGL_RETRIEVE_DRIVER_DATA_AS(buffer, OpenGLBuffer*);
 	OpenGLDevice* opengl_device = OPENGL_RETRIEVE_DRIVER_DATA_AS(buffer->device, OpenGLDevice*);
 	opengl_device->glBindBuffer(buffer->device, GL_SHADER_STORAGE_BUFFER, opengl_buffer->buffer);
-	*data = opengl_device->glMapBufferRange(buffer->device, GL_SHADER_STORAGE_BUFFER, mode == PULSE_MAP_READ ? GL_READ_ONLY : GL_WRITE_ONLY, 0, buffer->size);
+	*data = opengl_device->glMapBufferRange(buffer->device, GL_SHADER_STORAGE_BUFFER, 0, buffer->size, mode == PULSE_MAP_READ ? GL_MAP_READ_BIT : GL_MAP_WRITE_BIT);
 	return *data != PULSE_NULLPTR;
 }
 
