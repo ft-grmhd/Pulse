@@ -17,8 +17,6 @@
 #include "SoftComputePipeline.h"
 #include "SoftBuffer.h"
 
-#include <stdio.h>
-
 static void SoftCommandCopyBufferToBuffer(SoftCommand* cmd)
 {
 	const PulseBufferRegion* src = cmd->CopyBufferToBuffer.src;
@@ -32,16 +30,26 @@ static void SoftCommandCopyBufferToBuffer(SoftCommand* cmd)
 
 static int SoftCommandDispatchCore(void* arg)
 {
-	SoftComputePipeline* soft_pipeline = (SoftComputePipeline*)arg;
-	spvm_state_t state = spvm_state_create(soft_pipeline->program);
+	SoftCommand* cmd = (SoftCommand*)arg;
+	SoftComputePipeline* soft_pipeline = SOFT_RETRIEVE_DRIVER_DATA_AS(cmd->Dispatch.pipeline, SoftComputePipeline*);
+
+	mtx_lock(&cmd->Dispatch.dispatch_mutex);
+		spvm_state_t state = spvm_state_create(soft_pipeline->program);
+	mtx_unlock(&cmd->Dispatch.dispatch_mutex);
+
 	spvm_ext_opcode_func* glsl_ext_data = spvm_build_glsl450_ext();
 	spvm_result_t glsl_std_450 = spvm_state_get_result(state, "GLSL.std.450");
 	if(glsl_std_450)
 		glsl_std_450->extension = glsl_ext_data;
 	spvm_word main = spvm_state_get_result_location(state, (spvm_string)soft_pipeline->entry_point);
+
+	spvm_word mem_count = 0;
+	spvm_member_t local_invocation_id = spvm_state_get_builtin(state, SpvBuiltInLocalInvocationId, &mem_count);
+
 	spvm_state_prepare(state, main);
 	spvm_state_call_function(state);
 	spvm_state_delete(state);
+	atomic_fetch_sub(&cmd->cmd_list->commands_running, 1);
 	return 0;
 }
 
@@ -62,15 +70,13 @@ static void SoftCommandDispatch(SoftCommand* cmd)
 			{
 				for(uint32_t i = 0; i < local_size; i++)
 				{
-					thrd_create(&invocations[invocation_index], SoftCommandDispatchCore, soft_pipeline);
-					//thrd_join(invocations[invocation_index], NULL);
+					atomic_fetch_add(&cmd->cmd_list->commands_running, 1);
+					thrd_create(&invocations[invocation_index], SoftCommandDispatchCore, cmd);
 					invocation_index++;
 				}
 			}
 		}
 	}
-	for(uint32_t i = 0; i < invocations_count; i++)
-		thrd_join(invocations[i], PULSE_NULLPTR);
 	free(invocations);
 }
 
@@ -97,11 +103,8 @@ static int SoftCommandsRunner(void* arg)
 		}
 	}
 
-	if(soft_cmd->fence != PULSE_NULL_HANDLE)
-	{
-		SoftFence* fence = SOFT_RETRIEVE_DRIVER_DATA_AS(soft_cmd->fence, SoftFence*);
-		atomic_store(&fence->signal, true);
-	}
+	atomic_fetch_sub(&soft_cmd->commands_running, 1); // Remove fence safety
+
 	cmd->state = PULSE_COMMAND_LIST_STATE_READY;
 	return 0;
 }
@@ -126,6 +129,7 @@ PulseCommandList SoftRequestCommandList(PulseDevice device, PulseCommandListUsag
 	cmd->pass = SoftCreateComputePass(device, cmd);
 	cmd->state = PULSE_COMMAND_LIST_STATE_RECORDING;
 	cmd->is_available = false;
+	atomic_store(&soft_cmd->commands_running, 0);
 
 	return cmd;
 }
@@ -133,6 +137,7 @@ PulseCommandList SoftRequestCommandList(PulseDevice device, PulseCommandListUsag
 void SoftQueueCommand(PulseCommandList cmd, SoftCommand command)
 {
 	SoftCommandList* soft_cmd = SOFT_RETRIEVE_DRIVER_DATA_AS(cmd, SoftCommandList*);
+	command.cmd_list = soft_cmd;
 	PULSE_EXPAND_ARRAY_IF_NEEDED(soft_cmd->commands, SoftCommand, soft_cmd->commands_count, soft_cmd->commands_capacity, 8);
 	soft_cmd->commands[soft_cmd->commands_count] = command;
 	soft_cmd->commands_count++;
@@ -150,6 +155,7 @@ bool SoftSubmitCommandList(PulseDevice device, PulseCommandList cmd, PulseFence 
 		fence->cmd = cmd;
 		atomic_store(&soft_fence->signal, false);
 	}
+	atomic_fetch_add(&soft_cmd->commands_running, 1); // Fence safety to avoid fence being signaled before first command being sumitted
 	return thrd_create(&soft_cmd->thread, SoftCommandsRunner, cmd) == thrd_success;
 }
 
@@ -157,6 +163,20 @@ void SoftReleaseCommandList(PulseDevice device, PulseCommandList cmd)
 {
 	SoftCommandList* soft_cmd = SOFT_RETRIEVE_DRIVER_DATA_AS(cmd, SoftCommandList*);
 	SoftDestroyComputePass(device, cmd->pass);
+
+	for(uint32_t i = 0; i < soft_cmd->commands_count; i++)
+	{
+		SoftCommand* command = &soft_cmd->commands[i];
+		switch(command->type)
+		{
+			// Lock/Unlock to make sure the mutex is not in use
+			case SOFT_COMMAND_DISPATCH: mtx_lock(&command->Dispatch.dispatch_mutex); mtx_unlock(&command->Dispatch.dispatch_mutex); break;
+			case SOFT_COMMAND_DISPATCH_INDIRECT: mtx_lock(&command->DispatchIndirect.dispatch_mutex); mtx_unlock(&command->DispatchIndirect.dispatch_mutex); break;
+
+			default: break;
+		}
+	}
+	free(soft_cmd->commands);
 	free(soft_cmd);
 	free(cmd);
 }

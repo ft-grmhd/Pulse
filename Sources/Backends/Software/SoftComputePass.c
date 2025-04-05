@@ -14,11 +14,7 @@ PulseComputePass SoftCreateComputePass(PulseDevice device, PulseCommandList cmd)
 	PulseComputePass pass = (PulseComputePass)calloc(1, sizeof(PulseComputePassHandler));
 	PULSE_CHECK_ALLOCATION_RETVAL(pass, PULSE_NULL_HANDLE);
 
-	SoftComputePass* soft_pass = (SoftComputePass*)calloc(1, sizeof(SoftComputePass));
-	PULSE_CHECK_ALLOCATION_RETVAL(soft_pass, PULSE_NULL_HANDLE);
-
 	pass->cmd = cmd;
-	pass->driver_data = soft_pass;
 
 	return pass;
 }
@@ -42,6 +38,30 @@ void SoftEndComputePass(PulseComputePass pass)
 
 void SoftBindStorageBuffers(PulseComputePass pass, const PulseBuffer* buffers, uint32_t num_buffers)
 {
+	PulseBufferUsageFlags usage = buffers[0]->usage;
+	bool is_readwrite = (usage & PULSE_BUFFER_USAGE_STORAGE_WRITE) != 0;
+	PulseBuffer* array = is_readwrite ? pass->readwrite_storage_buffers : pass->readonly_storage_buffers;
+
+	for(uint32_t i = 0; i < num_buffers; i++)
+	{
+		if(is_readwrite && (buffers[i]->usage & PULSE_BUFFER_USAGE_STORAGE_WRITE) == 0)
+		{
+			if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(pass->cmd->device->backend))
+				PulseLogError(pass->cmd->device->backend, "cannot bind a read only buffer with read-write buffers");
+			PulseSetInternalError(PULSE_ERROR_INVALID_BUFFER_USAGE);
+			return;
+		}
+		else if(!is_readwrite && (buffers[i]->usage & PULSE_BUFFER_USAGE_STORAGE_WRITE) != 0)
+		{
+			if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(pass->cmd->device->backend))
+				PulseLogError(pass->cmd->device->backend, "cannot bind a read-write buffer with read only buffers");
+			PulseSetInternalError(PULSE_ERROR_INVALID_BUFFER_USAGE);
+			return;
+		}
+		if(array[i] == buffers[i])
+			continue;
+		array[i] = buffers[i];
+	}
 }
 
 void SoftBindUniformData(PulseComputePass pass, uint32_t slot, const void* data, uint32_t data_size)
@@ -66,5 +86,6 @@ void SoftDispatchComputations(PulseComputePass pass, uint32_t groupcount_x, uint
 	command.Dispatch.groupcount_y = groupcount_y;
 	command.Dispatch.groupcount_z = groupcount_z;
 	command.Dispatch.pipeline = pass->current_pipeline;
+	mtx_init(&command.Dispatch.dispatch_mutex, mtx_plain);
 	SoftQueueCommand(pass->cmd, command);
 }

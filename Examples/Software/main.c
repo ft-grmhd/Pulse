@@ -47,7 +47,7 @@ int main(void)
 		PulseCommandList cmd = PulseRequestCommandList(device, PULSE_COMMAND_LIST_GENERAL);
 
 		PulseComputePass pass = PulseBeginComputePass(cmd);
-			//PulseBindStorageBuffers(pass, &buffer, 1);
+			PulseBindStorageBuffers(pass, &buffer, 1);
 			PulseBindComputePipeline(pass, pipeline);
 			PulseDispatchComputations(pass, 16, 1, 1);
 		PulseEndComputePass(pass);

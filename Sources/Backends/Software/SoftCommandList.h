@@ -9,6 +9,7 @@
 #ifndef PULSE_SOFTWARE_COMMAND_LIST_H_
 #define PULSE_SOFTWARE_COMMAND_LIST_H_
 
+#include <stdatomic.h>
 #include <tinycthread.h>
 
 #include "Soft.h"
@@ -17,6 +18,7 @@
 
 typedef struct SoftCommand
 {
+	struct SoftCommandList* cmd_list;
 	SoftCommandType type;
 	union
 	{
@@ -50,6 +52,7 @@ typedef struct SoftCommand
 			uint32_t groupcount_x;
 			uint32_t groupcount_y;
 			uint32_t groupcount_z;
+			mtx_t dispatch_mutex;
 		} Dispatch;
 
 		struct
@@ -57,8 +60,20 @@ typedef struct SoftCommand
 			PulseComputePipeline pipeline;
 			PulseBuffer buffer;
 			uint32_t offset;
+			mtx_t dispatch_mutex;
 		} DispatchIndirect;
 	};
+	union
+	{
+		struct
+		{
+			uint32_t global_invocation_id[3];
+			uint32_t local_invocation_id[3];
+			uint32_t workgroup_count[3];
+			uint32_t workgroup_index[3];
+			uint32_t local_invocation_index;
+		} Dipsatch;
+	} Private;
 } SoftCommand;
 
 typedef struct SoftCommandList
@@ -68,6 +83,7 @@ typedef struct SoftCommandList
 	SoftCommand* commands;
 	uint32_t commands_count;
 	uint32_t commands_capacity;
+	atomic_ullong commands_running;
 } SoftCommandList;
 
 PulseCommandList SoftRequestCommandList(PulseDevice device, PulseCommandListUsage usage);

@@ -25,7 +25,6 @@ PULSE_API void PulseDestroyDevice(PulseDevice device)
 	free(device->allocated_buffers);
 	free(device->allocated_images);
 	device->PFN_DestroyDevice(device);
-	device->driver_data = PULSE_NULLPTR;
 }
 
 PULSE_API PulseBackendBits PulseGetBackendInUseByDevice(PulseDevice device)

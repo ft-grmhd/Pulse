@@ -6,6 +6,7 @@
 #include "../../PulseInternal.h"
 #include "Soft.h"
 #include "SoftFence.h"
+#include "SoftCommandList.h"
 
 PulseFence SoftCreateFence(PulseDevice device)
 {
@@ -35,6 +36,9 @@ bool SoftIsFenceReady(PulseDevice device, PulseFence fence)
 {
 	PULSE_UNUSED(device);
 	SoftFence* soft_fence = SOFT_RETRIEVE_DRIVER_DATA_AS(fence, SoftFence*);
+	SoftCommandList* soft_cmd = SOFT_RETRIEVE_DRIVER_DATA_AS(fence->cmd, SoftCommandList*);
+	if(atomic_load(&soft_cmd->commands_running) == 0)
+		atomic_store(&soft_fence->signal, true);
 	return atomic_load(&soft_fence->signal);
 }
 

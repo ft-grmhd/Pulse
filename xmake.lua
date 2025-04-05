@@ -33,7 +33,7 @@ local backends = {
 	Software = {
 		option = "software",
 		default = true,
-		packages = { "spirv-vm", "cpuinfo" }
+		packages = { "spirv-vm", "cpuinfo", "spirv-reflect" }
 	},
 	OpenGL = {
 		option = "opengl",

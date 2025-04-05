@@ -9,14 +9,27 @@
 #ifndef PULSE_SOFTWARE_COMPUTE_PIPELINE_H_
 #define PULSE_SOFTWARE_COMPUTE_PIPELINE_H_
 
+#include <tinycthread.h>
+
 #include "Soft.h"
 #include <spvm/state.h>
 #include <spvm/program.h>
+
+typedef struct SoftSharedMemoryEntry
+{
+	spvm_result data;
+	spvm_result_t destination;
+	spvm_word slot;
+} SoftSharedMemoryEntry;
 
 typedef struct SoftComputePipeline
 {
 	spvm_program_t program;
 	const char* entry_point;
+	SoftSharedMemoryEntry* workgroup_memory_allocations;
+	uint32_t workgroup_memory_allocations_size;
+	uint32_t workgroup_memory_allocations_capacity;
+	mtx_t workgroup_memory_allocations_mutex;
 } SoftComputePipeline;
 
 PulseComputePipeline SoftCreateComputePipeline(PulseDevice device, const PulseComputePipelineCreateInfo* info);

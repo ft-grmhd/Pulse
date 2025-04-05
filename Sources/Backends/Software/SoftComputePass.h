@@ -11,11 +11,6 @@
 
 #include "Soft.h"
 
-typedef struct SoftComputePass
-{
-	int dummy;
-} SoftComputePass;
-
 PulseComputePass SoftCreateComputePass(PulseDevice device, PulseCommandList cmd);
 void SoftDestroyComputePass(PulseDevice device, PulseComputePass pass);
 
