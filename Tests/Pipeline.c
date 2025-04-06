@@ -12,11 +12,15 @@ void TestPipelineSetup()
 
 	#if defined(VULKAN_ENABLED)
 		const uint8_t shader_bytecode[] = {
-			#include "Shaders/Vulkan/Simple.spv.h"
+			#include "Shaders/Vulkan-OpenGL/Simple.spv.h"
 		};
 	#elif defined(WEBGPU_ENABLED)
 		#define SHADER_NAME shader_bytecode
 		#include "Shaders/WebGPU/Simple.wgsl.h"
+	#elif defined(OPENGL_ENABLED) || defined(OPENGLES_ENABLED)
+		const uint8_t shader_bytecode[] = {
+			#include "Shaders/Vulkan-OpenGL/Simple.comp.glsl.h"
+		};
 	#endif
 
 	PulseComputePipeline pipeline;
@@ -53,11 +57,15 @@ void TestPipelineReadOnlyBindings()
 
 	#if defined(VULKAN_ENABLED)
 		const uint8_t shader_bytecode[] = {
-			#include "Shaders/Vulkan/ReadOnlyBindings.spv.h"
+			#include "Shaders/Vulkan-OpenGL/ReadOnlyBindings.spv.h"
 		};
 	#elif defined(WEBGPU_ENABLED)
 		#define SHADER_NAME shader_bytecode
 		#include "Shaders/WebGPU/ReadOnlyBindings.wgsl.h"
+	#elif defined(OPENGL_ENABLED) || defined(OPENGLES_ENABLED)
+		const uint8_t shader_bytecode[] = {
+			#include "Shaders/Vulkan-OpenGL/ReadOnlyBindings.comp.glsl.h"
+		};
 	#endif
 
 	PulseBufferCreateInfo buffer_create_info = { 0 };
@@ -114,11 +122,15 @@ void TestPipelineWriteOnlyBindings()
 
 	#if defined(VULKAN_ENABLED)
 		const uint8_t shader_bytecode[] = {
-			#include "Shaders/Vulkan/WriteOnlyBindings.spv.h"
+			#include "Shaders/Vulkan-OpenGL/WriteOnlyBindings.spv.h"
 		};
 	#elif defined(WEBGPU_ENABLED)
 		#define SHADER_NAME shader_bytecode
 		#include "Shaders/WebGPU/WriteOnlyBindings.wgsl.h"
+	#elif defined(OPENGL_ENABLED) || defined(OPENGLES_ENABLED)
+		const uint8_t shader_bytecode[] = {
+			#include "Shaders/Vulkan-OpenGL/WriteOnlyBindings.comp.glsl.h"
+		};
 	#endif
 
 	PulseBufferCreateInfo buffer_create_info = { 0 };
@@ -175,11 +187,15 @@ void TestPipelineReadWriteBindings()
 
 	#if defined(VULKAN_ENABLED)
 		const uint8_t shader_bytecode[] = {
-			#include "Shaders/Vulkan/ReadWriteBindings.spv.h"
+			#include "Shaders/Vulkan-OpenGL/ReadWriteBindings.spv.h"
 		};
 	#elif defined(WEBGPU_ENABLED)
 		#define SHADER_NAME shader_bytecode
 		#include "Shaders/WebGPU/ReadWriteBindings.wgsl.h"
+	#elif defined(OPENGL_ENABLED) || defined(OPENGLES_ENABLED)
+		const uint8_t shader_bytecode[] = {
+			#include "Shaders/Vulkan-OpenGL/ReadWriteBindings.comp.glsl.h"
+		};
 	#endif
 
 	PulseBufferCreateInfo buffer_create_info = { 0 };

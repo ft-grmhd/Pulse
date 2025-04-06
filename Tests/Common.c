@@ -24,6 +24,10 @@ void SetupPulse(PulseBackend* backend)
 		*backend = PulseLoadBackend(PULSE_BACKEND_VULKAN, PULSE_SHADER_FORMAT_SPIRV_BIT, PULSE_PARANOID_DEBUG);
 	#elif defined(WEBGPU_ENABLED)
 		*backend = PulseLoadBackend(PULSE_BACKEND_WEBGPU, PULSE_SHADER_FORMAT_WGSL_BIT, PULSE_PARANOID_DEBUG);
+	#elif defined(OPENGL_ENABLED)
+		*backend = PulseLoadBackend(PULSE_BACKEND_OPENGL, PULSE_SHADER_FORMAT_GLSL_BIT, PULSE_PARANOID_DEBUG);
+	#elif defined(OPENGLES_ENABLED)
+		*backend = PulseLoadBackend(PULSE_BACKEND_OPENGL_ES, PULSE_SHADER_FORMAT_GLSL_BIT, PULSE_PARANOID_DEBUG);
 	#endif
 	if(*backend == PULSE_NULL_HANDLE)
 	{
@@ -70,6 +74,10 @@ void LoadComputePipeline(PulseDevice device, PulseComputePipeline* pipeline, con
 		info.format = PULSE_SHADER_FORMAT_SPIRV_BIT;
 	#elif defined(WEBGPU_ENABLED)
 		info.format = PULSE_SHADER_FORMAT_WGSL_BIT;
+	#elif defined(OPENGL_ENABLED)
+		info.format = PULSE_SHADER_FORMAT_GLSL_BIT;
+	#elif defined(OPENGLES_ENABLED)
+		info.format = PULSE_SHADER_FORMAT_GLSL_BIT;
 	#endif
 	info.num_readonly_storage_images = num_readonly_storage_images;
 	info.num_readonly_storage_buffers = num_readonly_storage_buffers;

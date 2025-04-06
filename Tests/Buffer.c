@@ -271,11 +271,15 @@ void TestBufferComputeWrite()
 
 	#if defined(VULKAN_ENABLED)
 		const uint8_t shader_bytecode[] = {
-			#include "Shaders/Vulkan/SimpleBufferWrite.spv.h"
+			#include "Shaders/Vulkan-OpenGL/SimpleBufferWrite.spv.h"
 		};
 	#elif defined(WEBGPU_ENABLED)
 		#define SHADER_NAME shader_bytecode
 		#include "Shaders/WebGPU/SimpleBufferWrite.wgsl.h"
+	#elif defined(OPENGL_ENABLED) || defined(OPENGLES_ENABLED)
+		const uint8_t shader_bytecode[] = {
+			#include "Shaders/Vulkan-OpenGL/SimpleBufferWrite.comp.glsl.h"
+		};
 	#endif
 
 	PulseBufferCreateInfo buffer_create_info = { 0 };
@@ -338,11 +342,15 @@ void TestBufferComputeCopy()
 
 	#if defined(VULKAN_ENABLED)
 		const uint8_t shader_bytecode[] = {
-			#include "Shaders/Vulkan/BufferCopy.spv.h"
+			#include "Shaders/Vulkan-OpenGL/BufferCopy.spv.h"
 		};
 	#elif defined(WEBGPU_ENABLED)
 		#define SHADER_NAME shader_bytecode
 		#include "Shaders/WebGPU/BufferCopy.wgsl.h"
+	#elif defined(OPENGL_ENABLED) || defined(OPENGLES_ENABLED)
+		const uint8_t shader_bytecode[] = {
+			#include "Shaders/Vulkan-OpenGL/BufferCopy.comp.glsl.h"
+		};
 	#endif
 
 	uint32_t data[256];
