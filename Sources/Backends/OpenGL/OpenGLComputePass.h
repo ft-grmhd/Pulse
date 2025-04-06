@@ -11,10 +11,17 @@
 #include "OpenGL.h"
 #include "OpenGLBuffer.h"
 #include "OpenGLCommandList.h"
+#include "OpenGLBindsGroup.h"
 
 typedef struct OpenGLComputePass
 {
-	int dummy;
+	OpenGLBindsGroup* read_only_bind_group;
+	OpenGLBindsGroup* read_write_bind_group;
+	OpenGLBindsGroup* uniform_bind_group;
+
+	bool should_recreate_read_only_bind_group;
+	bool should_recreate_write_bind_group;
+	bool should_recreate_uniform_bind_group;
 } OpenGLComputePass;
 
 PulseComputePass OpenGLCreateComputePass(PulseDevice device, PulseCommandList cmd);

@@ -9,10 +9,14 @@
 
 #include <Pulse.h>
 #include "OpenGL.h"
+#include "OpenGLBindsGroup.h"
 
 typedef struct OpenGLComputePipeline
 {
 	GLuint program;
+	OpenGLBindsGroupLayout* readonly_group_layout;
+	OpenGLBindsGroupLayout* readwrite_group_layout;
+	OpenGLBindsGroupLayout* uniform_group_layout;
 } OpenGLComputePipeline;
 
 PulseComputePipeline OpenGLCreateComputePipeline(PulseDevice device, const PulseComputePipelineCreateInfo* info);

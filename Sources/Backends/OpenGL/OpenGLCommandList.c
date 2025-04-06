@@ -34,8 +34,49 @@ static void OpenGLCommandDispatch(PulseDevice device, OpenGLCommand* cmd)
 {
 	OpenGLDevice* opengl_device = OPENGL_RETRIEVE_DRIVER_DATA_AS(device, OpenGLDevice*);
 	OpenGLComputePipeline* opengl_pipeline = OPENGL_RETRIEVE_DRIVER_DATA_AS(cmd->Dispatch.pipeline, OpenGLComputePipeline*);
+
 	opengl_device->glUseProgram(device, opengl_pipeline->program);
+
+	uint32_t buffer_index = 0;
+	uint32_t image_index = 0;
+
+	if(cmd->Dispatch.read_only_group != PULSE_NULLPTR)
+	{
+		for(uint32_t i = 0; cmd->Dispatch.read_only_group->ReadOnly.images[i] != PULSE_NULLPTR; i++, image_index++)
+		{
+			PulseImage image = cmd->Dispatch.read_only_group->ReadOnly.images[i];
+		}
+		for(uint32_t i = 0; cmd->Dispatch.read_only_group->ReadOnly.storage_buffers[i] != PULSE_NULLPTR; i++, buffer_index++)
+		{
+			PulseBuffer buffer = cmd->Dispatch.read_only_group->ReadOnly.storage_buffers[i];
+			OpenGLBuffer* opengl_buffer = OPENGL_RETRIEVE_DRIVER_DATA_AS(buffer, OpenGLBuffer*);
+			opengl_device->glBindBufferRange(device, GL_SHADER_STORAGE_BUFFER, buffer_index, opengl_buffer->buffer, 0, buffer->size);
+		}
+	}
+
+	if(cmd->Dispatch.read_write_group != PULSE_NULLPTR)
+	{
+		for(uint32_t i = 0; cmd->Dispatch.read_write_group->ReadWrite.images[i] != PULSE_NULLPTR; i++, image_index++)
+		{
+			PulseImage image = cmd->Dispatch.read_write_group->ReadWrite.images[i];
+		}
+		for(uint32_t i = 0; cmd->Dispatch.read_write_group->ReadWrite.storage_buffers[i] != PULSE_NULLPTR; i++, buffer_index++)
+		{
+			PulseBuffer buffer = cmd->Dispatch.read_write_group->ReadWrite.storage_buffers[i];
+			OpenGLBuffer* opengl_buffer = OPENGL_RETRIEVE_DRIVER_DATA_AS(buffer, OpenGLBuffer*);
+			opengl_device->glBindBufferRange(device, GL_SHADER_STORAGE_BUFFER, buffer_index, opengl_buffer->buffer, 0, buffer->size);
+		}
+	}
+
+	if(cmd->Dispatch.uniform_group != PULSE_NULLPTR)
+	{
+	}
+
 	opengl_device->glDispatchCompute(device, cmd->Dispatch.groupcount_x, cmd->Dispatch.groupcount_y, cmd->Dispatch.groupcount_z);
+
+	free(cmd->Dispatch.read_only_group);
+	free(cmd->Dispatch.read_write_group);
+	free(cmd->Dispatch.uniform_group);
 }
 
 static void OpenGLCommandsRunner(PulseCommandList cmd)

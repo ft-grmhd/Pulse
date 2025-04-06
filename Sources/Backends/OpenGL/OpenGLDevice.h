@@ -9,6 +9,7 @@
 
 #include <Pulse.h>
 #include "OpenGL.h"
+#include "OpenGLBindsGroup.h"
 #include "EGL/EGLInstance.h"
 
 #define PULSE_OPENGL_WRAPPER_RET(ret, fn, arg_list, param_list, cast) typedef ret (*PulseOpenGLWrapperPFN_##fn) arg_list ;
@@ -26,6 +27,9 @@ typedef struct OpenGLDevice
 		EGLInstance egl_instance;
 	};
 	OpenGLContextType context_type;
+
+	OpenGLBindsGroupPoolManager binds_group_pool_manager;
+	OpenGLBindsGroupLayoutManager binds_group_layout_manager;
 
 	#define PULSE_OPENGL_WRAPPER_RET(ret, fn, arg_list, param_list, cast) PulseOpenGLWrapperPFN_##fn fn;
 	#define PULSE_OPENGL_WRAPPER(fn, arg_list, param_list, cast) PulseOpenGLWrapperPFN_##fn fn;

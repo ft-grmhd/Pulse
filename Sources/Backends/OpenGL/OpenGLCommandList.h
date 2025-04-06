@@ -8,8 +8,10 @@
 #define PULSE_OPENGL_COMMAND_LIST_H_
 
 #include <Pulse.h>
+#include "../../PulseInternal.h"
 #include "OpenGL.h"
 #include "OpenGLBuffer.h"
+#include "OpenGLBindsGroup.h"
 
 typedef struct OpenGLCommand
 {
@@ -42,6 +44,9 @@ typedef struct OpenGLCommand
 
 		struct
 		{
+			OpenGLBindsGroup* read_only_group;
+			OpenGLBindsGroup* read_write_group;
+			OpenGLBindsGroup* uniform_group;
 			PulseComputePipeline pipeline;
 			uint32_t groupcount_x;
 			uint32_t groupcount_y;
@@ -50,6 +55,9 @@ typedef struct OpenGLCommand
 
 		struct
 		{
+			OpenGLBindsGroup* read_only_group;
+			OpenGLBindsGroup* read_write_group;
+			OpenGLBindsGroup* uniform_group;
 			PulseComputePipeline pipeline;
 			PulseBuffer buffer;
 			uint32_t offset;

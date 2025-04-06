@@ -207,7 +207,7 @@ VulkanDescriptorSet* VulkanRequestDescriptorSetFromPool(VulkanDescriptorSetPool*
 			VulkanDescriptorSet* set = pool->free_sets[i];
 			PULSE_DEFRAG_ARRAY(pool->free_sets, VULKAN_POOL_SIZE, i);
 			pool->free_index--;
-			pool->used_sets[pool->used_index] = (VulkanDescriptorSet*)set;
+			pool->used_sets[pool->used_index] = set;
 			pool->used_index++;
 			return set;
 		}
@@ -228,6 +228,9 @@ VulkanDescriptorSet* VulkanRequestDescriptorSetFromPool(VulkanDescriptorSetPool*
 	alloc_info.descriptorSetCount = 1;
 	alloc_info.pSetLayouts = &layout->layout;
 	CHECK_VK_RETVAL(pool->device->backend, vulkan_device->vkAllocateDescriptorSets(vulkan_device->device, &alloc_info, &set->set), PULSE_ERROR_INITIALIZATION_FAILED, PULSE_NULLPTR);
+
+	pool->used_sets[pool->used_index] = set;
+	pool->used_index++;
 
 	pool->allocations_count++;
 	return set;

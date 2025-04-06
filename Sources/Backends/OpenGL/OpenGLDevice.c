@@ -47,6 +47,10 @@ const char* OpenGLVerbaliseError(GLenum code)
 
 static void OpenGLDebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* user_param)
 {
+	PULSE_UNUSED(source);
+	PULSE_UNUSED(type);
+	PULSE_UNUSED(id);
+	PULSE_UNUSED(severity);
 	PulseDevice device = (PulseDevice)user_param;
 	PulseLogInfoFmt(device->backend, "%s debug message catched: %.*s", device->backend->backend == PULSE_BACKEND_OPENGL ? "(OpenGL)" : "(OpenGL ES)", length, message);
 }
@@ -246,7 +250,7 @@ PulseDevice OpenGLCreateDevice(PulseBackend backend, PulseDevice* forbiden_devic
 		return PULSE_NULL_HANDLE;
 	}
 
-	if(backend->debug_level != PULSE_NO_DEBUG && device->original_function_ptrs[glDebugMessageCallback] != PULSE_NULLPTR)
+	if(backend->debug_level > PULSE_LOW_DEBUG && device->original_function_ptrs[glDebugMessageCallback] != PULSE_NULLPTR)
 	{
 		device->glEnable(pulse_device, GL_DEBUG_OUTPUT);
 		//device->glEnable(pulse_device, GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -260,6 +264,9 @@ PulseDevice OpenGLCreateDevice(PulseBackend backend, PulseDevice* forbiden_devic
 	device->device_id = PulseHashCombine(device->device_id, PulseHashString((const char*)device->glGetString(pulse_device, GL_RENDERER)));
 	for(uint32_t i = 0; i < device->supported_extensions_count; i++)
 		device->device_id = PulseHashCombine(device->device_id, PulseHashString(device->supported_extensions[i]));
+
+	OpenGLInitBindsGroupPoolManager(&device->binds_group_pool_manager, pulse_device);
+	OpenGLInitBindsGroupLayoutManager(&device->binds_group_layout_manager, pulse_device);
 
 	if(PULSE_IS_BACKEND_HIGH_LEVEL_DEBUG(backend))
 		PulseLogInfoFmt(backend, "%s created device from %s", backend->backend == PULSE_BACKEND_OPENGL ? "(OpenGL)" : "(OpenGL ES)", device->glGetString(pulse_device, GL_RENDERER));
@@ -282,6 +289,8 @@ void OpenGLDestroyDevice(PulseDevice device)
 	if(device == PULSE_NULL_HANDLE || device->driver_data == PULSE_NULLPTR)
 		return;
 	OpenGLDevice* opengl_device = OPENGL_RETRIEVE_DRIVER_DATA_AS(device, OpenGLDevice*);
+	OpenGLDestroyBindsGroupPoolManager(&opengl_device->binds_group_pool_manager);
+	OpenGLDestroyBindsGroupLayoutManager(&opengl_device->binds_group_layout_manager);
 	#ifdef PULSE_PLAT_WINDOWS
 		if(opengl_device->context_type == OPENGL_CONTEXT_WGL)
 		{} // TODO: WGL
