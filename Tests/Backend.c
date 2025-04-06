@@ -15,6 +15,8 @@ void TestBackendSupport()
 		if(!PulseSupportsBackend(PULSE_BACKEND_VULKAN, PULSE_SHADER_FORMAT_SPIRV_BIT))
 	#elif defined(WEBGPU_ENABLED)
 		if(!PulseSupportsBackend(PULSE_BACKEND_WEBGPU, PULSE_SHADER_FORMAT_WGSL_BIT))
+	#elif defined(OPENGL_ENABLED)
+		if(!PulseSupportsBackend(PULSE_BACKEND_WEBGPU, PULSE_SHADER_FORMAT_WGSL_BIT))
 	#endif
 	{
 		TEST_MESSAGE("Backend is not supported");

@@ -12,14 +12,21 @@ struct SSBO
     data: dyn_array[u32]
 }
 
+[set(0)]
 external
 {
-    [set(1), binding(0)] ssbo: storage[SSBO],
+    [binding(0)] read_ssbo: storage[SSBO, readonly],
+}
+
+[set(1)]
+external
+{
+    [binding(0)] write_ssbo: storage[SSBO, writeonly],
 }
 
 [entry(compute)]
 [workgroup(16, 16, 1)]
 fn main(input: Input)
 {
-    ssbo.data[input.indices.x * input.indices.y] = u32(0xFFFFFFFF);
+    write_ssbo.data[input.indices.x * input.indices.y] = read_ssbo.data[input.indices.x * input.indices.y];
 }

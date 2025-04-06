@@ -1,2 +1,4 @@
 *.spv.h
 *.wgsl.h
+*.json
+*.glsl.h
