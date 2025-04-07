@@ -212,6 +212,20 @@ PulseDevice OpenGLCreateDevice(PulseBackend backend, PulseDevice* forbiden_devic
 	pulse_device->driver_data = device;
 	pulse_device->backend = backend;
 
+	const char* core_extensions[] = {
+		"GL_ARB_texture_rg",
+		"GL_EXT_texture_storage",
+		"GL_EXT_texture_snorm",
+	};
+
+	const char* es_extensions[] = {
+		"GL_EXT_texture_rg",
+		"GL_EXT_texture_storage",
+		"GL_EXT_texture_snorm",
+	};
+
+	bool is_core = backend->backend == PULSE_BACKEND_OPENGL;
+
 	#ifdef PULSE_PLAT_WINDOWS
 		// WGL support
 		if(opengl_device->context_type == OPENGL_CONTEXT_WGL)
@@ -221,11 +235,25 @@ PulseDevice OpenGLCreateDevice(PulseBackend backend, PulseDevice* forbiden_devic
 		}
 		else
 		{
-			EGLLoadInstance(&device->egl_instance, forbiden_devices, forbiden_devices_count, backend->backend == PULSE_BACKEND_OPENGL_ES);
+			if(!EGLLoadInstance(&device->egl_instance, is_core ? core_extensions : es_extensions, PULSE_SIZEOF_ARRAY(is_core ? core_extensions : es_extensions), forbiden_devices, forbiden_devices_count, !is_core))
+			{
+				if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(backend))
+					PulseLogError(backend, "could not load EGL instance");
+				free(device);
+				free(pulse_device);
+				return PULSE_NULL_HANDLE;
+			}
 			device->context_type = OPENGL_CONTEXT_EGL;
 		}
 	#else
-		EGLLoadInstance(&device->egl_instance, forbiden_devices, forbiden_devices_count, backend->backend == PULSE_BACKEND_OPENGL_ES);
+		if(!EGLLoadInstance(&device->egl_instance, is_core ? core_extensions : es_extensions, PULSE_SIZEOF_ARRAY(is_core ? core_extensions : es_extensions), forbiden_devices, forbiden_devices_count, !is_core))
+		{
+			if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(backend))
+				PulseLogError(backend, "could not load EGL instance");
+			free(device);
+			free(pulse_device);
+			return PULSE_NULL_HANDLE;
+		}
 		device->context_type = OPENGL_CONTEXT_EGL;
 	#endif
 

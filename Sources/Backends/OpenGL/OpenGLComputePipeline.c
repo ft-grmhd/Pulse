@@ -2,6 +2,8 @@
 // This file is part of "Pulse"
 // For conditions of distribution and use, see copyright notice in LICENSE
 
+#include <string.h>
+
 #include <Pulse.h>
 
 #include "../../PulseInternal.h"
@@ -32,7 +34,10 @@ PulseComputePipeline OpenGLCreateComputePipeline(PulseDevice device, const Pulse
 			PulseLogError(device->backend, "invalid shader format passed to PulseComputePipelineCreateInfo");
 	}
 
-	opengl_pipeline->program = opengl_device->glCreateShaderProgramv(device, GL_COMPUTE_SHADER, 1, (const GLchar**)(&info->code));
+	uint8_t* code = (uint8_t*)calloc(info->code_size + 1, 1);
+	memcpy(code, info->code, info->code_size);
+
+	opengl_pipeline->program = opengl_device->glCreateShaderProgramv(device, GL_COMPUTE_SHADER, 1, (const GLchar**)(&code));
 	GLint linked = GL_FALSE;
 	opengl_device->glGetProgramiv(device, opengl_pipeline->program, GL_LINK_STATUS, &linked);
 	if(linked != GL_TRUE)
@@ -52,10 +57,13 @@ PulseComputePipeline OpenGLCreateComputePipeline(PulseDevice device, const Pulse
 		}
 
 		opengl_device->glDeleteProgram(device, opengl_pipeline->program);
+		free(code);
 		free(opengl_pipeline);
 		free(pipeline);
 		return PULSE_NULL_HANDLE;
 	}
+
+	free(code);
 
 	opengl_pipeline->readonly_group_layout  = OpenGLGetBindsGroupLayout(&opengl_device->binds_group_layout_manager, info->num_readonly_storage_images, info->num_readonly_storage_buffers, 0, 0, 0);
 	opengl_pipeline->readwrite_group_layout = OpenGLGetBindsGroupLayout(&opengl_device->binds_group_layout_manager, 0, 0, info->num_readwrite_storage_images, info->num_readwrite_storage_buffers, 0);

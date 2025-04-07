@@ -91,6 +91,37 @@ void OpenGLBindUniformData(PulseComputePass pass, uint32_t slot, const void* dat
 
 void OpenGLBindStorageImages(PulseComputePass pass, const PulseImage* images, uint32_t num_images)
 {
+	PulseImageUsageFlags usage = images[0]->usage;
+	bool is_readwrite = (usage & PULSE_IMAGE_USAGE_STORAGE_WRITE) != 0;
+	PulseImage* array = is_readwrite ? pass->readwrite_images : pass->readonly_images;
+	OpenGLComputePass* opengl_pass = OPENGL_RETRIEVE_DRIVER_DATA_AS(pass, OpenGLComputePass*);
+
+	for(uint32_t i = 0; i < num_images; i++)
+	{
+		if(is_readwrite && (images[i]->usage & PULSE_IMAGE_USAGE_STORAGE_WRITE) == 0)
+		{
+			if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(pass->cmd->device->backend))
+				PulseLogError(pass->cmd->device->backend, "cannot bind a read only image with read-write images");
+			PulseSetInternalError(PULSE_ERROR_INVALID_IMAGE_USAGE);
+			return;
+		}
+		else if(!is_readwrite && (images[i]->usage & PULSE_IMAGE_USAGE_STORAGE_WRITE) != 0)
+		{
+			if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(pass->cmd->device->backend))
+				PulseLogError(pass->cmd->device->backend, "cannot bind a read-write image with read only images");
+			PulseSetInternalError(PULSE_ERROR_INVALID_IMAGE_USAGE);
+			return;
+		}
+
+		if(array[i] == images[i])
+			continue;
+		array[i] = images[i];
+		
+		if(is_readwrite)
+			opengl_pass->should_recreate_write_bind_group = true;
+		else
+			opengl_pass->should_recreate_read_only_bind_group = true;
+	}
 }
 
 static void OpenGLBindBindsGroup(PulseComputePass pass)

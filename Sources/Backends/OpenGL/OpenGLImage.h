@@ -12,7 +12,7 @@
 
 typedef struct OpenGLImage
 {
-	int dummy;
+	GLuint image;
 } OpenGLImage;
 
 PulseImage OpenGLCreateImage(PulseDevice device, const PulseImageCreateInfo* create_infos);

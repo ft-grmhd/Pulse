@@ -28,7 +28,7 @@ typedef struct EGLInstance
 	#undef PULSE_EGL_FUNCTION_EXT
 } EGLInstance;
 
-bool EGLLoadInstance(EGLInstance* instance, PulseDevice* forbiden_devices, uint32_t forbiden_devices_count, bool es_context);
+bool EGLLoadInstance(EGLInstance* instance, const char** extensions, uint32_t extensions_count, PulseDevice* forbiden_devices, uint32_t forbiden_devices_count, bool es_context);
 void EGLUnloadInstance(EGLInstance* instance);
 
 #endif // PULSE_EGL_CONTEXT_H_

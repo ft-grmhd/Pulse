@@ -79,11 +79,11 @@ function nzsl(backend)
 			batchcmds:show_progress(opt.progress, "${color.build.object}compiling.shader %s", shaderfile)
 			local argv = {}
 			if backend == Backend.VULKAN then
-				argv = { "--compile=spv-header", "--optimize" }
+				argv = { "--compile=spv-header" }
 			elseif backend == Backend.OPENGL_ES then
-				argv = { "--compile=glsl-header", "--optimize", "--gl-version", "310", "--gl-es", "--gl-bindingmap" }
+				argv = { "--compile=glsl,glsl-header", "--gl-version", "310", "--gl-es", "--gl-bindingmap" }
 			else
-				argv = { "--compile=glsl-header", "--optimize", "--gl-version", "310", "--gl-bindingmap" }
+				argv = { "--compile=glsl,glsl-header", "--gl-version", "310", "--gl-bindingmap" }
 			end
 			if outputdir then
 				batchcmds:mkdir(outputdir)

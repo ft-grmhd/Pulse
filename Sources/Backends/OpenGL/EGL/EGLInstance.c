@@ -119,7 +119,7 @@ bool EGLLoadOpenGLContext(EGLInstance* instance, EGLDisplay* display, EGLDeviceE
 	return true;
 }
 
-bool EGLLoadInstance(EGLInstance* instance, PulseDevice* forbiden_devices, uint32_t forbiden_devices_count, bool es_context)
+bool EGLLoadInstance(EGLInstance* instance, const char** extensions, uint32_t extensions_count, PulseDevice* forbiden_devices, uint32_t forbiden_devices_count, bool es_context)
 {
 	PULSE_CHECK_PTR_RETVAL(instance, false);
 
@@ -161,14 +161,25 @@ bool EGLLoadInstance(EGLInstance* instance, PulseDevice* forbiden_devices, uint3
 				continue;
 			}
 
-			// Check for forbiden devices
+			uint32_t extensions_found_count = 0;
 			{
 				uint32_t device_id = PulseHashString((const char*)glGetString(GL_VENDOR));
 				device_id = PulseHashCombine(device_id, PulseHashString((const char*)glGetString(GL_RENDERER)));
 				GLint gl_extension_count = 0;
 				glGetIntegerv(GL_NUM_EXTENSIONS, &gl_extension_count);
 				for(int i = 0; i < gl_extension_count; i++)
-					device_id = PulseHashCombine(device_id, PulseHashString((const char*)glGetStringi(GL_EXTENSIONS, i)));
+				{
+					const char* extension = (const char*)glGetStringi(GL_EXTENSIONS, i);
+					device_id = PulseHashCombine(device_id, PulseHashString(extension));
+					for(uint32_t j = 0; j < extensions_count; j++) // Not optimal
+					{
+						if(strcmp(extensions[j], extension) == 0)
+						{
+							extensions_found_count++;
+							break;
+						}
+					}
+				}
 
 				for(uint32_t j = 0; j < forbiden_devices_count; j++)
 				{
@@ -211,12 +222,17 @@ bool EGLLoadInstance(EGLInstance* instance, PulseDevice* forbiden_devices, uint3
 			instance->eglDestroyContext(display, context);
 			instance->eglTerminate(display);
 
+			if(extensions_found_count != extensions_count)
+				current_device_score = 0;
+
 			if(current_device_score > best_device_score)
 			{
 				best_device_score = current_device_score;
 				instance->device = devices[i];
 			}
 		}
+		if(instance->device == EGL_NO_DEVICE_EXT)
+			return false;
 	}
 
 	return EGLLoadOpenGLContext(instance, &instance->display, instance->device, &instance->config, &instance->surface, &instance->context, es_context);
