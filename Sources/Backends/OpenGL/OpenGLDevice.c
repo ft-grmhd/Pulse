@@ -213,14 +213,10 @@ PulseDevice OpenGLCreateDevice(PulseBackend backend, PulseDevice* forbiden_devic
 	pulse_device->backend = backend;
 
 	const char* core_extensions[] = {
-		"GL_ARB_texture_rg",
-		"GL_EXT_texture_storage",
-		"GL_EXT_texture_snorm",
 	};
 
 	const char* es_extensions[] = {
-		"GL_EXT_texture_rg",
-		"GL_EXT_texture_storage",
+		"GL_EXT_texture_norm16",
 		"GL_EXT_texture_snorm",
 	};
 

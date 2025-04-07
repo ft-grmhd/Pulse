@@ -63,7 +63,7 @@ static WGPUTextureFormat PulseImageFormatToWGPUTextureFormat[] = {
 	WGPUTextureFormat_RG32Sint,          // R32G32_INT
 	WGPUTextureFormat_RGBA32Sint,        // R32G32B32A32_INT
 };
-PULSE_STATIC_ASSERT(PulseImageFormatToWGPUTextureFormat, (sizeof(PulseImageFormatToWGPUTextureFormat) / sizeof(WGPUTextureFormat)) == PULSE_IMAGE_FORMAT_MAX_ENUM);
+PULSE_STATIC_ASSERT(PulseImageFormatToWGPUTextureFormat, PULSE_SIZEOF_ARRAY(PulseImageFormatToWGPUTextureFormat) == PULSE_IMAGE_FORMAT_MAX_ENUM);
 
 static WGPUTextureDimension PulseImageTypeToWGPUTextureDimension[] = {
 	WGPUTextureDimension_2D,    //PULSE_IMAGE_TYPE_2D
@@ -72,7 +72,7 @@ static WGPUTextureDimension PulseImageTypeToWGPUTextureDimension[] = {
 	WGPUTextureDimension_2D,    //PULSE_IMAGE_TYPE_CUBE
 	WGPUTextureDimension_2D,    //PULSE_IMAGE_TYPE_CUBE_ARRAY
 };
-PULSE_STATIC_ASSERT(PulseImageTypeToWGPUTextureDimension, (sizeof(PulseImageTypeToWGPUTextureDimension) / sizeof(WGPUTextureDimension)) == PULSE_IMAGE_TYPE_MAX_ENUM);
+PULSE_STATIC_ASSERT(PulseImageTypeToWGPUTextureDimension, PULSE_SIZEOF_ARRAY(PulseImageTypeToWGPUTextureDimension) == PULSE_IMAGE_TYPE_MAX_ENUM);
 
 static WGPUTextureViewDimension PulseImageTypeToWGPUTextureViewDimension[] = {
 	WGPUTextureViewDimension_2D,          //PULSE_IMAGE_TYPE_2D
@@ -81,7 +81,7 @@ static WGPUTextureViewDimension PulseImageTypeToWGPUTextureViewDimension[] = {
 	WGPUTextureViewDimension_Cube,        //PULSE_IMAGE_TYPE_CUBE
 	WGPUTextureViewDimension_CubeArray,   //PULSE_IMAGE_TYPE_CUBE_ARRAY
 };
-PULSE_STATIC_ASSERT(PulseImageTypeToWGPUTextureViewDimension, (sizeof(PulseImageTypeToWGPUTextureViewDimension) / sizeof(WGPUTextureViewDimension)) == PULSE_IMAGE_TYPE_MAX_ENUM);
+PULSE_STATIC_ASSERT(PulseImageTypeToWGPUTextureViewDimension, PULSE_SIZEOF_ARRAY(PulseImageTypeToWGPUTextureViewDimension) == PULSE_IMAGE_TYPE_MAX_ENUM);
 
 PulseImage WebGPUCreateImage(PulseDevice device, const PulseImageCreateInfo* create_infos)
 {

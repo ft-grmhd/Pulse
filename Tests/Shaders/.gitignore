@@ -2,3 +2,4 @@
 *.wgsl.h
 *.json
 *.glsl.h
+*.glsl
