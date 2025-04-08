@@ -60,7 +60,7 @@
 	for(size_t defrag_i = start; defrag_i < size - 1; defrag_i++) \
 		array[defrag_i] = array[defrag_i + 1]; \
 
-#define PULSE_SIZEOF_ARRAY(x) ((sizeof(x) / sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
+#define PULSE_SIZEOF_ARRAY(x) (sizeof(x) / sizeof(0[x]))
 
 #define PULSE_CHECK_COMMAND_LIST_STATE_RETVAL(cmd, retval) \
 	do { \

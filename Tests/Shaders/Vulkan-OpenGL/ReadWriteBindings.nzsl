@@ -22,7 +22,7 @@ external
 [set(1)]
 external
 {
-    [binding(0)] write_texture: texture2D[f32, rgba8],
+    [binding(0)] write_texture: texture2D[f32, writeonly, rgba8],
     [binding(1)] write_ssbo: storage[SSBO, writeonly],
 }
 

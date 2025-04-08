@@ -89,6 +89,11 @@ PULSE_API PulseImage PulseCreateImage(PulseDevice device, const PulseImageCreate
 		}
 		else
 		{
+			if(create_infos->width > MAX_2D_DIMENSION || create_infos->height > MAX_2D_DIMENSION)
+			{
+				PulseLogError(device->backend, "2D images: width and height must be <= 16384");
+				failed = true;
+			}
 			if(!PulseIsImageFormatValid(device, create_infos->format, PULSE_IMAGE_TYPE_2D, create_infos->usage))
 			{
 				PulseLogError(device->backend, "2D images: the format is unsupported for the given usage");

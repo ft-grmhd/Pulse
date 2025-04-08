@@ -12,10 +12,10 @@ struct SSBO
     data: dyn_array[u32]
 }
 
-[set(0)]
+[set(1)]
 external
 {
-    [binding(0)] write_texture: texture2D[f32, readwrite, rgba8],
+    [binding(0)] write_texture: texture2D[f32, writeonly, rgba8],
     [binding(1)] write_ssbo: storage[SSBO],
 }
 

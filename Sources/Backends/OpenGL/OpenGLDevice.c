@@ -214,11 +214,12 @@ PulseDevice OpenGLCreateDevice(PulseBackend backend, PulseDevice* forbiden_devic
 
 	const char* core_extensions[] = {
 	};
+	uint32_t core_extensions_count = 0;
 
 	const char* es_extensions[] = {
 		"GL_EXT_texture_norm16",
-		"GL_EXT_texture_snorm",
 	};
+	uint32_t es_extensions_count = 1;
 
 	bool is_core = backend->backend == PULSE_BACKEND_OPENGL;
 
@@ -242,7 +243,7 @@ PulseDevice OpenGLCreateDevice(PulseBackend backend, PulseDevice* forbiden_devic
 			device->context_type = OPENGL_CONTEXT_EGL;
 		}
 	#else
-		if(!EGLLoadInstance(&device->egl_instance, is_core ? core_extensions : es_extensions, PULSE_SIZEOF_ARRAY(is_core ? core_extensions : es_extensions), forbiden_devices, forbiden_devices_count, !is_core))
+		if(!EGLLoadInstance(&device->egl_instance, is_core ? core_extensions : es_extensions, is_core ? core_extensions_count : es_extensions_count, forbiden_devices, forbiden_devices_count, !is_core))
 		{
 			if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(backend))
 				PulseLogError(backend, "could not load EGL instance");

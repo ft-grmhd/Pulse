@@ -85,23 +85,55 @@ PulseImage OpenGLCreateImageTryAndFail(PulseDevice device, const PulseImageCreat
 	OpenGLImage* opengl_image = (OpenGLImage*)calloc(1, sizeof(OpenGLImage));
 	PULSE_CHECK_ALLOCATION_RETVAL(opengl_image, PULSE_NULL_HANDLE);
 
-	GLenum image_type = PulseImageTypeToGLTextureType[create_infos->type];
+	image->driver_data = opengl_image;
 
-	// TODO error message if image_type is invalid
+	GLenum image_type = PulseImageTypeToGLTextureType[create_infos->type];
+	GLenum image_format = PulseImageFormatToGLInternalFormat[create_infos->format];
+
+	if(image_type == GL_INVALID_ENUM)
+	{
+		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(device->backend))
+			PulseLogErrorFmt(device->backend, "%s image type is not supported", device->backend->backend == PULSE_BACKEND_OPENGL ? "(OpenGL)" : "(OpenGL ES)");
+		PulseSetInternalError(PULSE_ERROR_INITIALIZATION_FAILED);
+		free(opengl_image);
+		free(image);
+		return PULSE_NULL_HANDLE;
+	}
+	if(image_format == GL_INVALID_ENUM)
+	{
+		if(PULSE_IS_BACKEND_LOW_LEVEL_DEBUG(device->backend))
+			PulseLogErrorFmt(device->backend, "%s image format is not supported", device->backend->backend == PULSE_BACKEND_OPENGL ? "(OpenGL)" : "(OpenGL ES)");
+		PulseSetInternalError(PULSE_ERROR_INVALID_IMAGE_FORMAT);
+		free(opengl_image);
+		free(image);
+		return PULSE_NULL_HANDLE;
+	}
+
+	bool is_3D = create_infos->type == PULSE_IMAGE_TYPE_3D || create_infos->type == PULSE_IMAGE_TYPE_2D_ARRAY || create_infos->type == PULSE_IMAGE_TYPE_CUBE_ARRAY;
 
 	opengl_device->glGenTextures(device, 1, &opengl_image->image);
 	opengl_device->glBindTexture(device, image_type, opengl_image->image);
 	if(try_and_fail)
 	{
 		while(((PFNGLGETERRORPROC)opengl_device->original_function_ptrs[glGetError])() != GL_NO_ERROR); // Clear errors
-		((PFNGLTEXSTORAGE2DPROC)opengl_device->original_function_ptrs[glTexStorage2D])();
+		if(is_3D)
+			((PFNGLTEXSTORAGE3DPROC)opengl_device->original_function_ptrs[glTexStorage3D])(image_type, 1, image_format, create_infos->width, create_infos->height, create_infos->layer_count_or_depth);
+		else
+			((PFNGLTEXSTORAGE2DPROC)opengl_device->original_function_ptrs[glTexStorage2D])(image_type, 1, image_format, create_infos->width, create_infos->height);
+		if(((PFNGLGETERRORPROC)opengl_device->original_function_ptrs[glGetError])() != GL_NO_ERROR)
+		{
+			while(((PFNGLGETERRORPROC)opengl_device->original_function_ptrs[glGetError])() != GL_NO_ERROR); // Clear errors
+			OpenGLDestroyImage(device, image);
+			opengl_device->glBindTexture(device, image_type, 0); // Unbind
+			return PULSE_NULL_HANDLE;
+		}
 	}
 	else
 	{
-		if(create_infos->type == PULSE_IMAGE_TYPE_3D)
-			opengl_device->glTexStorage3D(device, image_type, 1, PulseImageFormatToGLInternalFormat[create_infos->format], create_infos->width, create_infos->width, create_infos->layer_count_or_depth);
+		if(is_3D)
+			opengl_device->glTexStorage3D(device, image_type, 1, image_format, create_infos->width, create_infos->height, create_infos->layer_count_or_depth);
 		else
-			opengl_device->glTexStorage2D(device, image_type, 1, PulseImageFormatToGLInternalFormat[create_infos->format], create_infos->width, create_infos->height);
+			opengl_device->glTexStorage2D(device, image_type, 1, image_format, create_infos->width, create_infos->height);
 	}
 	if(create_infos->format == PULSE_IMAGE_FORMAT_A8_UNORM)
 	{
@@ -130,7 +162,18 @@ PulseImage OpenGLCreateImage(PulseDevice device, const PulseImageCreateInfo* cre
 
 bool OpenGLIsImageFormatValid(PulseDevice device, PulseImageFormat format, PulseImageType type, PulseImageUsageFlags usage)
 {
-	OpenGLDevice* opengl_device = OPENGL_RETRIEVE_DRIVER_DATA_AS(device, OpenGLDevice*);
+	PulseImageCreateInfo image_create_info = { 0 };
+	image_create_info.type = type;
+	image_create_info.format = format;
+	image_create_info.usage = usage;
+	image_create_info.width = 1;
+	image_create_info.height = 1;
+	image_create_info.layer_count_or_depth = 12;
+	PulseImage image = OpenGLCreateImageTryAndFail(device, &image_create_info, true);
+	if(image == PULSE_NULL_HANDLE)
+		return false;
+	OpenGLDestroyImage(device, image);
+	return true;
 }
 
 bool OpenGLCopyImageToBuffer(PulseCommandList cmd, const PulseImageRegion* src, const PulseBufferRegion* dst)
@@ -143,7 +186,9 @@ bool OpenGLBlitImage(PulseCommandList cmd, const PulseImageRegion* src, const Pu
 
 void OpenGLDestroyImage(PulseDevice device, PulseImage image)
 {
+	OpenGLDevice* opengl_device = OPENGL_RETRIEVE_DRIVER_DATA_AS(device, OpenGLDevice*);
 	OpenGLImage* opengl_image = OPENGL_RETRIEVE_DRIVER_DATA_AS(image, OpenGLImage*);
+	opengl_device->glDeleteTextures(device, 1, &opengl_image->image);
 	free(opengl_image);
 	free(image);
 }
