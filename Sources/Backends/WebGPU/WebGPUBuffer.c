@@ -3,6 +3,7 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
 #include <stdatomic.h>
+#include <string.h>
 #include <time.h>
 
 #include <Pulse.h>
@@ -33,21 +34,29 @@ PulseBuffer WebGPUCreateBuffer(PulseDevice device, const PulseBufferCreateInfo* 
 	WGPUBufferDescriptor descriptor = { 0 };
 	descriptor.mappedAtCreation = false;
 	descriptor.size = buffer->size;
-	if(buffer->usage & PULSE_BUFFER_USAGE_STORAGE_READ || buffer->usage & PULSE_BUFFER_USAGE_STORAGE_WRITE)
+	if(buffer->usage & PULSE_INTERNAL_BUFFER_USAGE_PURE_TRANSFER)
+		descriptor.usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_CopySrc;
+	else
 	{
-		descriptor.usage |= WGPUBufferUsage_Storage | WGPUBufferUsage_CopyDst | WGPUBufferUsage_CopySrc;
-		is_storage = true;
+		if(buffer->usage & PULSE_BUFFER_USAGE_STORAGE_READ || buffer->usage & PULSE_BUFFER_USAGE_STORAGE_WRITE)
+		{
+			descriptor.usage |= WGPUBufferUsage_Storage | WGPUBufferUsage_CopyDst | WGPUBufferUsage_CopySrc;
+			is_storage = true;
+		}
+		if(buffer->usage & PULSE_BUFFER_USAGE_TRANSFER_DOWNLOAD)
+		{
+			descriptor.usage |= WGPUBufferUsage_CopyDst;
+			if(!is_storage)
+			{
+				descriptor.usage |= WGPUBufferUsage_MapRead;
+				webgpu_buffer->needs_staging_upload = true;
+			}
+		}
+		if(buffer->usage & PULSE_BUFFER_USAGE_TRANSFER_UPLOAD && !webgpu_buffer->needs_staging_upload)
+			descriptor.usage |= WGPUBufferUsage_CopySrc | WGPUBufferUsage_CopyDst;
+		if(buffer->usage & PULSE_INTERNAL_BUFFER_USAGE_UNIFORM_ACCESS)
+			descriptor.usage |= WGPUBufferUsage_Uniform | WGPUBufferUsage_CopyDst | WGPUBufferUsage_CopySrc;
 	}
-	if(buffer->usage & PULSE_BUFFER_USAGE_TRANSFER_DOWNLOAD)
-	{
-		descriptor.usage |= WGPUBufferUsage_CopyDst;
-		if(!is_storage)
-			descriptor.usage |= WGPUBufferUsage_MapRead;
-	}
-	if(buffer->usage & PULSE_BUFFER_USAGE_TRANSFER_UPLOAD)
-		descriptor.usage |= WGPUBufferUsage_CopySrc;
-	if(buffer->usage & PULSE_INTERNAL_BUFFER_USAGE_UNIFORM_ACCESS)
-		descriptor.usage |= WGPUBufferUsage_Uniform | WGPUBufferUsage_CopyDst | WGPUBufferUsage_CopySrc;
 
 	webgpu_buffer->buffer = wgpuDeviceCreateBuffer(webgpu_device->device, &descriptor);
 	if(webgpu_buffer->buffer == PULSE_NULLPTR)
@@ -151,7 +160,28 @@ bool WebGPUCopyBufferToBuffer(PulseCommandList cmd, const PulseBufferRegion* src
 	WebGPUBuffer* webgpu_src_buffer = WEBGPU_RETRIEVE_DRIVER_DATA_AS(src->buffer, WebGPUBuffer*);
 	WebGPUBuffer* webgpu_dst_buffer = WEBGPU_RETRIEVE_DRIVER_DATA_AS(dst->buffer, WebGPUBuffer*);
 	WebGPUCommandList* webgpu_cmd = WEBGPU_RETRIEVE_DRIVER_DATA_AS(cmd, WebGPUCommandList*);
-	wgpuCommandEncoderCopyBufferToBuffer(webgpu_cmd->encoder, webgpu_src_buffer->buffer, src->offset, webgpu_dst_buffer->buffer, dst->offset, (src->size < dst->size ? src->size : dst->size));
+	if(webgpu_src_buffer->needs_staging_upload)
+	{
+		if(webgpu_src_buffer->upload_staging == PULSE_NULL_HANDLE)
+		{
+			PulseBufferCreateInfo buffer_create_info = { 0 };
+			buffer_create_info.size = src->buffer->size;
+			buffer_create_info.usage = PULSE_INTERNAL_BUFFER_USAGE_PURE_TRANSFER;
+			webgpu_src_buffer->upload_staging = WebGPUCreateBuffer(cmd->device, &buffer_create_info);
+		}
+		void* read_map;
+		void* write_map;
+		if(WebGPUMapBuffer(src->buffer, PULSE_MAP_READ, &read_map) && WebGPUMapBuffer(webgpu_src_buffer->upload_staging, PULSE_MAP_WRITE, &write_map))
+		{
+			memcpy(write_map, read_map, src->buffer->size);
+			WebGPUUnmapBuffer(src->buffer);
+			WebGPUUnmapBuffer(webgpu_src_buffer->upload_staging);
+		}
+		WebGPUBuffer* webgpu_staging_src_buffer = WEBGPU_RETRIEVE_DRIVER_DATA_AS(webgpu_src_buffer->upload_staging, WebGPUBuffer*);
+		wgpuCommandEncoderCopyBufferToBuffer(webgpu_cmd->encoder, webgpu_staging_src_buffer->buffer, src->offset, webgpu_dst_buffer->buffer, dst->offset, (src->size < dst->size ? src->size : dst->size));
+	}
+	else
+		wgpuCommandEncoderCopyBufferToBuffer(webgpu_cmd->encoder, webgpu_src_buffer->buffer, src->offset, webgpu_dst_buffer->buffer, dst->offset, (src->size < dst->size ? src->size : dst->size));
 	return true;
 }
 
@@ -192,15 +222,40 @@ bool WebGPUCopyBufferToImage(PulseCommandList cmd, const PulseBufferRegion* src,
 	extent.height = dst->height;
 	extent.depthOrArrayLayers = dst->depth;
 
+	WGPUBuffer buffer;
+
+	if(webgpu_src_buffer->needs_staging_upload)
+	{
+		if(webgpu_src_buffer->upload_staging == PULSE_NULL_HANDLE)
+		{
+			PulseBufferCreateInfo buffer_create_info = { 0 };
+			buffer_create_info.size = src->buffer->size;
+			buffer_create_info.usage = PULSE_INTERNAL_BUFFER_USAGE_PURE_TRANSFER;
+			webgpu_src_buffer->upload_staging = WebGPUCreateBuffer(cmd->device, &buffer_create_info);
+		}
+		void* read_map;
+		void* write_map;
+		if(WebGPUMapBuffer(src->buffer, PULSE_MAP_READ, &read_map) && WebGPUMapBuffer(webgpu_src_buffer->upload_staging, PULSE_MAP_WRITE, &write_map))
+		{
+			memcpy(write_map, read_map, src->buffer->size);
+			WebGPUUnmapBuffer(src->buffer);
+			WebGPUUnmapBuffer(webgpu_src_buffer->upload_staging);
+		}
+		WebGPUBuffer* webgpu_staging_src_buffer = WEBGPU_RETRIEVE_DRIVER_DATA_AS(webgpu_src_buffer->upload_staging, WebGPUBuffer*);
+		buffer = webgpu_staging_src_buffer->buffer;
+	}
+	else
+		buffer = webgpu_src_buffer->buffer;
+
 	if(bytes_per_row >= 256 && bytes_per_row % 256 == 0)
 	{
 		WGPUTexelCopyBufferInfo buffer_copy_info = { 0 };
-		buffer_copy_info.buffer = webgpu_src_buffer->buffer;
+		buffer_copy_info.buffer = buffer;
 		buffer_copy_info.layout = layout;
 		wgpuCommandEncoderCopyBufferToTexture(webgpu_cmd->encoder, &buffer_copy_info, &texture_copy_info, &extent);
 	}
 	else
-		wgpuQueueWriteTexture(webgpu_device->queue, &texture_copy_info, webgpu_src_buffer->buffer, src->size, &layout, &extent);
+		wgpuQueueWriteTexture(webgpu_device->queue, &texture_copy_info, buffer, src->size, &layout, &extent);
 
 	return true;
 }
@@ -209,6 +264,8 @@ void WebGPUDestroyBuffer(PulseDevice device, PulseBuffer buffer)
 {
 	PULSE_UNUSED(device);
 	WebGPUBuffer* webgpu_buffer = WEBGPU_RETRIEVE_DRIVER_DATA_AS(buffer, WebGPUBuffer*);
+	if(webgpu_buffer->upload_staging != PULSE_NULL_HANDLE)
+		WebGPUDestroyBuffer(device, webgpu_buffer->upload_staging);
 	wgpuBufferRelease(webgpu_buffer->buffer);
 	free(webgpu_buffer);
 	free(buffer);

@@ -153,6 +153,7 @@ PulseImage WebGPUCreateImage(PulseDevice device, const PulseImageCreateInfo* cre
 		return PULSE_NULL_HANDLE;
 	}
 
+	image->driver_data = webgpu_image;
 	return image;
 }
 

@@ -16,6 +16,8 @@ typedef struct WebGPUBuffer
 	WGPUBuffer buffer;
 	void* map;
 	PulseMapMode current_map_mode;
+	PulseBuffer upload_staging;
+	bool needs_staging_upload;
 } WebGPUBuffer;
 
 PulseBuffer WebGPUCreateBuffer(PulseDevice device, const PulseBufferCreateInfo* create_infos);
