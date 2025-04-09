@@ -211,7 +211,7 @@ bool WebGPUCopyBufferToImage(PulseCommandList cmd, const PulseBufferRegion* src,
 
 	WGPUTexelCopyTextureInfo texture_copy_info = { 0 };
 	texture_copy_info.texture = webgpu_dst_image->texture;
-	texture_copy_info.mipLevel = 1;
+	texture_copy_info.mipLevel = 0;
 	texture_copy_info.aspect = WGPUTextureAspect_All;
 	texture_copy_info.origin.x = dst->x;
 	texture_copy_info.origin.y = dst->y;

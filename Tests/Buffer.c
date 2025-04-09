@@ -239,11 +239,11 @@ void TestBufferCopyImage()
 		PulseImageRegion dst_region = { 0 };
 		dst_region.image = image;
 		dst_region.width = 8;
-		dst_region.height = 1;
-		dst_region.depth = 1;
-		dst_region.x = 1;
+		dst_region.height = 0;
+		dst_region.depth = 0;
+		dst_region.x = 0;
 		dst_region.y = 1;
-		dst_region.z = 1;
+		dst_region.z = 0;
 		dst_region.layer = 1;
 
 		TEST_ASSERT_TRUE_MESSAGE(PulseCopyBufferToImage(cmd, &src_region, &dst_region), PulseVerbaliseErrorType(PulseGetLastErrorType()));

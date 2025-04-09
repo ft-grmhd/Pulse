@@ -98,3 +98,45 @@ uint32_t PulseHashCombine(uint32_t lhs, uint32_t rhs)
 	lhs ^= rhs + 0x9e3779b9 + (lhs << 6) + (lhs >> 2);
 	return lhs;
 }
+
+size_t PulseStrlcpy(char* dst, const char* src, size_t maxlen)
+{
+	size_t srclen = strlen(src);
+	if(maxlen > 0)
+	{
+		size_t len = (srclen < maxlen - 1 ? srclen : maxlen - 1);
+		memcpy(dst, src, len);
+		dst[len] = '\0';
+	}
+	return srclen;
+}
+
+char* PulseStrtokR(char* str, const char* delim, char** saveptr)
+{
+	if(str != PULSE_NULLPTR)
+		*saveptr = str;
+	else if(*saveptr == PULSE_NULLPTR)
+		return PULSE_NULLPTR;
+	char* token = strtok(*saveptr, delim);
+	if(token != PULSE_NULLPTR)
+		*saveptr = PULSE_NULLPTR;
+	return token;
+}
+
+static int isspace(int x)
+{
+	return ((x) == ' ') || ((x) == '\t') || ((x) == '\r') || ((x) == '\n') || ((x) == '\f') || ((x) == '\v');
+}
+
+void PulseTrimString(char* str)
+{
+	char* start = str;
+	while(*start && isspace((unsigned char)*start))
+		start++;
+	char* end = start + strlen(start) - 1;
+	while(end > start && isspace((unsigned char)*end))
+		end--;
+	*(end + 1) = '\0';
+	if(start != str)
+		memmove(str, start, end - start + 2);
+}

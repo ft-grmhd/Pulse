@@ -192,6 +192,10 @@ void PulseSetInternalError(PulseErrorType error);
 uint32_t PulseHashString(const char* str);
 uint32_t PulseHashCombine(uint32_t lhs, uint32_t rhs);
 
+size_t PulseStrlcpy(char* dst, const char* src, size_t maxlen);
+char* PulseStrtokR(char* str, const char* delim, char** saveptr);
+void PulseTrimString(char* str);
+
 void PulseLogBackend(PulseBackend backend, PulseDebugMessageSeverity type, const char* message, const char* file, const char* function, int line, ...);
 
 #define PulseLogError(backend, msg) PulseLogBackend(backend, PULSE_DEBUG_MESSAGE_SEVERITY_ERROR, msg, __FILE__, __FUNCTION__, __LINE__)

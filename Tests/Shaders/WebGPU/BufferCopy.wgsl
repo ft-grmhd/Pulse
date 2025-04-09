@@ -1,4 +1,4 @@
-@group(0) @binding(0) var<storage, read_only> read_ssbo: array<u32>;
+@group(0) @binding(0) var<storage, read> read_ssbo: array<u32>;
 @group(1) @binding(0) var<storage, read_write> write_ssbo: array<u32>;
 
 @compute @workgroup_size(16, 16, 1)

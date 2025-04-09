@@ -121,9 +121,9 @@ PulseImage WebGPUCreateImage(PulseDevice device, const PulseImageCreateInfo* cre
 
 	descriptor.usage = 0;
 	if(create_infos->usage & PULSE_IMAGE_USAGE_STORAGE_READ)
-		descriptor.usage |= WGPUTextureUsage_StorageBinding | WGPUTextureUsage_CopyDst;
-	if(create_infos->usage & PULSE_IMAGE_USAGE_STORAGE_WRITE)
 		descriptor.usage |= WGPUTextureUsage_StorageBinding | WGPUTextureUsage_CopySrc;
+	if(create_infos->usage & PULSE_IMAGE_USAGE_STORAGE_WRITE)
+		descriptor.usage |= WGPUTextureUsage_StorageBinding | WGPUTextureUsage_CopyDst;
 	if(create_infos->usage & PULSE_IMAGE_USAGE_STORAGE_SIMULTANEOUS_READWRITE)
 		descriptor.usage |= WGPUTextureUsage_StorageBinding | WGPUTextureUsage_CopySrc | WGPUTextureUsage_CopyDst;
 
@@ -224,7 +224,7 @@ bool WebGPUCopyImageToBuffer(PulseCommandList cmd, const PulseImageRegion* src, 
 
 	WGPUTexelCopyTextureInfo texture_copy_info = { 0 };
 	texture_copy_info.texture = webgpu_src_image->texture;
-	texture_copy_info.mipLevel = 1;
+	texture_copy_info.mipLevel = 0;
 	texture_copy_info.aspect = WGPUTextureAspect_All;
 	texture_copy_info.origin.x = src->x;
 	texture_copy_info.origin.y = src->y;
