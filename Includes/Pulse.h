@@ -42,6 +42,7 @@ typedef enum PulseBackendBits
 	PULSE_BACKEND_SOFTWARE  = PULSE_BIT(6),
 	PULSE_BACKEND_OPENGL    = PULSE_BIT(7),
 	PULSE_BACKEND_OPENGL_ES = PULSE_BIT(8),
+	PULSE_BACKEND_D3D11     = PULSE_BIT(9),
 } PulseBackendBits;
 typedef PulseFlags PulseBackendFlags;
 
@@ -75,6 +76,7 @@ typedef enum PulseShaderFormatsBits
 	PULSE_SHADER_FORMAT_METALLIB_BIT = PULSE_BIT(3), // Can be used by Metal backend
 	PULSE_SHADER_FORMAT_WGSL_BIT     = PULSE_BIT(4), // Can be used by WebGPU backend
 	PULSE_SHADER_FORMAT_GLSL_BIT     = PULSE_BIT(5), // Can be used by OpenGL / OpenGL_ES backend
+	PULSE_SHADER_FORMAT_DXBC_BIT      = PULSE_BIT(6), // Can be used by D3D11 backend
 	// More to come
 } PulseShaderFormatsBits;
 typedef PulseFlags PulseShaderFormatsFlags;

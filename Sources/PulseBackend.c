@@ -23,6 +23,9 @@
 #ifdef PULSE_ENABLE_OPENGL_BACKEND
 	#include "Backends/OpenGL/OpenGL.h"
 #endif
+#ifdef PULSE_ENABLE_D3D11_BACKEND
+	#include "Backends/D3D11/D3D11.h"
+#endif
 
 // Ordered by default preference
 static const PulseCheckBackendSupportPFN backends_supports[] = {
@@ -34,6 +37,9 @@ static const PulseCheckBackendSupportPFN backends_supports[] = {
 	#endif
 	#ifdef PULSE_ENABLE_WEBGPU_BACKEND
 		WebGPUCheckSupport,
+	#endif
+	#ifdef PULSE_ENABLE_D3D11_BACKEND
+		PuD3D11CheckSupport,
 	#endif
 	#ifdef PULSE_ENABLE_OPENGL_BACKEND
 		OpenGLCheckSupport,
@@ -114,6 +120,9 @@ static PulseBackend PulseGetBackendFromFlag(PulseBackendBits flag)
 		#endif
 		#ifdef PULSE_ENABLE_WEBGPU_BACKEND
 			case PULSE_BACKEND_WEBGPU: return &WebGPUDriver;
+		#endif
+		#ifdef PULSE_ENABLE_D3D11_BACKEND
+			case PULSE_BACKEND_D3D11: return &D3D11Driver;
 		#endif
 		#ifdef PULSE_ENABLE_OPENGL_BACKEND
 			case PULSE_BACKEND_OPENGL: return &OpenGLDriver;

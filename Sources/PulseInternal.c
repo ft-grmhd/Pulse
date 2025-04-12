@@ -123,7 +123,7 @@ char* PulseStrtokR(char* str, const char* delim, char** saveptr)
 	return token;
 }
 
-static int isspace(int x)
+static int PulseIsSpace(int x)
 {
 	return ((x) == ' ') || ((x) == '\t') || ((x) == '\r') || ((x) == '\n') || ((x) == '\f') || ((x) == '\v');
 }
@@ -131,10 +131,10 @@ static int isspace(int x)
 void PulseTrimString(char* str)
 {
 	char* start = str;
-	while(*start && isspace((unsigned char)*start))
+	while(*start && PulseIsSpace((unsigned char)*start))
 		start++;
 	char* end = start + strlen(start) - 1;
-	while(end > start && isspace((unsigned char)*end))
+	while(end > start && PulseIsSpace((unsigned char)*end))
 		end--;
 	*(end + 1) = '\0';
 	if(start != str)

@@ -14,4 +14,7 @@ if has_config("examples") then
 	if has_config("software") then
 		includes("Software/xmake.lua")
 	end
+	if has_config("d3d11") then
+		includes("D3D11/xmake.lua")
+	end
 end

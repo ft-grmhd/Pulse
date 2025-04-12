@@ -83,6 +83,14 @@ extern "C" {
 	#define PULSE_API
 #endif
 
+#ifdef PULSE_COMPILER_MSVC
+	#define PULSE_IMPORT_API __declspec(dllimport)
+#elif defined(PULSE_COMPILER_MINGW)
+	#define PULSE_IMPORT_API __attribute__((dllimport))
+#else
+	#define PULSE_IMPORT_API
+#endif
+
 #ifndef __cplusplus // if we compile in C
 	#ifdef __STDC__
 		#ifdef __STDC_VERSION__

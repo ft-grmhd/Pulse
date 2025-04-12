@@ -11,6 +11,10 @@
 #include "PulseDefs.h"
 #include "PulseEnums.h"
 
+#ifdef PULSE_COMPILER_MINGW
+	#include <minwindef.h>
+#endif
+
 #define PULSE_MAX_READ_TEXTURES_BOUND    8
 #define PULSE_MAX_READ_BUFFERS_BOUND     8
 #define PULSE_MAX_WRITE_TEXTURES_BOUND   8
@@ -222,5 +226,8 @@ void PulseLogBackend(PulseBackend backend, PulseDebugMessageSeverity type, const
 	extern PulseBackendHandler OpenGLDriver;
 	extern PulseBackendHandler OpenGLESDriver;
 #endif // PULSE_ENABLE_OPENGL_BACKEND
+#ifdef PULSE_ENABLE_D3D11_BACKEND
+	extern PulseBackendHandler D3D11Driver;
+#endif // PULSE_ENABLE_D3D11_BACKEND
 
 #endif // PULSE_INTERNAL_H_
