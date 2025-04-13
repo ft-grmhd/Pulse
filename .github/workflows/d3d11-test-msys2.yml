@@ -22,13 +22,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, "windows-latest"]
+        msystem: [mingw64]
+        os: [windows-latest]
         arch: [x86_64]
-        confs:
-        - { mode: debug, archive: yes }
+        mode: [debug]
 
     runs-on: ${{ matrix.os }}
     if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
+
+    defaults:
+      run:
+        shell: msys2 {0}
 
     steps:
     - name: Get current date as package key
@@ -37,6 +41,13 @@ jobs:
 
     - name: Checkout repository
       uses: actions/checkout@v4
+
+    # Setup MSYS2
+    - uses: msys2/setup-msys2@v2
+      with:
+        msystem: ${{ matrix.msystem }}
+        install: base-devel git unzip p7zip mingw-w64-${{ matrix.arch }}-toolchain mingw-w64-${{ matrix.arch }}-xmake
+        update: true
 
     # Force xmake to a specific folder (for cache)
     - name: Set xmake env
