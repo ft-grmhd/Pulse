@@ -43,7 +43,7 @@
 
 #if defined _MSC_VER && defined __STDC_NO_ATOMICS__ && __STDC_VERSION__ >= 201112L
 
-#undef __STDC_NO_ATOMICS__
+#define ATOMICS_OVERLOAD
 
 #define __concat2(x,y) x ## y
 #define __concat3(x,y,z) x ## y ## z
