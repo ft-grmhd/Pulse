@@ -1,4 +1,4 @@
-name: D3D11-Unit-Tests
+name: D3D11
 
 on:
   pull_request:

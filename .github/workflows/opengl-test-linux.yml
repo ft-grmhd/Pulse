@@ -1,4 +1,4 @@
-name: OpenGL-Unit-Tests
+name: OpenGL
 
 on:
   pull_request:

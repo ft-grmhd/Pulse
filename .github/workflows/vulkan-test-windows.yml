@@ -1,4 +1,4 @@
-name: Vulkan-Unit-Tests
+name: Vulkan
 
 on:
   pull_request:
