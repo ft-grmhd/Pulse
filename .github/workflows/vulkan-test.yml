@@ -39,6 +39,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Detect if running in act
+      if: runner.os == 'ubuntu-latest'
       run: |
         if grep -q "act" <<< "$GITHUB_ACTOR"; then
           echo "XMAKE_ROOT=y" >> $GITHUB_ENV
