@@ -8,13 +8,14 @@
 Pulse is a low level GPGPU library designed for highly intensive general GPU computations with high control over the hardware. It is built on top of Vulkan. A Metal and WebGPU backends are in development.
 
 Unit tests map:
-|           | Linux | Windows | Msys2 (MinGW64) | macOS
- ---------- | ----- | ------- | --------------- | -----
-Vulkan      | ![test](https://github.com/ft-grmhd/Pulse/actions/workflows/vulkan-test-linux.yml/badge.svg) | ![test](https://github.com/ft-grmhd/Pulse/actions/workflows/vulkan-test-windows.yml/badge.svg) | ❌ | ❌
-OpenGL      | ![test](https://github.com/ft-grmhd/Pulse/actions/workflows/opengl-test-linux.yml/badge.svg) | ![test](https://github.com/ft-grmhd/Pulse/actions/workflows/opengl-test-windows.yml/badge.svg) | ❌ | ❌
-OpenGL ES   | ![test](https://github.com/ft-grmhd/Pulse/actions/workflows/opengl-es-test-linux.yml/badge.svg) | ![test](https://github.com/ft-grmhd/Pulse/actions/workflows/opengl-es-test-windows.yml/badge.svg) | ❌ | ❌
-D3D11       | ❌ | ![test](https://github.com/ft-grmhd/Pulse/actions/workflows/d3d11-test-windows.yml/badge.svg) | ![test](https://github.com/ft-grmhd/Pulse/actions/workflows/d3d11-test-msys2.yml/badge.svg) | ❌
-Software    | ![test](https://github.com/ft-grmhd/Pulse/actions/workflows/software-test-linux.yml/badge.svg) | ![test](https://github.com/ft-grmhd/Pulse/actions/workflows/software-test-windows.yml/badge.svg) | ![test](https://github.com/ft-grmhd/Pulse/actions/workflows/software-test-msys2.yml/badge.svg) | ![test](https://github.com/ft-grmhd/Pulse/actions/workflows/software-test-macos.yml/badge.svg)
+|           | Linux | Windows | Msys2 (MinGW64) | macOS |
+|-----------|-------|---------|-----------------|-------|
+| Vulkan    | [![test](https://github.com/ft-grmhd/Pulse/actions/workflows/vulkan-test-linux.yml/badge.svg)](https://github.com/ft-grmhd/Pulse/actions/workflows/vulkan-test-linux.yml) | [![test](https://github.com/ft-grmhd/Pulse/actions/workflows/vulkan-test-windows.yml/badge.svg)](https://github.com/ft-grmhd/Pulse/actions/workflows/vulkan-test-windows.yml) | ❌ | ❌ |
+| OpenGL    | [![test](https://github.com/ft-grmhd/Pulse/actions/workflows/opengl-test-linux.yml/badge.svg)](https://github.com/ft-grmhd/Pulse/actions/workflows/opengl-test-linux.yml) | [![test](https://github.com/ft-grmhd/Pulse/actions/workflows/opengl-test-windows.yml/badge.svg)](https://github.com/ft-grmhd/Pulse/actions/workflows/opengl-test-windows.yml) | ❌ | ❌ |
+| OpenGL ES | [![test](https://github.com/ft-grmhd/Pulse/actions/workflows/opengl-es-test-linux.yml/badge.svg)](https://github.com/ft-grmhd/Pulse/actions/workflows/opengl-es-test-linux.yml) | [![test](https://github.com/ft-grmhd/Pulse/actions/workflows/opengl-es-test-windows.yml/badge.svg)](https://github.com/ft-grmhd/Pulse/actions/workflows/opengl-es-test-windows.yml) | ❌ | ❌ |
+| D3D11     | ❌ | [![test](https://github.com/ft-grmhd/Pulse/actions/workflows/d3d11-test-windows.yml/badge.svg)](https://github.com/ft-grmhd/Pulse/actions/workflows/d3d11-test-windows.yml) | [![test](https://github.com/ft-grmhd/Pulse/actions/workflows/d3d11-test-msys2.yml/badge.svg)](https://github.com/ft-grmhd/Pulse/actions/workflows/d3d11-test-msys2.yml) | ❌ |
+| Software  | [![test](https://github.com/ft-grmhd/Pulse/actions/workflows/software-test-linux.yml/badge.svg)](https://github.com/ft-grmhd/Pulse/actions/workflows/software-test-linux.yml) | [![test](https://github.com/ft-grmhd/Pulse/actions/workflows/software-test-windows.yml/badge.svg)](https://github.com/ft-grmhd/Pulse/actions/workflows/software-test-windows.yml) | [![test](https://github.com/ft-grmhd/Pulse/actions/workflows/software-test-msys2.yml/badge.svg)](https://github.com/ft-grmhd/Pulse/actions/workflows/software-test-msys2.yml) | [![test](https://github.com/ft-grmhd/Pulse/actions/workflows/software-test-macos.yml/badge.svg)](https://github.com/ft-grmhd/Pulse/actions/workflows/software-test-macos.yml) |
+
 
 ```cpp
 #include <Pulse.h>
