@@ -13,6 +13,7 @@
 
 typedef struct SoftImage
 {
+	int dummy;
 } SoftImage;
 
 PulseImage SoftCreateImage(PulseDevice device, const PulseImageCreateInfo* create_infos);
