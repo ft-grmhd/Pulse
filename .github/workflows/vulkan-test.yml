@@ -38,6 +38,12 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Detect if running in act
+      run: |
+        if grep -q "act" <<< "$GITHUB_ACTOR"; then
+          echo "XMAKE_ROOT=y" >> $GITHUB_ENV
+        fi
+
     - uses: NcStudios/VulkanCI@v1.0
 
     # Force xmake to a specific folder (for cache)
@@ -70,7 +76,7 @@ jobs:
 
     # Setup compilation mode and install project dependencies
     - name: Configure xmake and install dependencies
-      run: xmake config --arch=${{ matrix.arch }} --mode=${{ matrix.confs.mode }} ${{ matrix.confs.config }} --ccache=n --unitybuild=y --yes
+      run: xmake config --vulkan-tests=y --arch=${{ matrix.arch }} --mode=${{ matrix.confs.mode }} ${{ matrix.confs.config }} --ccache=n --unitybuild=y --yes
 
     # Save dependencies
     - name: Save cached xmake dependencies
@@ -88,8 +94,7 @@ jobs:
         path: assets
         key: assets-${{ hashFiles('assets/examples_version.txt', 'assets/unittests_version.txt') }}
 
-    - name: Test
+    - name: Test Vulkan
       run: |
-        xmake config --vulkan-tests=y --arch=${{ matrix.arch }} --mode=${{ matrix.confs.mode }} ${{ matrix.confs.config }} --ccache=n --unitybuild=y --yes
         xmake build --yes VulkanUnitTests
         xmake run --yes VulkanUnitTests

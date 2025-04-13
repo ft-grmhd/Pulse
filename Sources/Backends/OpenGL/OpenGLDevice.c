@@ -225,7 +225,7 @@ PulseDevice OpenGLCreateDevice(PulseBackend backend, PulseDevice* forbiden_devic
 
 	#ifdef PULSE_PLAT_WINDOWS
 		// WGL support
-		if(opengl_device->context_type == OPENGL_CONTEXT_WGL)
+		if(false)
 		{
 			// TODO: WGL
 			device->context_type = OPENGL_CONTEXT_WGL;

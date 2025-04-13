@@ -9,6 +9,10 @@
 #ifndef PULSE_OPENGL_H_
 #define PULSE_OPENGL_H_
 
+#ifdef __STDC_NO_ATOMICS__
+	#error "Atomic support is not present"
+#endif
+
 #define OPENGL_RETRIEVE_DRIVER_DATA_AS(handle, cast) ((cast)handle->driver_data)
 
 #include "OpenGLEnums.h"

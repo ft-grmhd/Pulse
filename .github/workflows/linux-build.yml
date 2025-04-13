@@ -34,6 +34,12 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Detect if running in act
+      run: |
+        if grep -q "act" <<< "$GITHUB_ACTOR"; then
+          echo "XMAKE_ROOT=y" >> $GITHUB_ENV
+        fi
+
     - uses: NcStudios/VulkanCI@v1.0
 
     # Install system dependencies
