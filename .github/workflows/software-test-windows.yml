@@ -23,7 +23,6 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest]
-        arch: [x86_64]
         arch: [x64]
         mode: [debug]
 

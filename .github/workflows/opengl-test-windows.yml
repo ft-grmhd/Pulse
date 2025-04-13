@@ -10,7 +10,7 @@ on:
       - '.github/workflows/linux-build.yml'
       - '.github/workflows/d3d11-test.yml'
       - '.github/workflows/vulkan-test.yml'
-      - '.github/workflows/opengl-es--test.yml'
+      - '.github/workflows/opengl-es-test.yml'
       - '.github/workflows/software-test.yml'
       - '.gitignore'
       - 'LICENSE'
@@ -23,7 +23,6 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest]
-        arch: [x86_64]
         arch: [x64]
         mode: [debug]
 
