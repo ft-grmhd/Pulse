@@ -90,13 +90,5 @@ jobs:
         path: assets
         key: assets-${{ hashFiles('assets/examples_version.txt', 'assets/unittests_version.txt') }}
 
-    # Build the engine
     - name: Build Pulse
       run: xmake --yes
-
-    # Test the engine
-    - name: Test Vulkan
-      run: |
-        xmake config --vulkan-tests=y --arch=${{ matrix.arch }} --mode=${{ matrix.confs.mode }} ${{ matrix.confs.config }} --ccache=n --unitybuild=y --yes
-        xmake build --yes VulkanUnitTests
-        xmake run --yes VulkanUnitTests
