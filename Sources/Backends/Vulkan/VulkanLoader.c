@@ -51,6 +51,7 @@ bool VulkanInitLoader()
 		};
 	#else
 		const char* libnames[] = {
+			"/home/kbz8/Documents/SwiftShader/build/bin/libvulkan.so.1",
 			"libvulkan.so.1",
 			"libvulkan.so"
 		};

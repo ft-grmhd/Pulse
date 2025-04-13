@@ -448,13 +448,11 @@ void VulkanDestroyDescriptorSetPool(VulkanDescriptorSetPool* pool)
 	{
 		if(pool->used_sets[i] != PULSE_NULLPTR)
 		{
-			vulkan_device->vkDestroyDescriptorSetLayout(vulkan_device->device, pool->used_sets[i]->layout->layout, PULSE_NULLPTR);
 			free(pool->used_sets[i]);
 			pool->used_sets[i] = PULSE_NULLPTR;
 		}
 		if(pool->free_sets[i] != PULSE_NULLPTR)
 		{
-			vulkan_device->vkDestroyDescriptorSetLayout(vulkan_device->device, pool->free_sets[i]->layout->layout, PULSE_NULLPTR);
 			free(pool->free_sets[i]);
 			pool->free_sets[i] = PULSE_NULLPTR;
 		}
