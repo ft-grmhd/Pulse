@@ -31,6 +31,7 @@ jobs:
     steps:
     - name: Get current date as package key
       id: cache_key
+      shell: bash
       run: echo "key=$(date +'%W')" >> $GITHUB_OUTPUT
 
     - name: Checkout repository
