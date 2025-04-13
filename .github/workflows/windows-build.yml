@@ -4,9 +4,8 @@ on:
   pull_request:
   push:
     paths-ignore:
-      - '.github/workflows/linux-build.yml'
-      - '.github/workflows/macos-build.yml'
-      - '.github/workflows/wasm-build.yml'
+      - '.github/workflows/*.yml'
+      - '!.github/workflows/windows-build.yml'
       - '.gitignore'
       - 'LICENSE'
       - 'README.md'
