@@ -23,6 +23,8 @@ int main(void)
 	PulseBackend backend = PulseLoadBackend(PULSE_BACKEND_D3D11, PULSE_SHADER_FORMAT_DXBC_BIT, PULSE_HIGH_DEBUG);
 	PulseSetDebugCallback(backend, DebugCallBack);
 	PulseDevice device = PulseCreateDevice(backend, NULL, 0);
+
+	PulseDestroyDevice(device);
 	PulseUnloadBackend(backend);
 	puts("Successfully executed Pulse example using D3D11 !");
 	return 0;

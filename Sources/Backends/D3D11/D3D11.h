@@ -8,13 +8,14 @@
 #define PULSE_D3D11_H_
 
 #include <d3d11.h>
+#include <d3d11_1.h>
 #include <dxgi.h>
 
 #include "../../PulseInternal.h"
 
 #define D3D11_RETRIEVE_DRIVER_DATA_AS(handle, cast) ((cast)handle->driver_data)
 
-PulseBackendFlags PuD3D11CheckSupport(PulseBackendFlags candidates, PulseShaderFormatsFlags shader_formats_used); // Return PULSE_BACKEND_D3D11 in case of success and PULSE_BACKEND_INVALID otherwise
+PulseBackendFlags Direct3D11CheckSupport(PulseBackendFlags candidates, PulseShaderFormatsFlags shader_formats_used); // Return PULSE_BACKEND_D3D11 in case of success and PULSE_BACKEND_INVALID otherwise
 
 #endif // PULSE_D3D11_H_
 

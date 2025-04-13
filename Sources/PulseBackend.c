@@ -39,7 +39,7 @@ static const PulseCheckBackendSupportPFN backends_supports[] = {
 		WebGPUCheckSupport,
 	#endif
 	#ifdef PULSE_ENABLE_D3D11_BACKEND
-		PuD3D11CheckSupport,
+		Direct3D11CheckSupport,
 	#endif
 	#ifdef PULSE_ENABLE_OPENGL_BACKEND
 		OpenGLCheckSupport,

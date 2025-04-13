@@ -128,8 +128,7 @@ PulseDevice VulkanCreateDevice(PulseBackend backend, PulseDevice* forbiden_devic
 
 	const float queue_priority = 1.0f;
 
-	VkDeviceQueueCreateInfo queue_create_infos[VULKAN_QUEUE_END_ENUM * sizeof(VkDeviceQueueCreateInfo)] = { 0 };
-	// No need to check allocation, it is allocated on the stack
+	VkDeviceQueueCreateInfo queue_create_infos[VULKAN_QUEUE_END_ENUM] = { 0 };
 
 	uint32_t unique_queues_count = 1;
 
