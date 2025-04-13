@@ -5,7 +5,7 @@ on:
   push:
     paths-ignore:
       - '.github/workflows/*.yml'
-      - '!.github/workflows/vulkan-test-windows.yml'
+      - '!.github/workflows/webgpu-test-windows.yml'
       - '.gitignore'
       - 'LICENSE'
       - 'CHANGELOG.md'
