@@ -28,6 +28,7 @@ local backends = {
 			if not is_plat("wasm") then
 				add_packages("wgpu-native")
 			end
+			add_cxflags("cl::/experimental:c11atomics")
 		end
 	},
 	D3D11 = {
@@ -45,7 +46,10 @@ local backends = {
 	Software = {
 		option = "software",
 		default = true,
-		packages = { "spirv-vm", "cpuinfo", "spirv-reflect" }
+		packages = { "spirv-vm", "cpuinfo", "spirv-reflect" },
+		custom = function()
+			add_cxflags("cl::/experimental:c11atomics")
+		end
 	},
 	OpenGL = {
 		option = "opengl",

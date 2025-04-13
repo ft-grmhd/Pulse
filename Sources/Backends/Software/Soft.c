@@ -7,7 +7,7 @@
 #include <Pulse.h>
 #include "../../PulseInternal.h"
 
-#if defined(__STDC_NO_ATOMICS__) && !defined(ATOMICS_OVERLOAD)
+#ifdef __STDC_NO_ATOMICS__
 	#error "Atomic support is not present"
 #endif
 

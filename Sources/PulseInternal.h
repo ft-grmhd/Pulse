@@ -15,10 +15,6 @@
 	#include <minwindef.h>
 #endif
 
-#ifdef PULSE_COMPILER_MSVC
-	#include "MsvcAtomicsCompat.h"
-#endif
-
 #define PULSE_MAX_READ_TEXTURES_BOUND    8
 #define PULSE_MAX_READ_BUFFERS_BOUND     8
 #define PULSE_MAX_WRITE_TEXTURES_BOUND   8
