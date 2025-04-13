@@ -31,6 +31,20 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Download Mesa
+      run: |
+        curl -LO https://github.com/pal1000/mesa-dist-win/releases/download/23.3.1/mesa3d-23.3.1-release-msvc.7z
+        7z x mesa3d-23.3.1-release-msvc.7z -omesa
+
+    - name: Set Mesa in PATH
+      run: echo "$env:GITHUB_WORKSPACE\\mesa\\x64" | Out-File -Append -FilePath $env:GITHUB_PATH    
+
+    - name: Set Mesa env
+      run: |
+        echo "LIBGL_ALWAYS_SOFTWARE=1" >> $env:GITHUB_ENV
+        echo "MESA_GL_VERSION_OVERRIDE=4.3" >> $env:GITHUB_ENV
+        echo "MESA_GLES_VERSION_OVERRIDE=3.2" >> $env:GITHUB_ENV
+
     # Force xmake to a specific folder (for cache)
     - name: Set xmake env
       run: echo "XMAKE_GLOBALDIR=${{ runner.workspace }}/xmake-global" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
