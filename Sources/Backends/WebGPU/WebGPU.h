@@ -9,10 +9,6 @@
 #ifndef PULSE_WEBGPU_H_
 #define PULSE_WEBGPU_H_
 
-#ifdef __STDC_NO_ATOMICS__
-	#error "Atomic support is not present"
-#endif
-
 #include <webgpu/webgpu.h>
 
 #define WEBGPU_RETRIEVE_DRIVER_DATA_AS(handle, cast) ((cast)handle->driver_data)

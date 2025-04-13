@@ -5,6 +5,10 @@
 #include <Pulse.h>
 #include "../../PulseInternal.h"
 
+#ifdef __STDC_NO_ATOMICS__
+	#error "Atomic support is not present"
+#endif
+
 #include "WebGPU.h"
 #include "WebGPUDevice.h"
 
