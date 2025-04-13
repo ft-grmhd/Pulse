@@ -1,4 +1,4 @@
-name: OpenGL-ES-Unit-Tests
+name: Software-Unit-Tests
 
 on:
   pull_request:
@@ -11,7 +11,7 @@ on:
       - '.github/workflows/d3d11-test.yml'
       - '.github/workflows/vulkan-test.yml'
       - '.github/workflows/opengl-test.yml'
-      - '.github/workflows/software-test.yml'
+      - '.github/workflows/opengl-es-test.yml'
       - '.gitignore'
       - 'LICENSE'
       - 'CHANGELOG.md'
@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, "windows-latest"]
+        os: [ubuntu-latest]
         arch: [x86_64]
         confs:
         - { mode: debug, archive: yes }
@@ -92,8 +92,3 @@ jobs:
         path: assets
         key: assets-${{ hashFiles('assets/examples_version.txt', 'assets/unittests_version.txt') }}
 
-    - name: Test
-      run: |
-        xmake config --opengl-es-tests=y --arch=${{ matrix.arch }} --mode=${{ matrix.confs.mode }} ${{ matrix.confs.config }} --ccache=n --unitybuild=y --yes
-        xmake build --yes OpenGLESUnitTests
-        xmake run --yes OpenGLESUnitTests

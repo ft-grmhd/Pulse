@@ -1,4 +1,4 @@
-name: Vulkan-Unit-Tests
+name: Software-Unit-Tests
 
 on:
   pull_request:
@@ -9,9 +9,9 @@ on:
       - '.github/workflows/windows-build.yml'
       - '.github/workflows/linux-build.yml'
       - '.github/workflows/d3d11-test.yml'
+      - '.github/workflows/vulkan-test.yml'
       - '.github/workflows/opengl-test.yml'
-      - '.github/workflows/opengl-es--test.yml'
-      - '.github/workflows/software-test.yml'
+      - '.github/workflows/opengl-es-test.yml'
       - '.gitignore'
       - 'LICENSE'
       - 'CHANGELOG.md'
@@ -22,7 +22,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, "windows-latest"]
+        msystem: [mingw64]
+        os: [windows-latest]
         arch: [x86_64]
         confs:
         - { mode: debug, archive: yes }
@@ -39,13 +40,10 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Detect if running in act
-      if: runner.os == 'ubuntu-latest'
       run: |
         if grep -q "act" <<< "$GITHUB_ACTOR"; then
           echo "XMAKE_ROOT=y" >> $GITHUB_ENV
         fi
-
-    - uses: NcStudios/VulkanCI@v1.0
 
     # Force xmake to a specific folder (for cache)
     - name: Set xmake env
@@ -77,7 +75,7 @@ jobs:
 
     # Setup compilation mode and install project dependencies
     - name: Configure xmake and install dependencies
-      run: xmake config --vulkan-tests=y --arch=${{ matrix.arch }} --mode=${{ matrix.confs.mode }} ${{ matrix.confs.config }} --ccache=n --unitybuild=y --yes
+      run: xmake config --arch=${{ matrix.arch }} --mode=${{ matrix.confs.mode }} ${{ matrix.confs.config }} --ccache=n --unitybuild=y --yes
 
     # Save dependencies
     - name: Save cached xmake dependencies
@@ -95,7 +93,3 @@ jobs:
         path: assets
         key: assets-${{ hashFiles('assets/examples_version.txt', 'assets/unittests_version.txt') }}
 
-    - name: Test Vulkan
-      run: |
-        xmake build --yes VulkanUnitTests
-        xmake run --yes VulkanUnitTests

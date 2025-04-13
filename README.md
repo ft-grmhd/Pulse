@@ -7,13 +7,13 @@
 
 Pulse is a low level GPGPU library designed for highly intensive general GPU computations with high control over the hardware. It is built on top of Vulkan. A Metal and WebGPU backends are in development.
 
-Platform | Backend Status
------------- | -------------
-Windows | [![Windows build status](https://github.com/NazaraEngine/NazaraEngine/actions/workflows/windows-build.yml/badge.svg?branch=main)](https://github.com/NazaraEngine/NazaraEngine/actions/workflows/windows-build.yml)
-MSYS2 (MinGW64) | [![Windows build status](https://github.com/NazaraEngine/NazaraEngine/actions/workflows/msys2-build.yml/badge.svg?branch=main)](https://github.com/NazaraEngine/NazaraEngine/actions/workflows/msys2-build.yml)
-Linux | [![Linux build status](https://github.com/NazaraEngine/NazaraEngine/actions/workflows/linux-build.yml/badge.svg?branch=main)](https://github.com/NazaraEngine/NazaraEngine/actions/workflows/linux-build.yml)
-macOS | [![macOS build status](https://github.com/NazaraEngine/NazaraEngine/actions/workflows/macos-build.yml/badge.svg?branch=main)](https://github.com/NazaraEngine/NazaraEngine/actions/workflows/macos-build.yml)
-Emscripten | [![Emscripten build status](https://github.com/NazaraEngine/NazaraEngine/actions/workflows/wasm-build.yml/badge.svg?branch=main)](https://github.com/NazaraEngine/NazaraEngine/actions/workflows/wasm-build.yml)
+|           | Linux | Windows | Msys2 (MinGW64) | macOS
+ ---------- | ----- | ------- | --------------- | -----
+Vulkan      | [![Linux build](https://github.com/ft-grmhd/Pulse/actions/workflows/linux-build.yml/badge.svg)](https://github.com/ft-grmhd/Pulse/actions/workflows/linux-build.yml)  | NONE    | NONE            | NONE
+OpenGL      | [![Linux build](https://github.com/ft-grmhd/Pulse/actions/workflows/linux-build.yml/badge.svg)](https://github.com/ft-grmhd/Pulse/actions/workflows/linux-build.yml)  | NONE    | NONE            | NONE
+OpenGL ES   | [![Linux build](https://github.com/ft-grmhd/Pulse/actions/workflows/linux-build.yml/badge.svg)](https://github.com/ft-grmhd/Pulse/actions/workflows/linux-build.yml)  | NONE    | NONE            | NONE
+D3D11       | ❌  | NONE    | NONE            | NONE
+Software    | ![linux-software](https://github.com/ft-grmhd/Pulse/actions/workflows/software.yml/badge.svg) | NONE    | NONE            | NONE
 
 ```cpp
 #include <Pulse.h>
