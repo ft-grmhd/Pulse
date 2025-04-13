@@ -7,6 +7,7 @@
 
 Pulse is a low level GPGPU library designed for highly intensive general GPU computations with high control over the hardware. It is built on top of Vulkan. A Metal and WebGPU backends are in development.
 
+Unit tests map:
 |           | Linux | Windows | Msys2 (MinGW64) | macOS
  ---------- | ----- | ------- | --------------- | -----
 Vulkan      | ![test](https://github.com/ft-grmhd/Pulse/actions/workflows/vulkan-test-linux.yml/badge.svg) | ![test](https://github.com/ft-grmhd/Pulse/actions/workflows/vulkan-test-windows.yml/badge.svg) | ❌ | ❌
