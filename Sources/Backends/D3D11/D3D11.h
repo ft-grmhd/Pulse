@@ -7,6 +7,9 @@
 #ifndef PULSE_D3D11_H_
 #define PULSE_D3D11_H_
 
+#ifdef PULSE_PLAT_WINDOWS
+	#include <initguid.h>
+#endif
 #include <d3d11.h>
 #include <d3d11_1.h>
 #include <dxgi.h>
