@@ -41,14 +41,7 @@
 	#include <windows.h>
 	#include <dbghelp.h>
 
-	LONG WINAPI ExceptionHandler(EXCEPTION_POINTERS* ExceptionInfo)
-	{
-		fprintf(stderr, "Exception occurred!\n");
-		FollowStackTrace();
-		return EXCEPTION_EXECUTE_HANDLER;
-	}
-
-	void FollowStackTrace()
+	void PulseFollowStackTrace()
 	{
 		HANDLE process = GetCurrentProcess();
 		SymInitialize(process, NULL, TRUE);
@@ -82,6 +75,13 @@
 				fprintf(stderr, "[%d] (unable to resolve symbol)\n", i);
 		}
 		free(symbol);
+	}
+
+	LONG WINAPI ExceptionHandler(EXCEPTION_POINTERS* ExceptionInfo)
+	{
+		fprintf(stderr, "Exception occurred!\n");
+		PulseFollowStackTrace();
+		return EXCEPTION_EXECUTE_HANDLER;
 	}
 #endif
 
