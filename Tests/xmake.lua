@@ -206,6 +206,9 @@ for name, module in pairs(tests) do
 				add_defines("BACKTRACE")
 			elseif is_plat("windows") then
 				add_defines("WINTRACE")
+				add_cflags("/Zi")
+				add_ldflags("/DEBUG")
+				add_links("dbghelp")
 			end
 		target_end()
 	end

@@ -44,17 +44,17 @@
 	LONG WINAPI ExceptionHandler(EXCEPTION_POINTERS* ExceptionInfo)
 	{
 		fprintf(stderr, "Exception occurred!\n");
-		PrintStackTrace();
+		FollowStackTrace();
 		return EXCEPTION_EXECUTE_HANDLER;
 	}
 
-	void PrintStackTrace()
+	void FollowStackTrace()
 	{
-		// Initialize symbols
 		HANDLE process = GetCurrentProcess();
 		SymInitialize(process, NULL, TRUE);
 
-		// Capture stack backtrace
+		SymSetOptions(SYMOPT_LOAD_LINES | SYMOPT_UNDNAME);
+
 		void* stack[62];
 		USHORT frames = CaptureStackBackTrace(0, 62, stack, NULL);
 
@@ -62,12 +62,25 @@
 		symbol->MaxNameLen = 255;
 		symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
 
-		for(USHORT i = 0; i < frames; i++)
-		{
-			SymFromAddr(process, (DWORD64)(stack[i]), 0, symbol);
-			fprintf(stderr, "[%d] %s - 0x%0llX\n", i, symbol->Name, symbol->Address);
-		}
+		IMAGEHLP_LINE64 line;
+		DWORD displacement;
+		ZeroMemory(&line, sizeof(IMAGEHLP_LINE64));
+		line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
 
+		for (USHORT i = 0; i < frames; i++)
+		{
+			DWORD64 address = (DWORD64)(stack[i]);
+			if(SymFromAddr(process, address, 0, symbol))
+			{
+				fprintf(stderr, "[%d] %s - 0x%0llX", i, symbol->Name, symbol->Address);
+				if(SymGetLineFromAddr64(process, address, &displacement, &line))
+					fprintf(stderr, " (%s:%lu)\n", line.FileName, line.LineNumber);
+				else
+					fprintf(stderr, " (no file info)\n");
+			}
+			else
+				fprintf(stderr, "[%d] (unable to resolve symbol)\n", i);
+		}
 		free(symbol);
 	}
 #endif
