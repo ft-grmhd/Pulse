@@ -37,6 +37,41 @@
 	}
 #endif
 
+#ifdef WINTRACE
+	#include <windows.h>
+	#include <dbghelp.h>
+
+	LONG WINAPI ExceptionHandler(EXCEPTION_POINTERS* ExceptionInfo)
+	{
+		fprintf(stderr, "Exception occurred!\n");
+		PrintStackTrace();
+		return EXCEPTION_EXECUTE_HANDLER;
+	}
+
+	void PrintStackTrace()
+	{
+		// Initialize symbols
+		HANDLE process = GetCurrentProcess();
+		SymInitialize(process, NULL, TRUE);
+
+		// Capture stack backtrace
+		void* stack[62];
+		USHORT frames = CaptureStackBackTrace(0, 62, stack, NULL);
+
+		SYMBOL_INFO* symbol = (SYMBOL_INFO*)calloc(sizeof(SYMBOL_INFO) + 256 * sizeof(char), 1);
+		symbol->MaxNameLen = 255;
+		symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+
+		for(USHORT i = 0; i < frames; i++)
+		{
+			SymFromAddr(process, (DWORD64)(stack[i]), 0, symbol);
+			fprintf(stderr, "[%d] %s - 0x%0llX\n", i, symbol->Name, symbol->Address);
+		}
+
+		free(symbol);
+	}
+#endif
+
 extern void TestBackend();
 extern void TestDevice();
 extern void TestBuffer();
@@ -49,6 +84,10 @@ int main(void)
 		state = backtrace_create_state(NULL, 1, ErrorCallback, NULL);
 		signal(SIGSEGV, SignalHandler);
 		signal(SIGABRT, SignalHandler);
+	#endif
+
+	#ifdef WINTRACE
+		SetUnhandledExceptionFilter(ExceptionHandler);
 	#endif
 
 	UNITY_BEGIN();

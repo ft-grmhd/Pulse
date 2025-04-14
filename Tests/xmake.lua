@@ -204,6 +204,8 @@ for name, module in pairs(tests) do
 				add_packages("libbacktrace")
 				set_extension(".x86_64")
 				add_defines("BACKTRACE")
+			elseif is_plat("windows") then
+				add_defines("WINTRACE")
 			end
 		target_end()
 	end

@@ -12,13 +12,6 @@
 static PulseLibModule egl_lib_module = PULSE_NULL_LIB_MODULE;
 static uint32_t loader_references_count = 0;
 
-#define CheckEgl(instance)\
-	do { \
-		EGLint err = instance->eglGetError(); \
-		if(err != EGL_SUCCESS) \
-			fprintf(stderr, "EGL Error: 0x%04x at %s:%d\n", err, __FILE__, __LINE__); \
-	} while(0)
-
 static bool EGLLoadFunctions(EGLInstance* instance)
 {
 	#ifdef PULSE_PLAT_WINDOWS
@@ -31,6 +24,7 @@ static bool EGLLoadFunctions(EGLInstance* instance)
 			"libEGL.so"
 		};
 	#endif
+
 
 	for(size_t i = 0; i < sizeof(libnames) / sizeof(const char*); i++)
 	{
@@ -73,10 +67,8 @@ bool EGLLoadOpenGLContext(EGLInstance* instance, EGLDisplay* display, EGLDeviceE
 		*display = instance->eglGetPlatformDisplayEXT(EGL_PLATFORM_DEVICE_EXT, device, PULSE_NULLPTR);
 	else
 		*display = instance->eglGetDisplay(EGL_DEFAULT_DISPLAY);
-	CheckEgl(instance);
 	if(display == EGL_NO_DISPLAY || !instance->eglInitialize(*display, PULSE_NULLPTR, PULSE_NULLPTR))
 		return false;
-	CheckEgl(instance);
 
 	EGLint attribs[] = {
 		EGL_RENDERABLE_TYPE, es_context ? EGL_OPENGL_ES3_BIT : EGL_OPENGL_BIT,
@@ -85,16 +77,13 @@ bool EGLLoadOpenGLContext(EGLInstance* instance, EGLDisplay* display, EGLDeviceE
 	};
 	EGLint num_configs;
 	instance->eglChooseConfig(*display, attribs, config, 1, &num_configs);
-	CheckEgl(instance);
 	instance->eglBindAPI(es_context ? EGL_OPENGL_ES_API : EGL_OPENGL_API);
-	CheckEgl(instance);
 	EGLint pbufferAttribs[] = {
 		EGL_WIDTH, 1,
 		EGL_HEIGHT, 1,
 		EGL_NONE
 	};
 	*surface = instance->eglCreatePbufferSurface(*display, *config, pbufferAttribs);
-	CheckEgl(instance);
 	if(es_context)
 	{
 		EGLint ctx_attribs[] = {
@@ -102,7 +91,6 @@ bool EGLLoadOpenGLContext(EGLInstance* instance, EGLDisplay* display, EGLDeviceE
 			EGL_NONE
 		};
 		*context = instance->eglCreateContext(*display, *config, EGL_NO_CONTEXT, ctx_attribs);
-	CheckEgl(instance);
 	}
 	else
 	{
@@ -113,28 +101,20 @@ bool EGLLoadOpenGLContext(EGLInstance* instance, EGLDisplay* display, EGLDeviceE
 			EGL_NONE
 		};
 		*context = instance->eglCreateContext(*display, *config, EGL_NO_CONTEXT, ctx_attribs);
-	CheckEgl(instance);
 	}
 	if(*context == EGL_NO_CONTEXT)
 	{
 		instance->eglDestroySurface(*display, *surface);
-	CheckEgl(instance);
 		instance->eglTerminate(*display);
-	CheckEgl(instance);
 		return false;
 	}
 	if(!instance->eglMakeCurrent(*display, *surface, *surface, *context))
 	{
-	CheckEgl(instance);
 		instance->eglDestroySurface(*display, *surface);
-	CheckEgl(instance);
 		instance->eglDestroyContext(display, *context);
-	CheckEgl(instance);
 		instance->eglTerminate(*display);
-	CheckEgl(instance);
 		return false;
 	}
-	CheckEgl(instance);
 	return true;
 }
 
@@ -154,11 +134,9 @@ bool EGLLoadInstance(EGLInstance* instance, const char** extensions, uint32_t ex
 		uint64_t best_device_score = 0;
 
 		instance->eglQueryDevicesEXT(0, PULSE_NULLPTR, &device_count);
-	CheckEgl(instance);
 		devices = (EGLDeviceEXT*)calloc(device_count, sizeof(EGLDeviceEXT));
 		PULSE_CHECK_ALLOCATION_RETVAL(devices, false);
 		instance->eglQueryDevicesEXT(device_count, devices, &device_count);
-	CheckEgl(instance);
 
 		for(int32_t i = 0; i < device_count; i++)
 		{
@@ -170,22 +148,15 @@ bool EGLLoadInstance(EGLInstance* instance, const char** extensions, uint32_t ex
 				continue;
 
 			PFNGLGETINTEGERI_VPROC glGetIntegeri_v = (PFNGLGETINTEGERI_VPROC)instance->eglGetProcAddress("glGetIntegeri_v");
-	CheckEgl(instance);
 			PFNGLGETINTEGERVPROC glGetIntegerv = (PFNGLGETINTEGERVPROC)instance->eglGetProcAddress("glGetIntegerv");
-	CheckEgl(instance);
 			PFNGLGETSTRINGPROC glGetString = (PFNGLGETSTRINGPROC)instance->eglGetProcAddress("glGetString");
-	CheckEgl(instance);
 			PFNGLGETSTRINGIPROC glGetStringi = (PFNGLGETSTRINGIPROC)instance->eglGetProcAddress("glGetStringi");
-	CheckEgl(instance);
 
 			if(!glGetIntegeri_v || !glGetIntegerv || !glGetString || !glGetStringi)
 			{
 				instance->eglDestroySurface(display, surface);
-	CheckEgl(instance);
 				instance->eglDestroyContext(display, context);
-	CheckEgl(instance);
 				instance->eglTerminate(display);
-	CheckEgl(instance);
 				continue;
 			}
 
@@ -247,11 +218,8 @@ bool EGLLoadInstance(EGLInstance* instance, const char** extensions, uint32_t ex
 			current_device_score += max_texture_size;
 
 			instance->eglDestroySurface(display, surface);
-	CheckEgl(instance);
 			instance->eglDestroyContext(display, context);
-	CheckEgl(instance);
 			instance->eglTerminate(display);
-	CheckEgl(instance);
 
 			if(extensions_found_count != extensions_count)
 				current_device_score = 0;
@@ -273,11 +241,8 @@ void EGLUnloadInstance(EGLInstance* instance)
 {
 	PULSE_CHECK_PTR(instance);
 	instance->eglDestroySurface(instance->display, instance->surface);
-	CheckEgl(instance);
 	instance->eglDestroyContext(instance->display, instance->context);
-	CheckEgl(instance);
 	instance->eglTerminate(instance->display);
-	CheckEgl(instance);
 
 	loader_references_count--;
 	if(loader_references_count != 0)
