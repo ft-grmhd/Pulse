@@ -62,7 +62,7 @@ jobs:
 
     # Setup compilation mode and install project dependencies
     - name: Configure xmake and install dependencies
-      run: xmake config --arch=${{ matrix.arch }} --mode=${{ matrix.confs.mode }} ${{ matrix.confs.config }} --ccache=n --yes
+      run: xmake config --d3d11=y --examples=y --arch=${{ matrix.arch }} --mode=${{ matrix.confs.mode }} ${{ matrix.confs.config }} --ccache=n --yes
 
     # Save dependencies
     - name: Save cached xmake dependencies
@@ -80,3 +80,7 @@ jobs:
         path: assets
         key: assets-${{ hashFiles('assets/examples_version.txt', 'assets/unittests_version.txt') }}
 
+    - name: Test D3D11
+      run: |
+        xmake build --yes D3D11Example
+        xmake run --yes D3D11Example
