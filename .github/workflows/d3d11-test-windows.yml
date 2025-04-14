@@ -62,7 +62,7 @@ jobs:
 
     # Setup compilation mode and install project dependencies
     - name: Configure xmake and install dependencies
-      run: xmake config --d3d11=y --examples=y --arch=${{ matrix.arch }} --mode=${{ matrix.confs.mode }} ${{ matrix.confs.config }} --ccache=n --yes
+      run: xmake config --d3d11=y --vulkan=n --opengl=n --software=n --webgpu=n --examples=y --arch=${{ matrix.arch }} --mode=${{ matrix.confs.mode }} ${{ matrix.confs.config }} --ccache=n --yes
 
     # Save dependencies
     - name: Save cached xmake dependencies
