@@ -60,7 +60,7 @@
 		ZeroMemory(&line, sizeof(IMAGEHLP_LINE64));
 		line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
 
-		for (USHORT i = 0; i < frames; i++)
+		for(USHORT i = 0; i < frames; i++)
 		{
 			DWORD64 address = (DWORD64)(stack[i]);
 			if(SymFromAddr(process, address, 0, symbol))

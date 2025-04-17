@@ -122,7 +122,7 @@ PulseImage VulkanCreateImage(PulseDevice device, const PulseImageCreateInfo* cre
 
 	VkImageCreateInfo image_create_info = { 0 };
 	image_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-	image_create_info.imageType = VK_IMAGE_TYPE_2D;
+	image_create_info.imageType = create_infos->type == PULSE_IMAGE_TYPE_3D ? VK_IMAGE_TYPE_3D : VK_IMAGE_TYPE_2D;
 	image_create_info.extent.width = create_infos->width;
 	image_create_info.extent.height = create_infos->height;
 	image_create_info.extent.depth = depth;

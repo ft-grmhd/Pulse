@@ -35,11 +35,6 @@ void TestImageCreation()
 		PulseDestroyImage(device, image);
 	}
 
-	/**
-	 * This test may crash some Nouveau NVK drivers (wtf ???).
-	 * It seems to be comming exclusively from 3D read-only images
-	 */
-	#ifndef VULKAN_ENABLED
 	{
 		PulseImageCreateInfo image_create_info = { 0 };
 		image_create_info.type = PULSE_IMAGE_TYPE_3D;
@@ -52,7 +47,6 @@ void TestImageCreation()
 		TEST_ASSERT_NOT_EQUAL_MESSAGE(image, PULSE_NULL_HANDLE, PulseVerbaliseErrorType(PulseGetLastErrorType()));
 		PulseDestroyImage(device, image);
 	}
-	#endif
 
 	{
 		PulseImageCreateInfo image_create_info = { 0 };
